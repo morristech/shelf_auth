@@ -1,0 +1,12 @@
+name: shelf_auth
+version: 0.0.1
+author: Anders Holmgren <andersmholmgren@gmail.com>
+description: A shelf handler for authentication
+homepage: https://bitbucket.org/andersmholmgren/shelf_auth
+environment:
+  sdk: '>=1.2.0 <2.0.0'
+dependencies:
+  option: any
+  shelf: '>=0.5.1 <0.6.0'
+dev_dependencies:
+  unittest: '>=0.10.1+2 <0.12.0'
