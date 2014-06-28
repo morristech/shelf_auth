@@ -60,23 +60,56 @@ class AuthenticationMiddleware {
           streamFutures.asyncExpand((future) => future.asStream());
 
       // TODO: firstWhere will return a future error if no auths pass => handle
-      final Future<AuthenticationContext> authContextFuture =
-          streamAuthOpts.firstWhere((authOpt) => authOpt.nonEmpty());
+//      final Future<AuthenticationContext> authContextFuture =
+//          streamAuthOpts.firstWhere((authOpt) => authOpt.nonEmpty());
+//      final Future<AuthenticationContext> authContextFuture =
 
-      return authContextFuture.then((authContext) {
-        final newRequest = request.change(context: {
-          _SHELF_AUTH_REQUEST_CONTEXT: authContext
+
+      final Stream<Option<AuthenticationContext>> singleOptStream =
+          streamAuthOpts.skipWhile((authOpt) => authOpt.nonEmpty())
+          .take(1);
+
+      final singleResponseStream = singleOptStream.asyncMap((authContextOpt) {
+        return authContextOpt.map((authContext) {
+          final newRequest = request.change(context: {
+            _SHELF_AUTH_REQUEST_CONTEXT: authContext
+          });
+          return innerHandler(newRequest);
+
+        }).getOrElse(() {
+          return new Response(401);
         });
-        return innerHandler(newRequest);
-
-      }).catchError((e, stackTrace) {
-        print(e);
-        print(stackTrace);
-        /* TODO: either no auths match or one has failed
-         * return an error Response
-         */
       });
+
+      return singleResponseStream.firstWhere((_) => true, defaultValue: () => new Response(401))
+        .catchError((e, stackTrace) {
+          print('--- $e');
+          print(stackTrace);
+          /* TODO: either no auths match or one has failed
+           * return an error Response
+           */
+        });
     };
+
+//      final Future<Option<AuthenticationContext>> authContextFuture =
+//          x.isEmpty ? x.first :
+//            new Future.value(const None());
+//
+//      return authContextFuture.then((authContext) {
+//        final newRequest = request.change(context: {
+//          _SHELF_AUTH_REQUEST_CONTEXT: authContext
+//        });
+//        return innerHandler(newRequest);
+//
+//      }).catchError((e, stackTrace) {
+//        print('--- $e');
+//        print(stackTrace);
+//        /* TODO: either no auths match or one has failed
+//         * return an error Response
+//         */
+//      });
+
+//    };
   }
 
   Middleware get middleware => _createHandler;

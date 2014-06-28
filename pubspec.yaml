@@ -9,4 +9,5 @@ dependencies:
   option: any
   shelf: '>=0.5.1 <0.6.0'
 dev_dependencies:
+  mock: any
   unittest: '>=0.10.1+2 <0.12.0'
