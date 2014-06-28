@@ -66,7 +66,7 @@ class AuthenticationMiddleware {
 
 
       final Stream<Option<AuthenticationContext>> singleOptStream =
-          streamAuthOpts.skipWhile((authOpt) => authOpt.nonEmpty())
+          streamAuthOpts.skipWhile((authOpt) => authOpt.isEmpty())
           .take(1);
 
       final singleResponseStream = singleOptStream.asyncMap((authContextOpt) {
