@@ -70,17 +70,16 @@ class AuthenticationMiddleware {
   }
 
   Future<Response> _handle(Request request, Handler innerHandler) {
-    final Stream<Future<Option<AuthenticationContext>>> streamFutures =
-        new Stream.fromIterable(authenticators.map((a) =>
-            a.authenticate(request)));
+    final Stream<Option<AuthenticationContext>> optAuthContexts =
+        new Stream.fromIterable(authenticators).asyncMap((a) =>
+            a.authenticate(request));
 
-    final Future<Option<AuthenticationContext>> authOptFuture = streamFutures
-        .asyncExpand((future) => future.asStream())
-        .firstWhere((authOpt) => authOpt.nonEmpty(),
+    final Future<Option<AuthenticationContext>> optAuthFuture =
+        optAuthContexts.firstWhere((authOpt) => authOpt.nonEmpty(),
             defaultValue: () => const None());
 
     final Future<Response> responseFuture =
-        authOptFuture.then((authOpt) =>
+        optAuthFuture.then((authOpt) =>
             _createResponse(authOpt, request, innerHandler));
 
     // TODO: errors should likely be in shelf_expection_response types and
