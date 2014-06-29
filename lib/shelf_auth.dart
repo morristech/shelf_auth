@@ -171,6 +171,7 @@ class AuthenticationMiddleware {
   Future<Response> _createResponse(
       Option<AuthenticationContext> authContextOpt,
       Request request, Handler innerHandler) {
+
     return authContextOpt.map((authContext) {
       final newRequest = request.change(context: {
         _SHELF_AUTH_REQUEST_CONTEXT: authContext
@@ -189,7 +190,7 @@ class AuthenticationMiddleware {
 
       return updatedResponseFuture;
     }).getOrElse(() {
-        return newFuture(() => new Response(401));
+      return syncFuture(() => innerHandler(request));
     });
   }
 }

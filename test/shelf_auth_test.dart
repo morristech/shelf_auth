@@ -47,24 +47,26 @@ main() {
 
   group('authenticationMiddleware', () {
     group('when passed an empty list of authenticators', () {
-      final mw = authenticationMiddleware([]);
-      final middlewareHandler = mw(handler);
+      var middlewareHandler;
+      setUp(() {
+        final mw = authenticationMiddleware([]);
+        middlewareHandler = mw(handler);
+      });
 
       test('completes', () {
         expect(middlewareHandler(request), completes);
       });
 
-      test("doesn't call handler", () {
+      test("calls handler", () {
         final f = middlewareHandler(request);
         f.then((response) {
-          handler.calls('call').verify(neverHappened);
+          handler.calls('call').verify(happenedOnce);
         });
         expect(f, completes);
-
       });
 
-      test('returns 401 response', () {
-        expect(middlewareHandler(request), completion(responseWithStatus(401)));
+      test('returns 200 response', () {
+        expect(middlewareHandler(request), completion(responseWithStatus(200)));
       });
     });
 
@@ -84,10 +86,10 @@ main() {
         expect(middlewareHandler(request), completes);
       });
 
-      test("doesn't call handler", () {
+      test("calls handler", () {
         final f = middlewareHandler(request);
         f.then((response) {
-          handler.calls('call').verify(neverHappened);
+          handler.calls('call').verify(happenedOnce);
         });
         expect(f, completes);
 
@@ -100,11 +102,10 @@ main() {
           authenticator2.calls('authenticate').verify(happenedOnce);
         });
         expect(f, completes);
-
       });
 
-      test('returns 401 response', () {
-        expect(middlewareHandler(request), completion(responseWithStatus(401)));
+      test('returns 200 response', () {
+        expect(middlewareHandler(request), completion(responseWithStatus(200)));
       });
     });
 

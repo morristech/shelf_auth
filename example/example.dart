@@ -32,6 +32,6 @@ class RandomAuthenticator extends Authenticator {
 
     return new Future.value(approve ?
         new Some(new AuthenticationContext(new Principal("fred")))
-        : const None());
+        : throw new UnauthorizedException());
   }
 }
