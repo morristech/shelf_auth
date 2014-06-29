@@ -62,57 +62,78 @@ class AuthenticationMiddleware {
 
   AuthenticationMiddleware(this.authenticators, this.sessionHandler);
 
-  Handler _createHandler(Handler innerHandler) {
-    return (Request request) {
-      final Iterable<Future<Option<AuthenticationContext>>> authFutures =
-          authenticators.map((a) => a.authenticate(request));
-
-      final Stream<Future<Option<AuthenticationContext>>> streamFutures =
-          new Stream.fromIterable(authFutures);
-
-      final Stream<Option<AuthenticationContext>> streamAuthOpts =
-          streamFutures.asyncExpand((future) => future.asStream());
-
-      final Stream<Option<AuthenticationContext>> singleOptStream =
-          streamAuthOpts.skipWhile((authOpt) => authOpt.isEmpty())
-          .take(1);
-
-      final Stream<Response> singleResponseStream =
-          singleOptStream.asyncMap((authContextOpt) {
-        return authContextOpt.map((authContext) {
-          final newRequest = request.change(context: {
-            _SHELF_AUTH_REQUEST_CONTEXT: authContext
-          });
-          final responseFuture = syncFuture(() => innerHandler(newRequest));
-
-          final bool canHandleSession = sessionHandler.nonEmpty() &&
-              (authContext.sessionCreationAllowed ||
-                  authContext.sessionUpdateAllowed);
-
-          final updatedResponseFuture = canHandleSession ?
-              responseFuture.then((response) =>
-                  sessionHandler.get().handle(authContext, request, response))
-              : responseFuture;
-
-          return updatedResponseFuture;
-        }).getOrElse(() {
-          return new Response(401);
-        });
-      });
-
-      return singleResponseStream.firstWhere((_) => true,
-          defaultValue: () => new Response(401))
-        .catchError((e) {
-          return new Response(401);
-        }, test: (e) => e is AuthenticationFailure)
-        .catchError((e, stackTrace) {
-          print('--- $e');
-          print(stackTrace);
-          // TODO: let through to shelf_expection_response
-          return new Response.internalServerError(body: e);
-        });
-    };
-  }
 
   Middleware get middleware => _createHandler;
+
+  Handler _createHandler(Handler innerHandler) {
+    return (Request request) => _handle(request, innerHandler);
+  }
+
+  Future<Response> _handle(Request request, Handler innerHandler) {
+    final Iterable<Future<Option<AuthenticationContext>>> authFutures =
+        authenticators.map((a) => a.authenticate(request));
+
+    final Stream<Future<Option<AuthenticationContext>>> streamFutures =
+        new Stream.fromIterable(authFutures);
+
+    final Stream<Option<AuthenticationContext>> streamAuthOpts =
+        streamFutures.asyncExpand((future) => future.asStream());
+
+    final Stream<Option<AuthenticationContext>> singleOptStream =
+        streamAuthOpts.skipWhile((authOpt) => authOpt.isEmpty())
+        .take(1);
+
+    Future<Response> responseFuture =
+        _mapToResponse(singleOptStream, request, innerHandler);
+
+    return responseFuture
+      .catchError((e) {
+        return new Response(401);
+      }, test: (e) => e is AuthenticationFailure)
+      .catchError((e, stackTrace) {
+        print('--- $e');
+        print(stackTrace);
+        // TODO: let through to shelf_expection_response
+        return new Response.internalServerError(body: e);
+      });
+  }
+
+  Future<Response> _mapToResponse(
+      Stream<Option<AuthenticationContext>> singleOptStream,
+      Request request, Handler innerHandler) {
+
+    final Stream<Response> singleResponseStream =
+        singleOptStream.asyncMap((authContextOpt) =>
+            _createResponse(authContextOpt, request, innerHandler));
+
+    final Future<Response> responseFuture =
+        singleResponseStream.firstWhere((_) => true,
+        defaultValue: () => new Response(401));
+    return responseFuture;
+  }
+
+  Future<Response> _createResponse(
+      Option<AuthenticationContext> authContextOpt,
+      Request request, Handler innerHandler) {
+    return authContextOpt.map((authContext) {
+      final newRequest = request.change(context: {
+        _SHELF_AUTH_REQUEST_CONTEXT: authContext
+      });
+      final responseFuture = syncFuture(() => innerHandler(newRequest));
+
+      final bool canHandleSession = sessionHandler.nonEmpty() &&
+          (authContext.sessionCreationAllowed ||
+              authContext.sessionUpdateAllowed);
+
+      final updatedResponseFuture = canHandleSession ?
+          responseFuture.then((response) =>
+              newFuture(() =>
+                  sessionHandler.get().handle(authContext, request, response)))
+          : responseFuture;
+
+      return updatedResponseFuture;
+    }).getOrElse(() {
+        return newFuture(() => new Response(401));
+    });
+  }
 }
