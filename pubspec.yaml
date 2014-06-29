@@ -6,7 +6,7 @@ homepage: https://bitbucket.org/andersmholmgren/shelf_auth
 environment:
   sdk: '>=1.2.0 <2.0.0'
 dependencies:
-  option: any
+  option: '>=0.3.3 <0.4.0'
   shelf: '>=0.5.1 <0.6.0'
   shelf_exception_response: '>=0.1.0 <0.2.0'
 dev_dependencies:
