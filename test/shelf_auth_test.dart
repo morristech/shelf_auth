@@ -49,7 +49,7 @@ main() {
     group('when passed an empty list of authenticators', () {
       var middlewareHandler;
       setUp(() {
-        final mw = authenticationMiddleware([]);
+        final mw = authenticate([]);
         middlewareHandler = mw(handler);
       });
 
@@ -77,7 +77,7 @@ main() {
           .alwaysReturn(new Future.value(const None()));
         authenticator2.when(callsTo('authenticate'))
           .alwaysReturn(new Future.value(const None()));
-        final mw = authenticationMiddleware([authenticator1, authenticator2]);
+        final mw = authenticate([authenticator1, authenticator2]);
         middlewareHandler = mw(handler);
       });
 
@@ -116,7 +116,7 @@ main() {
           .alwaysReturn(new Future.error(new UnauthorizedException()));
         authenticator2.when(callsTo('authenticate'))
           .alwaysReturn(new Future.value(const None()));
-        final mw = authenticationMiddleware([authenticator1, authenticator2]);
+        final mw = authenticate([authenticator1, authenticator2]);
         middlewareHandler = mw(handler);
       });
 
@@ -157,7 +157,7 @@ main() {
         authenticator3.when(callsTo('authenticate'))
           .alwaysReturn(new Future.value(const None()));
 
-        final mw = authenticationMiddleware([authenticator1, authenticator2,
+        final mw = authenticate([authenticator1, authenticator2,
                                              authenticator3]);
         middlewareHandler = mw(handler);
       });
@@ -201,7 +201,7 @@ main() {
       });
 
       Handler authHandler(Iterable<Authenticator> auths) {
-        final mw = authenticationMiddleware(auths, sessionHandler);
+        final mw = authenticate(auths, sessionHandler);
         return mw(handler);
       }
 
@@ -244,7 +244,7 @@ main() {
         authenticator1.when(callsTo('authenticate'))
           .alwaysReturn(new Future.value(new Some(authContext)));
 
-        final mw = authenticationMiddleware([authenticator1], sessionHandler);
+        final mw = authenticate([authenticator1], sessionHandler);
         authHandler = mw(handler);
 
       });
@@ -289,7 +289,7 @@ main() {
         authenticator1.when(callsTo('authenticate'))
           .alwaysReturn(new Future.value(new Some(authContext)));
 
-        final mw = authenticationMiddleware([authenticator1], sessionHandler);
+        final mw = authenticate([authenticator1], sessionHandler);
         authHandler = mw(handler);
       });
 

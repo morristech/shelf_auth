@@ -15,7 +15,7 @@ void main() {
   var handler = const Pipeline()
       .addMiddleware(logRequests())
       .addMiddleware(exceptionResponse())
-      .addMiddleware(authenticationMiddleware([new RandomAuthenticator()]))
+      .addMiddleware(authenticate([new RandomAuthenticator()]))
       .addHandler((Request request) => new Response.ok("I'm in"));
 
   io.serve(handler, 'localhost', 8080).then((server) {

@@ -27,7 +27,7 @@ const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
  *   var handler = const Pipeline()
         .addMiddleware(logRequests())
         .addMiddleware(exceptionResponse())
-        .addMiddleware(authenticationMiddleware([new BasicAuthAuthenticator()]))
+        .addMiddleware(authenticate([new BasicAuthAuthenticator()]))
         .addHandler((Request request) => new Response.ok("I'm in"));
 
     io.serve(handler, 'localhost', 8080).then((server) {
@@ -35,7 +35,7 @@ const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
     });
   * ```
  */
-Middleware authenticationMiddleware(Iterable<Authenticator> authenticators,
+Middleware authenticate(Iterable<Authenticator> authenticators,
                                     [ SessionHandler sessionHandler ]) =>
     new AuthenticationMiddleware(authenticators.toList(growable: false),
         new Option(sessionHandler))
