@@ -8,7 +8,7 @@ environment:
 dependencies:
   option: any
   shelf: '>=0.5.1 <0.6.0'
-  shelf_exception_response: any
+  shelf_exception_response: '>=0.1.0 <0.2.0'
 dev_dependencies:
-  mock: any
+  mock: '>=0.11.0+1 <0.12.0'
   unittest: '>=0.10.1+2 <0.12.0'
