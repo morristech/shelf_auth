@@ -12,11 +12,28 @@ const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
  * Creates *Shelf* middleware for performing authenication and optionally
  * creating / updating a session.
  *
- * Supports a chain of authenticators where the first to either succeed or
+ * Supports a chain of [Authenticator]s where the first to either succeed or
  * throw wins.
  *
- * Supports custom [Authenticators] in addition to some standard out of the box
+ * Supports custom [Authenticator]s in addition to some standard out of the box
  * implementations.
+ *
+ * The [SessionHandler] if provided will be invoked on successful authentication
+ * if the resulting [AuthenticationContext] supports sessions.
+ *
+ * Example use
+ *
+ * ```
+ *   var handler = const Pipeline()
+        .addMiddleware(logRequests())
+        .addMiddleware(exceptionResponse())
+        .addMiddleware(authenticationMiddleware([new BasicAuthAuthenticator()]))
+        .addHandler((Request request) => new Response.ok("I'm in"));
+
+    io.serve(handler, 'localhost', 8080).then((server) {
+      print('Serving at http://${server.address.host}:${server.port}');
+    });
+  * ```
  */
 Middleware authenticationMiddleware(Iterable<Authenticator> authenticators,
                                     [ SessionHandler sessionHandler ]) =>
@@ -154,6 +171,7 @@ class AuthenticationMiddleware {
   Future<Response> _createResponse(
       Option<AuthenticationContext> authContextOpt,
       Request request, Handler innerHandler) {
+
     return authContextOpt.map((authContext) {
       final newRequest = request.change(context: {
         _SHELF_AUTH_REQUEST_CONTEXT: authContext
@@ -172,7 +190,7 @@ class AuthenticationMiddleware {
 
       return updatedResponseFuture;
     }).getOrElse(() {
-        return newFuture(() => new Response(401));
+      return syncFuture(() => innerHandler(request));
     });
   }
 }
