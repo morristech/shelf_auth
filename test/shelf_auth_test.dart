@@ -61,6 +61,9 @@ main() {
         final f = middlewareHandler(request);
         f.then((response) {
           handler.calls('call').verify(happenedOnce);
+          test("with", () {
+            handler.calls('call').verify(happenedOnce);
+          });
         });
         expect(f, completes);
       });
