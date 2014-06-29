@@ -70,22 +70,21 @@ class AuthenticationMiddleware {
   }
 
   Future<Response> _handle(Request request, Handler innerHandler) {
-    final Iterable<Future<Option<AuthenticationContext>>> authFutures =
-        authenticators.map((a) => a.authenticate(request));
-
     final Stream<Future<Option<AuthenticationContext>>> streamFutures =
-        new Stream.fromIterable(authFutures);
+        new Stream.fromIterable(authenticators.map((a) =>
+            a.authenticate(request)));
 
-    final Stream<Option<AuthenticationContext>> streamAuthOpts =
-        streamFutures.asyncExpand((future) => future.asStream());
+    final Future<Option<AuthenticationContext>> authOptFuture = streamFutures
+        .asyncExpand((future) => future.asStream())
+        .firstWhere((authOpt) => authOpt.nonEmpty(),
+            defaultValue: () => const None());
 
-    final Stream<Option<AuthenticationContext>> singleOptStream =
-        streamAuthOpts.skipWhile((authOpt) => authOpt.isEmpty())
-        .take(1);
+    final Future<Response> responseFuture =
+        authOptFuture.then((authOpt) =>
+            _createResponse(authOpt, request, innerHandler));
 
-    Future<Response> responseFuture =
-        _mapToResponse(singleOptStream, request, innerHandler);
-
+    // TODO: errors should likely be in shelf_expection_response types and
+    // just throw out of here
     return responseFuture
       .catchError((e) {
         return new Response(401);
@@ -96,20 +95,6 @@ class AuthenticationMiddleware {
         // TODO: let through to shelf_expection_response
         return new Response.internalServerError(body: e);
       });
-  }
-
-  Future<Response> _mapToResponse(
-      Stream<Option<AuthenticationContext>> singleOptStream,
-      Request request, Handler innerHandler) {
-
-    final Stream<Response> singleResponseStream =
-        singleOptStream.asyncMap((authContextOpt) =>
-            _createResponse(authContextOpt, request, innerHandler));
-
-    final Future<Response> responseFuture =
-        singleResponseStream.firstWhere((_) => true,
-        defaultValue: () => new Response(401));
-    return responseFuture;
   }
 
   Future<Response> _createResponse(
