@@ -15,8 +15,9 @@ void main() {
   var handler = const Pipeline()
       .addMiddleware(logRequests())
       .addMiddleware(exceptionResponse())
-      .addMiddleware(authenticationMiddleware([new RandomAuthenticator()]))
-      .addHandler((Request request) => new Response.ok("I'm in"));
+      .addMiddleware(authenticate([new RandomAuthenticator()]))
+      .addHandler((Request request) => new Response.ok("I'm in with "
+          "${getAuthenticationContext(request).map((ac) => ac.principal.name)}\n"));
 
   io.serve(handler, 'localhost', 8080).then((server) {
     print('Serving at http://${server.address.host}:${server.port}');
@@ -32,6 +33,6 @@ class RandomAuthenticator extends Authenticator {
 
     return new Future.value(approve ?
         new Some(new AuthenticationContext(new Principal("fred")))
-        : const None());
+        : throw new UnauthorizedException());
   }
 }

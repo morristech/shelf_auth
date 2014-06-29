@@ -1,5 +1,5 @@
 name: shelf_auth
-version: 0.0.1+1
+version: 0.0.2
 author: Anders Holmgren <andersmholmgren@gmail.com>
 description: A shelf handler for authentication
 homepage: https://bitbucket.org/andersmholmgren/shelf_auth

@@ -8,6 +8,10 @@ import 'package:option/option.dart';
 import 'package:shelf/shelf.dart';
 import 'dart:async';
 import 'package:shelf_exception_response/exception.dart';
+import 'src/matchers.dart';
+
+// TODO: avoid the dupe
+const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
 
 
 class MockAuthenticator extends Mock implements Authenticator {
@@ -36,6 +40,7 @@ main() {
 
   final request = new Request('GET', Uri.parse('http://blah/foo'));
   final okResponse = new Response.ok('sweet');
+  final defaultAuthContext = new AuthenticationContext(new Principal("fred"));
 
   setUp(() {
     authenticator1 = new MockAuthenticator();
@@ -47,24 +52,29 @@ main() {
 
   group('authenticationMiddleware', () {
     group('when passed an empty list of authenticators', () {
-      final mw = authenticationMiddleware([]);
-      final middlewareHandler = mw(handler);
+      var middlewareHandler;
+      setUp(() {
+        final mw = authenticate([]);
+        middlewareHandler = mw(handler);
+      });
 
       test('completes', () {
         expect(middlewareHandler(request), completes);
       });
 
-      test("doesn't call handler", () {
+      test("calls handler with no auth context in request", () {
         final f = middlewareHandler(request);
         f.then((response) {
-          handler.calls('call').verify(neverHappened);
+          handler.calls('call').verify(happenedOnce);
+          handler.calls('call', requestWithContextValue(
+                _SHELF_AUTH_REQUEST_CONTEXT, isNull))
+              .verify(happenedOnce);
         });
         expect(f, completes);
-
       });
 
-      test('returns 401 response', () {
-        expect(middlewareHandler(request), completion(responseWithStatus(401)));
+      test('returns 200 response', () {
+        expect(middlewareHandler(request), completion(responseWithStatus(200)));
       });
     });
 
@@ -75,7 +85,7 @@ main() {
           .alwaysReturn(new Future.value(const None()));
         authenticator2.when(callsTo('authenticate'))
           .alwaysReturn(new Future.value(const None()));
-        final mw = authenticationMiddleware([authenticator1, authenticator2]);
+        final mw = authenticate([authenticator1, authenticator2]);
         middlewareHandler = mw(handler);
       });
 
@@ -84,13 +94,15 @@ main() {
         expect(middlewareHandler(request), completes);
       });
 
-      test("doesn't call handler", () {
+      test("calls handler with no auth context in request", () {
         final f = middlewareHandler(request);
         f.then((response) {
-          handler.calls('call').verify(neverHappened);
+          handler.calls('call').verify(happenedOnce);
+          handler.calls('call', requestWithContextValue(
+                _SHELF_AUTH_REQUEST_CONTEXT, isNull))
+              .verify(happenedOnce);
         });
         expect(f, completes);
-
       });
 
       test("calls all authenticators", () {
@@ -100,11 +112,10 @@ main() {
           authenticator2.calls('authenticate').verify(happenedOnce);
         });
         expect(f, completes);
-
       });
 
-      test('returns 401 response', () {
-        expect(middlewareHandler(request), completion(responseWithStatus(401)));
+      test('returns 200 response', () {
+        expect(middlewareHandler(request), completion(responseWithStatus(200)));
       });
     });
 
@@ -115,7 +126,7 @@ main() {
           .alwaysReturn(new Future.error(new UnauthorizedException()));
         authenticator2.when(callsTo('authenticate'))
           .alwaysReturn(new Future.value(const None()));
-        final mw = authenticationMiddleware([authenticator1, authenticator2]);
+        final mw = authenticate([authenticator1, authenticator2]);
         middlewareHandler = mw(handler);
       });
 
@@ -152,11 +163,11 @@ main() {
           .alwaysReturn(new Future.value(const None()));
         authenticator2.when(callsTo('authenticate'))
           .alwaysReturn(new Future.value(
-              new Some(new AuthenticationContext(new Principal("fred")))));
+              new Some(defaultAuthContext)));
         authenticator3.when(callsTo('authenticate'))
           .alwaysReturn(new Future.value(const None()));
 
-        final mw = authenticationMiddleware([authenticator1, authenticator2,
+        final mw = authenticate([authenticator1, authenticator2,
                                              authenticator3]);
         middlewareHandler = mw(handler);
       });
@@ -166,13 +177,19 @@ main() {
         expect(middlewareHandler(request), completes);
       });
 
-      test("calls handler", () {
+      test("calls handler with auth context in request", () {
         final f = middlewareHandler(request);
         f.then((response) {
           handler.calls('call').verify(happenedOnce);
+
+          handler.calls('call', requestWithContextValue(
+              _SHELF_AUTH_REQUEST_CONTEXT, isNotNull)).verify(happenedOnce);
+
+          handler.calls('call', requestWithContextValue(
+              _SHELF_AUTH_REQUEST_CONTEXT, equals(defaultAuthContext)))
+              .verify(happenedOnce);
         });
         expect(f, completes);
-
       });
 
       test("calls first 2 authenticators but not last", () {
@@ -200,7 +217,7 @@ main() {
       });
 
       Handler authHandler(Iterable<Authenticator> auths) {
-        final mw = authenticationMiddleware(auths, sessionHandler);
+        final mw = authenticate(auths, sessionHandler);
         return mw(handler);
       }
 
@@ -233,7 +250,6 @@ main() {
 
     group('calls sessionHandler when auth succeeds', () {
       MockSessionHandler sessionHandler;
-      final authContext = new AuthenticationContext(new Principal("fred"));
       var authHandler;
 
       setUp(() {
@@ -241,9 +257,9 @@ main() {
         sessionHandler.when(callsTo('handle')).alwaysReturn(okResponse);
 
         authenticator1.when(callsTo('authenticate'))
-          .alwaysReturn(new Future.value(new Some(authContext)));
+          .alwaysReturn(new Future.value(new Some(defaultAuthContext)));
 
-        final mw = authenticationMiddleware([authenticator1], sessionHandler);
+        final mw = authenticate([authenticator1], sessionHandler);
         authHandler = mw(handler);
 
       });
@@ -262,7 +278,7 @@ main() {
       });
 
       test("with correct auth context", () {
-        verifyHandlerCalledFor((sh) => sh.calls('handle', authContext));
+        verifyHandlerCalledFor((sh) => sh.calls('handle', defaultAuthContext));
       });
 
       test("with correct request", () {
@@ -288,7 +304,7 @@ main() {
         authenticator1.when(callsTo('authenticate'))
           .alwaysReturn(new Future.value(new Some(authContext)));
 
-        final mw = authenticationMiddleware([authenticator1], sessionHandler);
+        final mw = authenticate([authenticator1], sessionHandler);
         authHandler = mw(handler);
       });
 
