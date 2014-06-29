@@ -35,6 +35,7 @@ main() {
     authenticator2 = new MockAuthenticator();
     authenticator3 = new MockAuthenticator();
     handler = new MockHandler();
+    handler.when(callsTo('call')).alwaysReturn(new Response.ok('sweet'));
   });
 
   group('authenticationMiddleware', () {
@@ -99,6 +100,93 @@ main() {
         expect(middlewareHandler(request), completion(responseWithStatus(401)));
       });
     });
+
+    group('when first authenticator throws AuthenticationFailure', () {
+      var middlewareHandler;
+      setUp(() {
+        authenticator1.when(callsTo('authenticate'))
+          .alwaysReturn(new Future.error(new AuthenticationFailure()));
+        authenticator2.when(callsTo('authenticate'))
+          .alwaysReturn(new Future.value(const None()));
+        final mw = authenticationMiddleware([authenticator1, authenticator2]);
+        middlewareHandler = mw(handler);
+      });
+
+
+      test('completes', () {
+        expect(middlewareHandler(request), completes);
+      });
+
+      test("doesn't call handler", () {
+        final f = middlewareHandler(request);
+        f.then((response) {
+          handler.calls('call').verify(neverHappened);
+        });
+        expect(f, completes);
+
+      });
+
+      test("doesn't call remaining authenticators", () {
+        final f = middlewareHandler(request);
+        f.then((response) {
+          authenticator1.calls('authenticate').verify(happenedOnce);
+          authenticator2.calls('authenticate').verify(neverHappened);
+        });
+        expect(f, completes);
+
+      });
+
+      test('returns 401 response', () {
+        expect(middlewareHandler(request), completion(responseWithStatus(401)));
+      });
+    });
+
+    group('when middle authenticator returns Some', () {
+      var middlewareHandler;
+      setUp(() {
+        authenticator1.when(callsTo('authenticate'))
+          .alwaysReturn(new Future.value(const None()));
+        authenticator2.when(callsTo('authenticate'))
+          .alwaysReturn(new Future.value(
+              new Some(new AuthenticationContext(new Principal("fred")))));
+        authenticator3.when(callsTo('authenticate'))
+          .alwaysReturn(new Future.value(const None()));
+
+        final mw = authenticationMiddleware([authenticator1, authenticator2,
+                                             authenticator3]);
+        middlewareHandler = mw(handler);
+      });
+
+
+      test('completes', () {
+        expect(middlewareHandler(request), completes);
+      });
+
+      test("calls handler", () {
+        final f = middlewareHandler(request);
+        f.then((response) {
+          handler.calls('call').verify(happenedOnce);
+        });
+        expect(f, completes);
+
+      });
+
+      test("calls first 2 authenticators but not last", () {
+        final f = middlewareHandler(request);
+        f.then((response) {
+          authenticator1.calls('authenticate').verify(happenedOnce);
+          authenticator2.calls('authenticate').verify(happenedOnce);
+          authenticator3.calls('authenticate').verify(neverHappened);
+        });
+        expect(f, completes);
+
+      });
+
+      test('returns 200 response', () {
+        expect(middlewareHandler(request), completion(responseWithStatus(200)));
+      });
+    });
+
   });
 }
 
