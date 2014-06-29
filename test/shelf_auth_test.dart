@@ -7,6 +7,8 @@ import 'package:mock/mock.dart';
 import 'package:option/option.dart';
 import 'package:shelf/shelf.dart';
 import 'dart:async';
+import 'package:shelf_exception_response/exception.dart';
+
 
 class MockAuthenticator extends Mock implements Authenticator {
   noSuchMethod(_) => super.noSuchMethod(_);
@@ -106,11 +108,11 @@ main() {
       });
     });
 
-    group('when first authenticator throws AuthenticationFailure', () {
+    group('when first authenticator throws UnauthorizedException', () {
       var middlewareHandler;
       setUp(() {
         authenticator1.when(callsTo('authenticate'))
-          .alwaysReturn(new Future.error(new AuthenticationFailure()));
+          .alwaysReturn(new Future.error(new UnauthorizedException()));
         authenticator2.when(callsTo('authenticate'))
           .alwaysReturn(new Future.value(const None()));
         final mw = authenticationMiddleware([authenticator1, authenticator2]);
@@ -119,15 +121,15 @@ main() {
 
 
       test('completes', () {
-        expect(middlewareHandler(request), completes);
+        expect(middlewareHandler(request), throws);
       });
 
       test("doesn't call handler", () {
-        final f = middlewareHandler(request);
-        f.then((response) {
+        final Future f = middlewareHandler(request);
+        f.whenComplete(() {
           handler.calls('call').verify(neverHappened);
         });
-        expect(f, completes);
+        expect(f, throws);
 
       });
 
@@ -137,13 +139,10 @@ main() {
           authenticator1.calls('authenticate').verify(happenedOnce);
           authenticator2.calls('authenticate').verify(neverHappened);
         });
-        expect(f, completes);
+        expect(f, throws);
 
       });
 
-      test('returns 401 response', () {
-        expect(middlewareHandler(request), completion(responseWithStatus(401)));
-      });
     });
 
     group('when middle authenticator returns Some', () {
@@ -226,7 +225,7 @@ main() {
 
       test("for invalid auth", () {
         authenticator1.when(callsTo('authenticate'))
-          .alwaysReturn(new Future.error(new AuthenticationFailure()));
+          .alwaysReturn(new Future.error(new UnauthorizedException()));
 
         verifyHandlerNotCalledFor([authenticator1]);
       });

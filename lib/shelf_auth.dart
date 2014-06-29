@@ -4,25 +4,61 @@ import 'package:shelf/shelf.dart';
 import 'dart:async';
 import 'package:option/option.dart';
 import 'src/util.dart';
+import 'package:shelf_exception_response/exception.dart';
 
 const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
 
+/**
+ * Creates *Shelf* middleware for performing authenication and optionally
+ * creating / updating a session.
+ *
+ * Supports a chain of authenticators where the first to either succeed or
+ * throw wins.
+ *
+ * Supports custom [Authenticators] in addition to some standard out of the box
+ * implementations.
+ */
 Middleware authenticationMiddleware(Iterable<Authenticator> authenticators,
                                     [ SessionHandler sessionHandler ]) =>
     new AuthenticationMiddleware(authenticators.toList(growable: false),
         new Option(sessionHandler))
       .middleware;
 
+/**
+ * Retrieves the current [AuthenticationContext] from the [request] if one
+ * exists
+ */
 Option<AuthenticationContext> getAuthenticationContext(Request request) {
   return new Option(request.context[_SHELF_AUTH_REQUEST_CONTEXT]);
 }
 
+/**
+ * Someone or system that can be authenicated
+ */
 class Principal {
   final String name;
 
   Principal(this.name);
 }
 
+/**
+ * A context representing a successful authentication as a particular
+ * [Principal].
+ *
+ * Supports optionally authenitcating as one principal that is acting [onBehalfOf]
+ * another. Typically that would be a system acting on behalf of a real user.
+ *
+ * If [sessionCreationAllowed] is true then a [SessionHandler] will be allowed
+ * to create a new session based on this context.
+ *
+ * If [sessionUpdateAllowed] is true then a [SessionHandler] will be allowed
+ * to update the details in an existing session, including extending timeouts,
+ * updating the details about the authenticated principal etc.
+ *
+ * Note: [sessionCreationAllowed] and [sessionUpdateAllowed] are typically false
+ * for server to server interaction, but true for user to system interaction
+ *
+ */
 class AuthenticationContext<P extends Principal> {
   final P principal;
 
@@ -42,20 +78,50 @@ class AuthenticationContext<P extends Principal> {
         this.sessionCreationAllowed: true, this.sessionUpdateAllowed: true });
 }
 
-class AuthenticationFailure {
-
-}
-
+/**
+ * A class that may establish and / or update a session for the authenticated
+ * principal.
+ *
+ * Implementations must respect the values of
+ * [sessionCreationAllowed] and [sessionUpdateAllowed] in the given
+ * [AuthenticationContext]
+ */
 abstract class SessionHandler {
   Response handle(AuthenticationContext context,
                   Request request, Response response);
 }
 
-
+/**
+ * An authenticator of Http Requests for *Shelf*
+ */
 abstract class Authenticator<P extends Principal> {
+  /**
+   * Authenticates the request returning a Future with one of three outcomes:
+   *
+   * * [None] to indicate that no authentication credentials exist for this
+   * authenticator. Other authenicators can now get their turn to authenticate
+   *
+   * * [Some] [AuthenticationContext] when authentication succeeds
+   *
+   * * An exception if authentication fails (e.g. [UnauthorizedException])
+   *
+   * Note: *shelf_auth* assumes that the *shelf_exception_response* package
+   * or similar is used to turn exceptions into suitable http responses.
+   */
   Future<Option<AuthenticationContext<P>>> authenticate(Request request);
 }
 
+/**
+ * [Middleware] for performing authentication using a provided list of
+ * [Authenticator]s.
+ *
+ * An optional [SessionHandler] can be provided to create /
+ * update a session as a result (e.g. by setting a cookie or token etc).
+ *
+ * If no [SessionHandler] is provided then no session will be created if none
+ * currently exists and no changes will be made to an existing one if one does
+ * exist
+ */
 class AuthenticationMiddleware {
   final List<Authenticator> authenticators;
   final Option<SessionHandler> sessionHandler;
@@ -82,18 +148,7 @@ class AuthenticationMiddleware {
         optAuthFuture.then((authOpt) =>
             _createResponse(authOpt, request, innerHandler));
 
-    // TODO: errors should likely be in shelf_expection_response types and
-    // just throw out of here
-    return responseFuture
-      .catchError((e) {
-        return new Response(401);
-      }, test: (e) => e is AuthenticationFailure)
-      .catchError((e, stackTrace) {
-        print('--- $e');
-        print(stackTrace);
-        // TODO: let through to shelf_expection_response
-        return new Response.internalServerError(body: e.toString());
-      });
+    return responseFuture;
   }
 
   Future<Response> _createResponse(
