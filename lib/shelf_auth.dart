@@ -4,6 +4,7 @@ import 'package:shelf/shelf.dart';
 import 'dart:async';
 import 'package:option/option.dart';
 import 'src/util.dart';
+import 'package:shelf_exception_response/exception.dart';
 
 const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
 
@@ -42,9 +43,6 @@ class AuthenticationContext<P extends Principal> {
         this.sessionCreationAllowed: true, this.sessionUpdateAllowed: true });
 }
 
-class AuthenticationFailure {
-
-}
 
 abstract class SessionHandler {
   Response handle(AuthenticationContext context,
@@ -84,16 +82,16 @@ class AuthenticationMiddleware {
 
     // TODO: errors should likely be in shelf_expection_response types and
     // just throw out of here
-    return responseFuture
-      .catchError((e) {
-        return new Response(401);
-      }, test: (e) => e is AuthenticationFailure)
-      .catchError((e, stackTrace) {
-        print('--- $e');
-        print(stackTrace);
-        // TODO: let through to shelf_expection_response
-        return new Response.internalServerError(body: e.toString());
-      });
+    return responseFuture;
+//      .catchError((e) {
+//        throw e;
+//      }, test: (e) => e is HttpException)
+//      .catchError((e, stackTrace) {
+//        print('--- $e');
+//        print(stackTrace);
+//        // TODO: let through to shelf_expection_response
+//        return new Response.internalServerError(body: e.toString());
+//      });
   }
 
   Future<Response> _createResponse(
