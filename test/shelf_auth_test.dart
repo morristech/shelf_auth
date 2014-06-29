@@ -21,6 +21,10 @@ class MockHandler extends Mock implements HandlerClass {
   noSuchMethod(_) => super.noSuchMethod(_);
 }
 
+class MockSessionHandler extends Mock implements SessionHandler {
+  noSuchMethod(_) => super.noSuchMethod(_);
+}
+
 
 main() {
   MockAuthenticator authenticator1;
@@ -29,13 +33,14 @@ main() {
   MockHandler handler;
 
   final request = new Request('GET', Uri.parse('http://blah/foo'));
+  final okResponse = new Response.ok('sweet');
 
   setUp(() {
     authenticator1 = new MockAuthenticator();
     authenticator2 = new MockAuthenticator();
     authenticator3 = new MockAuthenticator();
     handler = new MockHandler();
-    handler.when(callsTo('call')).alwaysReturn(new Response.ok('sweet'));
+    handler.when(callsTo('call')).alwaysReturn(okResponse);
   });
 
   group('authenticationMiddleware', () {
@@ -187,6 +192,119 @@ main() {
       });
     });
 
+    group('does not call sessionHandler when auth fails', () {
+      MockSessionHandler sessionHandler;
+
+      setUp(() {
+        sessionHandler = new MockSessionHandler();
+        sessionHandler.when(callsTo('handle')).alwaysCall(okResponse);
+      });
+
+      Handler authHandler(Iterable<Authenticator> auths) {
+        final mw = authenticationMiddleware(auths, sessionHandler);
+        return mw(handler);
+      }
+
+      verifyHandlerNotCalledFor(Iterable<Authenticator> auths) {
+        final f = authHandler(auths)(request);
+        f.then((response) {
+          sessionHandler.calls('handle').verify(neverHappened);
+        });
+        expect(f, completes);
+      }
+
+      test("for empty authenticators", () {
+        verifyHandlerNotCalledFor([]);
+      });
+
+      test("for non matching authenticators", () {
+        authenticator1.when(callsTo('authenticate'))
+          .alwaysReturn(new Future.value(const None()));
+
+        verifyHandlerNotCalledFor([authenticator1]);
+      });
+
+      test("for invalid auth", () {
+        authenticator1.when(callsTo('authenticate'))
+          .alwaysReturn(new Future.error(new AuthenticationFailure()));
+
+        verifyHandlerNotCalledFor([authenticator1]);
+      });
+    });
+
+    group('calls sessionHandler when auth succeeds', () {
+      MockSessionHandler sessionHandler;
+      final authContext = new AuthenticationContext(new Principal("fred"));
+      var authHandler;
+
+      setUp(() {
+        sessionHandler = new MockSessionHandler();
+        sessionHandler.when(callsTo('handle')).alwaysReturn(okResponse);
+
+        authenticator1.when(callsTo('authenticate'))
+          .alwaysReturn(new Future.value(new Some(authContext)));
+
+        final mw = authenticationMiddleware([authenticator1], sessionHandler);
+        authHandler = mw(handler);
+
+      });
+
+
+      verifyHandlerCalledFor(sessionHandlerCalls(MockSessionHandler sessionHandler)) {
+        final f = authHandler(request);
+        f.then((response) {
+          sessionHandlerCalls(sessionHandler).verify(happenedOnce);
+        });
+        expect(f, completes);
+      }
+
+      test("", () {
+        verifyHandlerCalledFor((sh) => sh.calls('handle'));
+      });
+
+      test("with correct auth context", () {
+        verifyHandlerCalledFor((sh) => sh.calls('handle', authContext));
+      });
+
+      test("with correct request", () {
+        verifyHandlerCalledFor((sh) => sh.calls('handle', anything, request));
+      });
+
+      test("with correct response", () {
+        verifyHandlerCalledFor((sh) => sh.calls('handle', anything, anything,
+            okResponse));
+      });
+    });
+
+//    group('does not call sessionHandler when sessionCreateAllowed is false', () {
+//      MockSessionHandler sessionHandler;
+//
+//      setUp(() {
+//        sessionHandler = new MockSessionHandler();
+//        sessionHandler.when(callsTo('handle')).alwaysReturn(okResponse);
+//      });
+//
+//      Handler authHandler(Iterable<Authenticator> auths) {
+//        final mw = authenticationMiddleware(auths, sessionHandler);
+//        return mw(handler);
+//      }
+//
+//      verifyHandlerCalledFor(Iterable<Authenticator> auths) {
+//        final f = authHandler(auths)(request);
+//        f.then((response) {
+//          sessionHandler.calls('handle').verify(happenedOnce);
+//        });
+//        expect(f, completes);
+//      }
+//
+//      test("", () {
+//        authenticator1.when(callsTo('authenticate'))
+//          .alwaysReturn(new Future.value(
+//              new Some(new AuthenticationContext(new Principal("fred")))));
+//
+//        verifyHandlerCalledFor([authenticator1]);
+//      });
+//    });
   });
 }
 

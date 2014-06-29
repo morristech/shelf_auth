@@ -92,7 +92,7 @@ class AuthenticationMiddleware {
         print('--- $e');
         print(stackTrace);
         // TODO: let through to shelf_expection_response
-        return new Response.internalServerError(body: e);
+        return new Response.internalServerError(body: e.toString());
       });
   }
 
