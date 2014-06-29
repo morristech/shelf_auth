@@ -276,35 +276,31 @@ main() {
       });
     });
 
-//    group('does not call sessionHandler when sessionCreateAllowed is false', () {
-//      MockSessionHandler sessionHandler;
-//
-//      setUp(() {
-//        sessionHandler = new MockSessionHandler();
-//        sessionHandler.when(callsTo('handle')).alwaysReturn(okResponse);
-//      });
-//
-//      Handler authHandler(Iterable<Authenticator> auths) {
-//        final mw = authenticationMiddleware(auths, sessionHandler);
-//        return mw(handler);
-//      }
-//
-//      verifyHandlerCalledFor(Iterable<Authenticator> auths) {
-//        final f = authHandler(auths)(request);
-//        f.then((response) {
-//          sessionHandler.calls('handle').verify(happenedOnce);
-//        });
-//        expect(f, completes);
-//      }
-//
-//      test("", () {
-//        authenticator1.when(callsTo('authenticate'))
-//          .alwaysReturn(new Future.value(
-//              new Some(new AuthenticationContext(new Principal("fred")))));
-//
-//        verifyHandlerCalledFor([authenticator1]);
-//      });
-//    });
+    group('does not call sessionHandler when session creation and update not allowed', () {
+      MockSessionHandler sessionHandler;
+      final authContext = new AuthenticationContext(new Principal("fred"),
+          sessionCreationAllowed: false, sessionUpdateAllowed: false);
+      var authHandler;
+
+      setUp(() {
+        sessionHandler = new MockSessionHandler();
+        sessionHandler.when(callsTo('handle')).alwaysReturn(okResponse);
+
+        authenticator1.when(callsTo('authenticate'))
+          .alwaysReturn(new Future.value(new Some(authContext)));
+
+        final mw = authenticationMiddleware([authenticator1], sessionHandler);
+        authHandler = mw(handler);
+      });
+
+      test("", () {
+        final f = authHandler(request);
+        f.then((response) {
+          sessionHandler.calls('handle').verify(neverHappened);
+        });
+        expect(f, completes);
+      });
+    });
   });
 }
 
