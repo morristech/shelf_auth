@@ -76,6 +76,8 @@ class Principal {
  * for server to server interaction, but true for user to system interaction
  *
  */
+// TODO: AuthenticationContext sounds more like something you pass into an
+// authenticator than something that you get out
 class AuthenticationContext<P extends Principal> {
   final P principal;
 
@@ -193,4 +195,22 @@ class AuthenticationMiddleware {
       return syncFuture(() => innerHandler(request));
     });
   }
+}
+
+Option<AuthorizationHeader> authorizationHeader(Request request) {
+  return new Option(request.headers['Authorization'])
+    .flatMap((String header) {
+      final List<String> parts = header.split(' ');
+      if (parts.length != 2) {
+        return const None();
+      }
+      return new Some(new AuthorizationHeader(parts[0], parts[1]));
+    });
+}
+
+class AuthorizationHeader {
+  final String realm;
+  final String credentials;
+
+  AuthorizationHeader(this.realm, this.credentials);
 }
