@@ -9,7 +9,7 @@ import 'package:shelf_exception_response/exception.dart';
 const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
 
 /**
- * Creates *Shelf* middleware for performing authenication and optionally
+ * Creates *Shelf* middleware for performing authentication and optionally
  * creating / updating a session.
  *
  * Supports a chain of [Authenticator]s where the first to either succeed or
@@ -25,14 +25,11 @@ const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
  *
  * ```
  *   var handler = const Pipeline()
-        .addMiddleware(logRequests())
         .addMiddleware(exceptionResponse())
-        .addMiddleware(authenticate([new BasicAuthAuthenticator()]))
+        .addMiddleware(authenticate([new BasicAuthenticator(userLookup)]))
         .addHandler((Request request) => new Response.ok("I'm in"));
 
-    io.serve(handler, 'localhost', 8080).then((server) {
-      print('Serving at http://${server.address.host}:${server.port}');
-    });
+    io.serve(handler, 'localhost', 8080);
   * ```
  */
 Middleware authenticate(Iterable<Authenticator> authenticators,
@@ -76,6 +73,8 @@ class Principal {
  * for server to server interaction, but true for user to system interaction
  *
  */
+// TODO: AuthenticationContext sounds more like something you pass into an
+// authenticator than something that you get out
 class AuthenticationContext<P extends Principal> {
   final P principal;
 
@@ -193,4 +192,22 @@ class AuthenticationMiddleware {
       return syncFuture(() => innerHandler(request));
     });
   }
+}
+
+Option<AuthorizationHeader> authorizationHeader(Request request) {
+  return new Option(request.headers['Authorization'])
+    .flatMap((String header) {
+      final List<String> parts = header.split(' ');
+      if (parts.length != 2) {
+        return const None();
+      }
+      return new Some(new AuthorizationHeader(parts[0], parts[1]));
+    });
+}
+
+class AuthorizationHeader {
+  final String realm;
+  final String credentials;
+
+  AuthorizationHeader(this.realm, this.credentials);
 }
