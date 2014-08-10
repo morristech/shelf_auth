@@ -5,7 +5,7 @@ import 'dart:async';
 import 'package:option/option.dart';
 import 'package:crypto/crypto.dart';
 import 'package:shelf_auth/src/authentication.dart';
-import 'package:shelf_auth/src/authenticators/basic.dart';
+import 'package:shelf_auth/src/authenticators/basic_auth.dart';
 import 'package:unittest/unittest.dart';
 
 //
