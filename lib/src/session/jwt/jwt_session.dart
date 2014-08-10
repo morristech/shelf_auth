@@ -5,6 +5,8 @@ import 'package:logging/logging.dart';
 
 Logger _log = new Logger('shelf_auth.session.jwt');
 
+const String JWT_SESSION_AUTH_SCHEME = 'ShelfAuthJwtSession';
+
 /**
  * Creates a Jwt token containing claims about a session
  */

@@ -95,6 +95,28 @@ class AuthenticationContext<P extends Principal> {
 }
 
 /**
+ * An [AuthenticationContext] established by authenticating via a session
+ * token mechanism
+ */
+class SessionAuthenticationContext<P extends Principal>
+        extends AuthenticationContext<P> {
+  final DateTime sessionFirstCreated;
+
+  final DateTime sessionLastRefreshed;
+
+  final DateTime noSessionRenewalAfter;
+
+  SessionAuthenticationContext(P principal,
+      this.sessionFirstCreated, this.sessionLastRefreshed,
+          this.noSessionRenewalAfter,
+      { Option<P> onBehalfOf: const None(),
+         bool sessionCreationAllowed: true, bool sessionUpdateAllowed: true })
+      : super(principal, sessionCreationAllowed: sessionCreationAllowed,
+            sessionUpdateAllowed: sessionUpdateAllowed);
+}
+
+
+/**
  * A class that may establish and / or update a session for the authenticated
  * principal.
  *
@@ -194,20 +216,3 @@ class AuthenticationMiddleware {
   }
 }
 
-Option<AuthorizationHeader> authorizationHeader(Request request) {
-  return new Option(request.headers['Authorization'])
-    .flatMap((String header) {
-      final List<String> parts = header.split(' ');
-      if (parts.length != 2) {
-        return const None();
-      }
-      return new Some(new AuthorizationHeader(parts[0], parts[1]));
-    });
-}
-
-class AuthorizationHeader {
-  final String authScheme;
-  final String credentials;
-
-  AuthorizationHeader(this.authScheme, this.credentials);
-}

@@ -1,16 +1,16 @@
 library shelf_auth.authentication.session.jwt;
 
-import '../authentication.dart';
+import '../../authentication.dart';
 import 'package:shelf/shelf.dart';
 import 'dart:async';
 import 'package:option/option.dart';
-import '../principal/user_lookup.dart';
-import '../session/jwt/jwt_session.dart';
+import '../../principal/user_lookup.dart';
+import 'jwt_session.dart';
 import 'package:dart_jwt/dart_jwt.dart';
 import 'package:shelf_exception_response/exception.dart';
-import '../preconditions.dart';
+import '../../preconditions.dart';
+import '../../util.dart';
 
-const String _JWT_SESSION_AUTH_SCHEME = 'ShelfAuthJwtSession';
 
 /**
  * An [Authenticator] for Shelf Auth Jwt Session Token
@@ -26,10 +26,8 @@ class JwtSessionAuthenticator<P extends Principal> extends Authenticator<P> {
 
   @override
   Future<Option<AuthenticationContext<P>>> authenticate(Request request) {
-    return authorizationHeader(request).flatMap((authHeader) {
-      if (authHeader.authScheme != _JWT_SESSION_AUTH_SCHEME) {
-        return const None();
-      }
+    final authHeaderOpt = authorizationHeader(request, JWT_SESSION_AUTH_SCHEME);
+    return authHeaderOpt.flatMap((authHeader) {
 
       final sessionJwtToken = authHeader.credentials;
 
@@ -42,11 +40,14 @@ class JwtSessionAuthenticator<P extends Principal> extends Authenticator<P> {
         throw new UnauthorizedException();
       }
 
-      final principalFuture = userLookup(sessionJwt.claimSet.subject);
+      final SessionClaimSet claimSet = sessionJwt.claimSet;
+      final principalFuture = userLookup(claimSet.subject);
 
       return new Some(principalFuture.then((principalOption) =>
           principalOption.map((principal) =>
-              new AuthenticationContext(principal))));
+              new SessionAuthenticationContext(principal,
+                  claimSet.issuedAt, new DateTime.now(),
+                  claimSet.totalSessionExpiry))));
     })
     .getOrElse(() => new Future(() => const None()));
 

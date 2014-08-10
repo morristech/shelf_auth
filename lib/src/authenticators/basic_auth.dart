@@ -8,7 +8,9 @@ import 'package:crypto/crypto.dart';
 import '../principal/user_lookup.dart';
 import 'package:shelf_exception_response/exception.dart';
 import '../preconditions.dart';
+import '../util.dart';
 
+const BASIC_AUTH_SCHEME = 'Basic';
 /**
  * An [Authenticator] for Basic Authentication (http://tools.ietf.org/html/rfc2617)
  */
@@ -21,10 +23,8 @@ class BasicAuthenticator<P extends Principal> extends Authenticator<P> {
 
   @override
   Future<Option<AuthenticationContext<P>>> authenticate(Request request) {
-    return authorizationHeader(request).flatMap((authHeader) {
-      if (authHeader.authScheme != 'Basic') {
-        return const None();
-      }
+    final authHeaderOpt = authorizationHeader(request, BASIC_AUTH_SCHEME);
+    return authHeaderOpt.flatMap((authHeader) {
 
       final usernamePasswordStr = _getCredentials(authHeader);
 
