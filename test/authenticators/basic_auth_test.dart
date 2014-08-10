@@ -3,7 +3,6 @@ library shelf_auth.authentication.basic.test;
 import 'package:shelf/shelf.dart';
 import 'dart:async';
 import 'package:option/option.dart';
-import 'package:crypto/crypto.dart';
 import 'package:shelf_auth/src/authentication.dart';
 import 'package:shelf_auth/src/authenticators/basic_auth.dart';
 import 'package:unittest/unittest.dart';
@@ -16,6 +15,15 @@ final UserLookupByUsernamePassword lookup = new TestLookup();
 main() {
   request() => new Request('GET', Uri.parse('http://localhost/foo'),
     headers: { 'Authorization': 'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==' });
+
+  requestInvalidCredentials() => new Request('GET', Uri.parse('http://localhost/foo'),
+    headers: { 'Authorization': 'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQXXXXXX==' });
+
+  requestWrongRealm() => new Request('GET', Uri.parse('http://localhost/foo'),
+    headers: { 'Authorization': 'Complex QWxhZGRpbjpvcGVuIHNlc2FtZQ==' });
+
+  requestNoAuth() => new Request('GET', Uri.parse('http://localhost/foo'),
+    headers: { 'Foo': 'bar' });
 
   final authenticator = new BasicAuthenticator(lookup);
 
@@ -43,8 +51,41 @@ main() {
         });
       });
 
+      group('and credentials is for invalid user', () {
+        test('completes', () {
+          expect(authenticator.authenticate(requestInvalidCredentials()), completes);
+        });
+
+        test('completes with None', () {
+          expect(authenticator.authenticate(requestInvalidCredentials()),
+          completion(new isInstanceOf<None>()));
+        });
+      });
+
+      group('and Realm is not Basic', () {
+        test('completes', () {
+          expect(authenticator.authenticate(requestWrongRealm()), completes);
+        });
+
+        test('completes with None', () {
+          expect(authenticator.authenticate(requestWrongRealm()),
+          completion(new isInstanceOf<None>()));
+        });
+      });
     });
 
+    group('when no Authorization header is present', () {
+      test('completes', () {
+        expect(authenticator.authenticate(requestNoAuth()), completes);
+      });
+
+      test('completes with None', () {
+        expect(authenticator.authenticate(requestNoAuth()),
+        completion(new isInstanceOf<None>()));
+      });
+
+
+    });
 
 
   });

@@ -18,8 +18,7 @@ class BasicAuthenticator<P extends Principal> extends Authenticator<P> {
         return const None();
       }
 
-      final usernamePasswordStr = new String.fromCharCodes(
-          CryptoUtils.base64StringToBytes(authHeader.credentials));
+      final usernamePasswordStr = _getCredentials(authHeader);
 
       final usernamePassword = usernamePasswordStr.split(':');
 
@@ -36,6 +35,15 @@ class BasicAuthenticator<P extends Principal> extends Authenticator<P> {
     })
     .getOrElse(() => new Future(() => const None()));
 
+  }
+
+  String _getCredentials(AuthorizationHeader authHeader) {
+    try {
+      return new String.fromCharCodes(
+          CryptoUtils.base64StringToBytes(authHeader.credentials));
+    } on FormatException catch(e) {
+      return '';
+    }
   }
 }
 
