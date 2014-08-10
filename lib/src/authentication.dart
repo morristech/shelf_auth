@@ -9,7 +9,7 @@ import 'package:shelf_exception_response/exception.dart';
 const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
 
 /**
- * Creates *Shelf* middleware for performing authenication and optionally
+ * Creates *Shelf* middleware for performing authentication and optionally
  * creating / updating a session.
  *
  * Supports a chain of [Authenticator]s where the first to either succeed or
@@ -25,14 +25,11 @@ const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
  *
  * ```
  *   var handler = const Pipeline()
-        .addMiddleware(logRequests())
         .addMiddleware(exceptionResponse())
-        .addMiddleware(authenticate([new BasicAuthAuthenticator()]))
+        .addMiddleware(authenticate([new BasicAuthenticator(userLookup)]))
         .addHandler((Request request) => new Response.ok("I'm in"));
 
-    io.serve(handler, 'localhost', 8080).then((server) {
-      print('Serving at http://${server.address.host}:${server.port}');
-    });
+    io.serve(handler, 'localhost', 8080);
   * ```
  */
 Middleware authenticate(Iterable<Authenticator> authenticators,
