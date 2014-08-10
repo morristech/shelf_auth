@@ -5,7 +5,9 @@ import 'package:shelf/shelf.dart';
 import 'dart:async';
 import 'package:option/option.dart';
 import 'package:crypto/crypto.dart';
-
+import '../principal/user_lookup.dart';
+import 'package:shelf_exception_response/exception.dart';
+import '../preconditions.dart';
 
 /**
  * An [Authenticator] for Basic Authentication (http://tools.ietf.org/html/rfc2617)
@@ -13,12 +15,14 @@ import 'package:crypto/crypto.dart';
 class BasicAuthenticator<P extends Principal> extends Authenticator<P> {
   final UserLookupByUsernamePassword<P> userLookup;
 
-  BasicAuthenticator(this.userLookup);
+  BasicAuthenticator(this.userLookup) {
+    ensure(userLookup, isNotNull);
+  }
 
   @override
   Future<Option<AuthenticationContext<P>>> authenticate(Request request) {
     return authorizationHeader(request).flatMap((authHeader) {
-      if (authHeader.realm != 'Basic') {
+      if (authHeader.authScheme != 'Basic') {
         return const None();
       }
 
@@ -27,10 +31,10 @@ class BasicAuthenticator<P extends Principal> extends Authenticator<P> {
       final usernamePassword = usernamePasswordStr.split(':');
 
       if (usernamePassword.length != 2) {
-        return const None();
+        throw new BadRequestException();
       }
 
-      final principalFuture = userLookup.lookup(usernamePassword[0],
+      final principalFuture = userLookup(usernamePassword[0],
           usernamePassword[1]);
 
       return new Some(principalFuture.then((principalOption) =>
@@ -49,11 +53,4 @@ class BasicAuthenticator<P extends Principal> extends Authenticator<P> {
       return '';
     }
   }
-}
-
-// TODO: move elsewhere as usable beyond basic
-abstract class UserLookupByUsernamePassword<P extends Principal> {
-
-  Future<Option<P>> lookup(String username, String password);
-
 }

@@ -206,8 +206,8 @@ Option<AuthorizationHeader> authorizationHeader(Request request) {
 }
 
 class AuthorizationHeader {
-  final String realm;
+  final String authScheme;
   final String credentials;
 
-  AuthorizationHeader(this.realm, this.credentials);
+  AuthorizationHeader(this.authScheme, this.credentials);
 }

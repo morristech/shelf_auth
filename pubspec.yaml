@@ -7,6 +7,7 @@ environment:
   sdk: '>=1.2.0 <2.0.0'
 dependencies:
   crypto: '>=0.9.0 <0.10.0'
+  dart_jwt: any
   option: '>=0.3.3 <0.4.0'
   shelf: '>=0.5.1 <0.6.0'
   shelf_exception_response: '>=0.1.0 <0.2.0'

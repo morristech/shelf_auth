@@ -16,7 +16,7 @@ void main() {
       .addMiddleware(logRequests())
       .addMiddleware(exceptionResponse())
       .addMiddleware(authenticate([
-          new BasicAuthenticator(new TestLookup()),
+          new BasicAuthenticator(testLookup),
           new RandomAuthenticator()]))
       .addHandler((Request request) => new Response.ok("I'm in with "
           "${getAuthenticationContext(request).map((ac) => ac.principal.name)}\n"));
@@ -39,15 +39,11 @@ class RandomAuthenticator extends Authenticator {
   }
 }
 
-class TestLookup extends UserLookupByUsernamePassword<Principal> {
+Future<Option<Principal>> testLookup(String username, String password) {
+  final validUser = username == 'Aladdin' && password == 'open sesame';
 
-  @override
-  Future<Option<Principal>> lookup(String username, String password) {
-    final validUser = username == 'Aladdin' && password == 'open sesame';
+  final principalOpt = validUser ? new Some(new Principal(username)) :
+    const None();
 
-    final principalOpt = validUser ? new Some(new Principal(username)) :
-      const None();
-
-    return new Future.value(principalOpt);
-  }
+  return new Future.value(principalOpt);
 }

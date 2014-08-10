@@ -13,6 +13,10 @@ packages:
     description: crypto
     source: hosted
     version: "0.9.0"
+  dart_jwt:
+    description: dart_jwt
+    source: hosted
+    version: "0.1.1"
   either:
     description: either
     source: hosted
@@ -21,6 +25,10 @@ packages:
     description: http_parser
     source: hosted
     version: "0.0.2+3"
+  logging:
+    description: logging
+    source: hosted
+    version: "0.9.2"
   matcher:
     description: matcher
     source: hosted

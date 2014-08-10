@@ -6,11 +6,10 @@ import 'package:option/option.dart';
 import 'package:shelf_auth/src/authentication.dart';
 import 'package:shelf_auth/src/authenticators/basic_auth.dart';
 import 'package:unittest/unittest.dart';
+import 'package:shelf_auth/src/principal/user_lookup.dart';
 
-//
 
-
-final UserLookupByUsernamePassword lookup = new TestLookup();
+final UserLookupByUsernamePassword lookup = testLookup;
 
 main() {
   request() => new Request('GET', Uri.parse('http://localhost/foo'),
@@ -52,14 +51,14 @@ main() {
       });
 
       group('and credentials is for invalid user', () {
-        test('completes', () {
-          expect(authenticator.authenticate(requestInvalidCredentials()), completes);
+        test('throws', () {
+          expect(authenticator.authenticate(requestInvalidCredentials()), throws);
         });
 
-        test('completes with None', () {
-          expect(authenticator.authenticate(requestInvalidCredentials()),
-          completion(new isInstanceOf<None>()));
-        });
+//        test('completes with None', () {
+//          expect(authenticator.authenticate(requestInvalidCredentials()),
+//          completion(new isInstanceOf<None>()));
+//        });
       });
 
       group('and Realm is not Basic', () {
@@ -92,15 +91,11 @@ main() {
 
 }
 
-class TestLookup extends UserLookupByUsernamePassword<Principal> {
+Future<Option<Principal>> testLookup(String username, String password) {
+  final validUser = username == 'Aladdin' && password == 'open sesame';
 
-  @override
-  Future<Option<Principal>> lookup(String username, String password) {
-    final validUser = username == 'Aladdin' && password == 'open sesame';
+  final principalOpt = validUser ? new Some(new Principal(username)) :
+    const None();
 
-    final principalOpt = validUser ? new Some(new Principal(username)) :
-      const None();
-
-    return new Future.value(principalOpt);
-  }
+  return new Future.value(principalOpt);
 }
