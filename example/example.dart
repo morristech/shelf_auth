@@ -15,7 +15,9 @@ void main() {
   var handler = const Pipeline()
       .addMiddleware(logRequests())
       .addMiddleware(exceptionResponse())
-      .addMiddleware(authenticate([new RandomAuthenticator()]))
+      .addMiddleware(authenticate([
+          new BasicAuthenticator(new TestLookup()),
+          new RandomAuthenticator()]))
       .addHandler((Request request) => new Response.ok("I'm in with "
           "${getAuthenticationContext(request).map((ac) => ac.principal.name)}\n"));
 
@@ -34,5 +36,18 @@ class RandomAuthenticator extends Authenticator {
     return new Future.value(approve ?
         new Some(new AuthenticationContext(new Principal("fred")))
         : throw new UnauthorizedException());
+  }
+}
+
+class TestLookup extends UserLookupByUsernamePassword<Principal> {
+
+  @override
+  Future<Option<Principal>> lookup(String username, String password) {
+    final validUser = username == 'Aladdin' && password == 'open sesame';
+
+    final principalOpt = validUser ? new Some(new Principal(username)) :
+      const None();
+
+    return new Future.value(principalOpt);
   }
 }

@@ -6,6 +6,10 @@ import 'dart:async';
 import 'package:option/option.dart';
 import 'package:crypto/crypto.dart';
 
+
+/**
+ * An [Authenticator] for Basic Authentication (http://tools.ietf.org/html/rfc2617)
+ */
 class BasicAuthenticator<P extends Principal> extends Authenticator<P> {
   final UserLookupByUsernamePassword<P> userLookup;
 
