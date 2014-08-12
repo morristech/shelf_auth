@@ -1,30 +1,36 @@
-library shelf_auth.authentication.jwtsession.test;
+library shelf_auth.authentication.session.jwt.test;
 
 import 'package:shelf/shelf.dart';
 import 'dart:async';
 import 'package:option/option.dart';
 import 'package:shelf_auth/src/authentication.dart';
-import 'package:shelf_auth/src/authenticators/basic_auth.dart';
 import 'package:unittest/unittest.dart';
 import 'package:shelf_auth/src/principal/user_lookup.dart';
+import 'package:shelf_auth/src/session/jwt/jwt_session_auth.dart';
+import 'package:shelf_auth/src/session/jwt/jwt_session.dart';
 
 
-final UserLookupByUsernamePassword lookup = testLookup;
+final UserLookupByUsername lookup = testLookup;
+const String secret = 'sshhh  its a secret';
+const String issuer = 'da issuer';
+const String subject = 'el subjecto';
 
 main() {
+  final String sessionToken = createSessionToken(secret, issuer, subject);
+  
   request() => new Request('GET', Uri.parse('http://localhost/foo'),
-    headers: { 'Authorization': 'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==' });
+    headers: { 'Authorization': '$JWT_SESSION_AUTH_SCHEME $sessionToken' });
 
   requestInvalidCredentials() => new Request('GET', Uri.parse('http://localhost/foo'),
-    headers: { 'Authorization': 'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQXXXXXX==' });
+    headers: { 'Authorization': '$JWT_SESSION_AUTH_SCHEME QWxhZGRpbjpvcGVuIHNlc2FtZQXXXXXX==' });
 
   requestWrongRealm() => new Request('GET', Uri.parse('http://localhost/foo'),
-    headers: { 'Authorization': 'Complex QWxhZGRpbjpvcGVuIHNlc2FtZQ==' });
+    headers: { 'Authorization': 'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==' });
 
   requestNoAuth() => new Request('GET', Uri.parse('http://localhost/foo'),
     headers: { 'Foo': 'bar' });
 
-  final authenticator = new BasicAuthenticator(lookup);
+  final authenticator = new JwtSessionAuthenticator(lookup, secret);
 
   group('authenticate', () {
 
@@ -46,7 +52,7 @@ main() {
 
         test('completes with correct principal', () {
           expect(authenticator.authenticate(request()),
-            completion((optContext) => optContext.get().principal.name == 'Aladdin'));
+            completion((optContext) => optContext.get().principal.name == subject));
         });
       });
 
@@ -54,11 +60,6 @@ main() {
         test('throws', () {
           expect(() => authenticator.authenticate(requestInvalidCredentials()), throws);
         });
-
-//        test('completes with None', () {
-//          expect(authenticator.authenticate(requestInvalidCredentials()),
-//          completion(new isInstanceOf<None>()));
-//        });
       });
 
       group('and Realm is not Basic', () {
@@ -91,8 +92,8 @@ main() {
 
 }
 
-Future<Option<Principal>> testLookup(String username, String password) {
-  final validUser = username == 'Aladdin' && password == 'open sesame';
+Future<Option<Principal>> testLookup(String username) {
+  final validUser = username == subject;
 
   final principalOpt = validUser ? new Some(new Principal(username)) :
     const None();

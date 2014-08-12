@@ -6,9 +6,8 @@ import 'package:dart_jwt/dart_jwt.dart';
 
 main() {
   group('encode decode rountrip', () {
-    var issuer = 'da issuer';
-
-    var subject = 'el subjecto';
+    final issuer = 'da issuer';
+    final subject = 'el subjecto';
 
     String token() => createSessionToken('secret sauce', issuer, subject);
     JsonWebToken<SessionClaimSet> roundTrip() => decodeSessionToken(token());
