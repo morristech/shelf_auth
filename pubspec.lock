@@ -37,6 +37,10 @@ packages:
     description: mock
     source: hosted
     version: "0.11.0+1"
+  mockito:
+    description: mockito
+    source: hosted
+    version: "0.8.1"
   option:
     description: option
     source: hosted
