@@ -56,7 +56,7 @@ Option<AuthorizationHeader> authorizationHeader(Request request,
 Iterable<AuthorizationHeader> authorizationHeaders(Request request) {
   List<String> authHeaders = _authHeaders(request);
 
-  return authHeaders.expand((header) {
+  return authHeaders.map((header) {
         final List<String> parts = header.split(' ');
         if (parts.length != 2) {
           throw new BadRequestException();

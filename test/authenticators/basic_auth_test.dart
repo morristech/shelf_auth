@@ -52,7 +52,7 @@ main() {
 
       group('and credentials is for invalid user', () {
         test('throws', () {
-          expect(authenticator.authenticate(requestInvalidCredentials()), throws);
+          expect(() => authenticator.authenticate(requestInvalidCredentials()), throws);
         });
 
 //        test('completes with None', () {
