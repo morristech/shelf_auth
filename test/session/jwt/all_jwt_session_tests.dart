@@ -2,17 +2,12 @@
 // Please see the AUTHORS file for details.
 // All rights reserved. Use of this source code is governed by
 // a BSD 2-Clause License that can be found in the LICENSE file.
-library constrain.all.test;
+library shelf_auth.session.jwt.all.test;
 
 import 'package:unittest/unittest.dart';
-import 'shelf_auth_test.dart' as core;
-import 'authenticators/basic_auth_test.dart' as basic;
-import 'session/jwt/all_jwt_session_tests.dart' as jwt;
-
+import 'jwt_session_test.dart' as jwt_session;
 
 main() {
-  group('[core]', core.main);
-  group('[basic]', basic.main);
-  group('[jwt]', jwt.main);
+  group('[jwt_session]', jwt_session.main);
 }
 
