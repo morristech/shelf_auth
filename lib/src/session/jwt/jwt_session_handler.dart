@@ -1,19 +1,24 @@
 library shelf_auth.session.jwt.handler;
 
 import 'jwt_session.dart';
+import 'jwt_session_auth.dart';
 import '../../authentication.dart';
 import 'package:shelf/shelf.dart';
 import '../../preconditions.dart';
 import '../../util.dart';
+import '../../principal/user_lookup.dart';
 
-class JwtSessionHandler implements SessionHandler {
+class JwtSessionHandler<P extends Principal> implements SessionHandler<P> {
   final String issuer;
   final String secret;
   final Duration idleTimeout;
   final Duration totalSessionTimeout;
+  final JwtSessionAuthenticator<P> authenticator;
 
-  JwtSessionHandler(this.issuer, this.secret, this.idleTimeout,
-      this.totalSessionTimeout) {
+  JwtSessionHandler(this.issuer, String secret, this.idleTimeout,
+      this.totalSessionTimeout, UserLookupByUsername<P> userLookup)
+      : this.secret = secret,
+        this.authenticator = new JwtSessionAuthenticator<P>(userLookup, secret){
     ensure(issuer, isNotNull);
     ensure(secret, isNotNull);
     ensure(idleTimeout, isNotNull);

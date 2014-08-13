@@ -118,15 +118,20 @@ class SessionAuthenticationContext<P extends Principal>
 
 /**
  * A class that may establish and / or update a session for the authenticated
- * principal.
+ * principal. It has an accompanying [Authenticator] to authenticate session
+ * tokens on incoming requests.
  *
  * Implementations must respect the values of
  * [sessionCreationAllowed] and [sessionUpdateAllowed] in the given
  * [AuthenticationContext]
  */
-abstract class SessionHandler {
-  Response handle(AuthenticationContext context,
-                  Request request, Response response);
+abstract class SessionHandler<P extends Principal> {
+  /// Update the [response] with a session token as appropriate
+  Response handle(AuthenticationContext context, Request request,
+                  Response response);
+
+  /// authenticator for session tokens created by the [handle] method
+  Authenticator<P> get authenticator;
 }
 
 /**
@@ -155,6 +160,8 @@ abstract class Authenticator<P extends Principal> {
  *
  * An optional [SessionHandler] can be provided to create /
  * update a session as a result (e.g. by setting a cookie or token etc).
+ * The [sessionHandler]s associated [Authenticator] will be
+ * the first authenticator called when authenticating requests
  *
  * If no [SessionHandler] is provided then no session will be created if none
  * currently exists and no changes will be made to an existing one if one does
@@ -164,7 +171,12 @@ class AuthenticationMiddleware {
   final List<Authenticator> authenticators;
   final Option<SessionHandler> sessionHandler;
 
-  AuthenticationMiddleware(this.authenticators, this.sessionHandler);
+  AuthenticationMiddleware(List<Authenticator> authenticators,
+                           Option<SessionHandler> sessionHandler)
+      : this.authenticators = (sessionHandler.nonEmpty() ?
+          ([]..add(sessionHandler.get().authenticator)..addAll(authenticators))
+          : authenticators),
+          this.sessionHandler = sessionHandler;
 
 
   Middleware get middleware => _createHandler;

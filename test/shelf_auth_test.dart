@@ -36,9 +36,10 @@ main() {
   MockAuthenticator authenticator1;
   MockAuthenticator authenticator2;
   MockAuthenticator authenticator3;
+  MockAuthenticator sessionAuthenticator;
   MockHandler handler;
 
-  final request = new Request('GET', Uri.parse('http://blah/foo'));
+  Request request() => new Request('GET', Uri.parse('http://blah/foo'));
   final okResponse = new Response.ok('sweet');
   final defaultAuthContext = new AuthenticationContext(new Principal("fred"));
 
@@ -46,6 +47,7 @@ main() {
     authenticator1 = new MockAuthenticator();
     authenticator2 = new MockAuthenticator();
     authenticator3 = new MockAuthenticator();
+    sessionAuthenticator = new MockAuthenticator();
     handler = new MockHandler();
     when(handler.call(argThat(new isInstanceOf<Request>())))
       .thenReturn(okResponse);
@@ -60,11 +62,11 @@ main() {
       });
 
       test('completes', () {
-        expect(middlewareHandler(request), completes);
+        expect(middlewareHandler(request()), completes);
       });
 
       test("calls handler with no auth context in request", () {
-        final f = middlewareHandler(request);
+        final f = middlewareHandler(request());
         f.then((response) {
           verify(handler.call(argThat(requestWithContextValue(
                 _SHELF_AUTH_REQUEST_CONTEXT, isNull))))
@@ -74,7 +76,7 @@ main() {
       });
 
       test('returns 200 response', () {
-        expect(middlewareHandler(request), completion(responseWithStatus(200)));
+        expect(middlewareHandler(request()), completion(responseWithStatus(200)));
       });
     });
 
@@ -91,11 +93,11 @@ main() {
 
 
       test('completes', () {
-        expect(middlewareHandler(request), completes);
+        expect(middlewareHandler(request()), completes);
       });
 
       test("calls handler with no auth context in request", () {
-        final f = middlewareHandler(request);
+        final f = middlewareHandler(request());
         f.then((response) {
           verify(handler.call(argThat(requestWithContextValue(
                 _SHELF_AUTH_REQUEST_CONTEXT, isNull))))
@@ -105,7 +107,7 @@ main() {
       });
 
       test("calls all authenticators", () {
-        final f = middlewareHandler(request);
+        final f = middlewareHandler(request());
         f.then((response) {
           verify(authenticator1.authenticate(any)).called(1);
           verify(authenticator2.authenticate(any)).called(1);
@@ -114,7 +116,7 @@ main() {
       });
 
       test('returns 200 response', () {
-        expect(middlewareHandler(request), completion(responseWithStatus(200)));
+        expect(middlewareHandler(request()), completion(responseWithStatus(200)));
       });
     });
 
@@ -131,11 +133,11 @@ main() {
 
 
       test('completes', () {
-        expect(middlewareHandler(request), throws);
+        expect(middlewareHandler(request()), throws);
       });
 
       test("doesn't call handler", () {
-        final Future f = middlewareHandler(request);
+        final Future f = middlewareHandler(request());
         f.then((_) {
           fail('show throw');
         }, onError: (_) {
@@ -146,7 +148,7 @@ main() {
       });
 
       test("doesn't call remaining authenticators", () {
-        final f = middlewareHandler(request);
+        final f = middlewareHandler(request());
         f.then((_) {
           fail('show throw');
         }, onError: (_) {
@@ -177,11 +179,11 @@ main() {
 
 
       test('completes', () {
-        expect(middlewareHandler(request), completes);
+        expect(middlewareHandler(request()), completes);
       });
 
       test("calls handler with auth context in request", () {
-        final f = middlewareHandler(request);
+        final f = middlewareHandler(request());
         f.then((response) {
           verify(handler.call(argThat(requestWithContextValue(
               _SHELF_AUTH_REQUEST_CONTEXT, equals(defaultAuthContext)))))
@@ -191,7 +193,7 @@ main() {
       });
 
       test("calls first 2 authenticators but not last", () {
-        final f = middlewareHandler(request);
+        final f = middlewareHandler(request());
         f.then((response) {
           verify(authenticator1.authenticate(any)).called(1);
           verify(authenticator2.authenticate(any)).called(1);
@@ -202,7 +204,7 @@ main() {
       });
 
       test('returns 200 response', () {
-        expect(middlewareHandler(request), completion(responseWithStatus(200)));
+        expect(middlewareHandler(request()), completion(responseWithStatus(200)));
       });
     });
 
@@ -220,7 +222,7 @@ main() {
       }
 
       verifyHandlerNotCalledFor(Iterable<Authenticator> auths) {
-        final f = authHandler(auths)(request);
+        final f = authHandler(auths)(request());
         f.then((response) {
           verifyNever(sessionHandler.handle(any, any, any));
         },
@@ -255,8 +257,12 @@ main() {
       setUp(() {
         sessionHandler = new MockSessionHandler();
         when(sessionHandler.handle(any, any, any)).thenReturn(okResponse);
+        when(sessionHandler.authenticator).thenReturn(sessionAuthenticator);
 
-         when(authenticator1.authenticate(any))
+        when(sessionAuthenticator.authenticate(any))
+          .thenReturn(new Future.value(const None()));
+
+        when(authenticator1.authenticate(any))
           .thenReturn(new Future.value(new Some(defaultAuthContext)));
 
         final mw = authenticate([authenticator1], sessionHandler);
@@ -265,8 +271,9 @@ main() {
       });
 
 
-      verifyHandlerCalledFor(sessionHandlerCalls(MockSessionHandler sessionHandler)) {
-        final f = authHandler(request);
+      verifyHandlerCalledFor(sessionHandlerCalls(MockSessionHandler sessionHandler),
+          [Request req]) {
+        final f = authHandler(req != null ? req : request());
         f.then((response) {
           verify(sessionHandlerCalls(sessionHandler)).called(1);
         });
@@ -282,7 +289,8 @@ main() {
       });
 
       test("with correct request", () {
-        verifyHandlerCalledFor((sh) => sh.handle(any, request, any));
+        final req = request();
+        verifyHandlerCalledFor((sh) => sh.handle(any, req, any), req);
       });
 
       test("with correct response", () {
@@ -299,8 +307,13 @@ main() {
       setUp(() {
         sessionHandler = new MockSessionHandler();
         when(sessionHandler.handle(any, any, any)).thenReturn(okResponse);
+        when(sessionHandler.authenticator).thenReturn(sessionAuthenticator);
 
-         when(authenticator1.authenticate(any))
+        when(sessionAuthenticator.authenticate(any))
+          .thenReturn(new Future.value(const None()));
+
+
+        when(authenticator1.authenticate(any))
           .thenReturn(new Future.value(new Some(authContext)));
 
         final mw = authenticate([authenticator1], sessionHandler);
@@ -308,13 +321,45 @@ main() {
       });
 
       test("", () {
-        final f = authHandler(request);
+        final f = authHandler(request());
         f.then((response) {
           verifyNever(sessionHandler.handle(any, any, any));
         });
         expect(f, completes);
       });
     });
+
+    group('calls sessionHandlers authenticator before other authenticators', () {
+      MockSessionHandler sessionHandler;
+      var authHandler;
+
+      setUp(() {
+        sessionHandler = new MockSessionHandler();
+        when(sessionHandler.handle(any, any, any)).thenReturn(okResponse);
+        when(sessionHandler.authenticator).thenReturn(sessionAuthenticator);
+
+        when(sessionAuthenticator.authenticate(any))
+          .thenReturn(new Future.value(new Some(defaultAuthContext)));
+
+        when(authenticator1.authenticate(any))
+          .thenReturn(new Future.value(new Some(defaultAuthContext)));
+
+        final mw = authenticate([authenticator1], sessionHandler);
+        authHandler = mw(handler);
+
+      });
+
+      test('', () {
+        final f = authHandler(request());
+        f.then((response) {
+          verify(sessionAuthenticator.authenticate(any)).called(1);
+          verifyNever(authenticator1.authenticate(any));
+        });
+        expect(f, completes);
+      });
+
+    });
+
   });
 }
 
