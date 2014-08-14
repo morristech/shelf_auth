@@ -10,11 +10,20 @@ import 'package:shelf_exception_response/exception_response.dart';
 import 'dart:async';
 import 'package:option/option.dart';
 import 'package:uuid/uuid.dart';
+import 'package:logging/logging.dart';
 
 void main() {
 
+  Logger.root.level = Level.FINER;
+  Logger.root.onRecord.listen((lr) {
+    print('${lr.time} ${lr.level} ${lr.message}');
+  });
+
   var authMiddleware = authenticate([new RandomAuthenticator()],
-      new JwtSessionHandler('super app', new Uuid().v4(), testLookup));
+      sessionHandler: new JwtSessionHandler('super app', new Uuid().v4(),
+          testLookup),
+          // allow http for testing with curl. Don't do in production
+          allowHttp: true);
 
   var handler = const Pipeline()
       .addMiddleware(logRequests())
