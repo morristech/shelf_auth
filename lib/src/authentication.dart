@@ -24,6 +24,10 @@ final Logger _log = new Logger('shelf_auth.authentication');
  * The [SessionHandler] if provided will be invoked on successful authentication
  * if the resulting [AuthenticationContext] supports sessions.
  *
+ * By default authentication must occur over https and anonymous access is
+ * allowed. These can be overriden with the flags [allowHttp] and
+ * [allowAnonymousAccess] respectively.
+ *
  * Example use
  *
  * ```

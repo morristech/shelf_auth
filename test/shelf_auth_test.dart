@@ -121,6 +121,27 @@ main() {
       });
     });
 
+    group('when allowAnonymousAccess is false and all authenticators return None', () {
+      var middlewareHandler;
+      setUp(() {
+        when(authenticator1.authenticate(any))
+          .thenReturn(new Future.value(const None()));
+         when(authenticator2.authenticate(any))
+          .thenReturn(new Future.value(const None()));
+        final mw = authenticate([authenticator1, authenticator2],
+            allowAnonymousAccess: false);
+        middlewareHandler = mw(handler);
+      });
+
+
+      test('completes', () {
+        expect(middlewareHandler(request()),
+            throwsA(new isInstanceOf<UnauthorizedException>()));
+      });
+    });
+
+
+
     group('when first authenticator throws UnauthorizedException', () {
       var middlewareHandler;
       setUp(() {
