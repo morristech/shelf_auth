@@ -9,15 +9,24 @@ import 'package:shelf_auth/shelf_auth.dart';
 import 'package:shelf_exception_response/exception_response.dart';
 import 'dart:async';
 import 'package:option/option.dart';
+import 'package:logging/logging.dart';
 
 void main() {
+  Logger.root.level = Level.FINER;
+  Logger.root.onRecord.listen((lr) {
+    print('${lr.time} ${lr.level} ${lr.message}');
+  });
+
+  var authMiddleware = authenticate([
+             new BasicAuthenticator(testLookup),
+             new RandomAuthenticator()],
+             // allow http for testing with curl. Don't do in production
+             allowHttp: true);
 
   var handler = const Pipeline()
       .addMiddleware(logRequests())
       .addMiddleware(exceptionResponse())
-      .addMiddleware(authenticate([
-          new BasicAuthenticator(testLookup),
-          new RandomAuthenticator()]))
+      .addMiddleware(authMiddleware)
       .addHandler((Request request) => new Response.ok("I'm in with "
           "${getAuthenticationContext(request).map((ac) => ac.principal.name)}\n"));
 
