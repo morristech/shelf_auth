@@ -40,6 +40,7 @@ main() {
   MockHandler handler;
 
   Request request() => new Request('GET', Uri.parse('https://blah/foo'));
+  Request httpRequest() => new Request('GET', Uri.parse('http://blah/foo'));
   final okResponse = new Response.ok('sweet');
   final defaultAuthContext = new AuthenticationContext(new Principal("fred"));
 
@@ -208,6 +209,30 @@ main() {
       });
     });
 
+    group('when request over http and authenticator returns Some', () {
+      setUp(() {
+         when(authenticator1.authenticate(any))
+          .thenReturn(new Future.value(
+              new Some(defaultAuthContext)));
+
+      });
+
+      middlewareHandler(bool allowHttp) {
+         final mw = authenticate([authenticator1], allowHttp: allowHttp);
+         return mw(handler);
+      }
+
+      test('and allowHttp false then UnauthorizedException thrown', () {
+        expect(middlewareHandler(false)(httpRequest()),
+            throwsA(new isInstanceOf<UnauthorizedException>()));
+      });
+
+      test('and allowHttp true then returns response', () {
+        expect(middlewareHandler(true)(httpRequest()),
+            completion(new isInstanceOf<Response>()));
+      });
+    });
+
     group('does not call sessionHandler when auth fails', () {
       MockSessionHandler sessionHandler;
 
@@ -217,7 +242,7 @@ main() {
       });
 
       Handler authHandler(Iterable<Authenticator> auths) {
-        final mw = authenticate(auths, sessionHandler);
+        final mw = authenticate(auths, sessionHandler: sessionHandler);
         return mw(handler);
       }
 
@@ -265,7 +290,7 @@ main() {
         when(authenticator1.authenticate(any))
           .thenReturn(new Future.value(new Some(defaultAuthContext)));
 
-        final mw = authenticate([authenticator1], sessionHandler);
+        final mw = authenticate([authenticator1], sessionHandler: sessionHandler);
         authHandler = mw(handler);
 
       });
@@ -316,7 +341,7 @@ main() {
         when(authenticator1.authenticate(any))
           .thenReturn(new Future.value(new Some(authContext)));
 
-        final mw = authenticate([authenticator1], sessionHandler);
+        final mw = authenticate([authenticator1], sessionHandler: sessionHandler);
         authHandler = mw(handler);
       });
 
@@ -344,7 +369,7 @@ main() {
         when(authenticator1.authenticate(any))
           .thenReturn(new Future.value(new Some(defaultAuthContext)));
 
-        final mw = authenticate([authenticator1], sessionHandler);
+        final mw = authenticate([authenticator1], sessionHandler: sessionHandler);
         authHandler = mw(handler);
 
       });
