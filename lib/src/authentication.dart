@@ -5,8 +5,11 @@ import 'dart:async';
 import 'package:option/option.dart';
 import 'util.dart';
 import 'package:shelf_exception_response/exception.dart';
+import 'package:logging/logging.dart';
 
 const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
+
+final Logger _log = new Logger('shelf_auth.authentication');
 
 /**
  * Creates *Shelf* middleware for performing authentication and optionally
@@ -166,13 +169,24 @@ abstract class Authenticator<P extends Principal> {
  * If no [SessionHandler] is provided then no session will be created if none
  * currently exists and no changes will be made to an existing one if one does
  * exist
+ *
+ * By default authentication is only allowed via HTTPS to avoid eavesdropping of
+ * security credentials. This can be overriden by setting [allowHttp] to true.
+ *
+ * By default if no authenticators either return a successful authentication or
+ * throw an exception, the request is allowed to continue as anonymous (guest).
+ * This can be overriden by setting [allowAnonymousAccess] to false.
  */
 class AuthenticationMiddleware {
   final List<Authenticator> authenticators;
   final Option<SessionHandler> sessionHandler;
+  final bool allowHttp;
+  final bool allowAnonymousAccess;
 
   AuthenticationMiddleware(List<Authenticator> authenticators,
-                           Option<SessionHandler> sessionHandler)
+                           Option<SessionHandler> sessionHandler,
+                           { this.allowHttp: false,
+                             this.allowAnonymousAccess: true })
       : this.authenticators = (sessionHandler.nonEmpty() ?
           ([]..add(sessionHandler.get().authenticator)..addAll(authenticators))
           : authenticators),
@@ -206,6 +220,11 @@ class AuthenticationMiddleware {
       Request request, Handler innerHandler) {
 
     return authContextOpt.map((authContext) {
+      if (!allowHttp && request.requestedUri.scheme != 'https') {
+        _log.finer('denying access over http');
+        throw new UnauthorizedException();
+      }
+
       final newRequest = request.change(context: {
         _SHELF_AUTH_REQUEST_CONTEXT: authContext
       });
@@ -223,6 +242,10 @@ class AuthenticationMiddleware {
 
       return updatedResponseFuture;
     }).getOrElse(() {
+      if (!allowAnonymousAccess) {
+        _log.finer('denying unauthenticated access');
+        throw new UnauthorizedException();
+      }
       return syncFuture(() => innerHandler(request));
     });
   }

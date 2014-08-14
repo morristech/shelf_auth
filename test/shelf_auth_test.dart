@@ -39,7 +39,7 @@ main() {
   MockAuthenticator sessionAuthenticator;
   MockHandler handler;
 
-  Request request() => new Request('GET', Uri.parse('http://blah/foo'));
+  Request request() => new Request('GET', Uri.parse('https://blah/foo'));
   final okResponse = new Response.ok('sweet');
   final defaultAuthContext = new AuthenticationContext(new Principal("fred"));
 
