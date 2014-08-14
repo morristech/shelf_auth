@@ -5,8 +5,11 @@ import 'dart:async';
 import 'package:option/option.dart';
 import 'util.dart';
 import 'package:shelf_exception_response/exception.dart';
+import 'package:logging/logging.dart';
 
 const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
+
+final Logger _log = new Logger('shelf_auth.authentication');
 
 /**
  * Creates *Shelf* middleware for performing authentication and optionally
@@ -21,6 +24,10 @@ const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
  * The [SessionHandler] if provided will be invoked on successful authentication
  * if the resulting [AuthenticationContext] supports sessions.
  *
+ * By default authentication must occur over https and anonymous access is
+ * allowed. These can be overriden with the flags [allowHttp] and
+ * [allowAnonymousAccess] respectively.
+ *
  * Example use
  *
  * ```
@@ -33,9 +40,12 @@ const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
   * ```
  */
 Middleware authenticate(Iterable<Authenticator> authenticators,
-                                    [ SessionHandler sessionHandler ]) =>
+                        { SessionHandler sessionHandler,
+                          bool allowHttp: false,
+                          bool allowAnonymousAccess: true }) =>
     new AuthenticationMiddleware(authenticators.toList(growable: false),
-        new Option(sessionHandler))
+        new Option(sessionHandler), allowHttp: allowHttp,
+        allowAnonymousAccess: allowAnonymousAccess)
       .middleware;
 
 /**
@@ -95,16 +105,43 @@ class AuthenticationContext<P extends Principal> {
 }
 
 /**
+ * An [AuthenticationContext] established by authenticating via a session
+ * token mechanism
+ */
+class SessionAuthenticationContext<P extends Principal>
+        extends AuthenticationContext<P> {
+  final DateTime sessionFirstCreated;
+
+  final DateTime sessionLastRefreshed;
+
+  final DateTime noSessionRenewalAfter;
+
+  SessionAuthenticationContext(P principal,
+      this.sessionFirstCreated, this.sessionLastRefreshed,
+          this.noSessionRenewalAfter,
+      { Option<P> onBehalfOf: const None(),
+         bool sessionCreationAllowed: true, bool sessionUpdateAllowed: true })
+      : super(principal, sessionCreationAllowed: sessionCreationAllowed,
+            sessionUpdateAllowed: sessionUpdateAllowed);
+}
+
+
+/**
  * A class that may establish and / or update a session for the authenticated
- * principal.
+ * principal. It has an accompanying [Authenticator] to authenticate session
+ * tokens on incoming requests.
  *
  * Implementations must respect the values of
  * [sessionCreationAllowed] and [sessionUpdateAllowed] in the given
  * [AuthenticationContext]
  */
-abstract class SessionHandler {
-  Response handle(AuthenticationContext context,
-                  Request request, Response response);
+abstract class SessionHandler<P extends Principal> {
+  /// Update the [response] with a session token as appropriate
+  Response handle(AuthenticationContext context, Request request,
+                  Response response);
+
+  /// authenticator for session tokens created by the [handle] method
+  Authenticator<P> get authenticator;
 }
 
 /**
@@ -133,16 +170,34 @@ abstract class Authenticator<P extends Principal> {
  *
  * An optional [SessionHandler] can be provided to create /
  * update a session as a result (e.g. by setting a cookie or token etc).
+ * The [sessionHandler]s associated [Authenticator] will be
+ * the first authenticator called when authenticating requests
  *
  * If no [SessionHandler] is provided then no session will be created if none
  * currently exists and no changes will be made to an existing one if one does
  * exist
+ *
+ * By default authentication is only allowed via HTTPS to avoid eavesdropping of
+ * security credentials. This can be overriden by setting [allowHttp] to true.
+ *
+ * By default if no authenticators either return a successful authentication or
+ * throw an exception, the request is allowed to continue as anonymous (guest).
+ * This can be overriden by setting [allowAnonymousAccess] to false.
  */
 class AuthenticationMiddleware {
   final List<Authenticator> authenticators;
   final Option<SessionHandler> sessionHandler;
+  final bool allowHttp;
+  final bool allowAnonymousAccess;
 
-  AuthenticationMiddleware(this.authenticators, this.sessionHandler);
+  AuthenticationMiddleware(List<Authenticator> authenticators,
+                           Option<SessionHandler> sessionHandler,
+                           { this.allowHttp: false,
+                             this.allowAnonymousAccess: true })
+      : this.authenticators = (sessionHandler.nonEmpty() ?
+          ([]..add(sessionHandler.get().authenticator)..addAll(authenticators))
+          : authenticators),
+          this.sessionHandler = sessionHandler;
 
 
   Middleware get middleware => _createHandler;
@@ -172,6 +227,11 @@ class AuthenticationMiddleware {
       Request request, Handler innerHandler) {
 
     return authContextOpt.map((authContext) {
+      if (!allowHttp && request.requestedUri.scheme != 'https') {
+        _log.finer('denying access over http');
+        throw new UnauthorizedException();
+      }
+
       final newRequest = request.change(context: {
         _SHELF_AUTH_REQUEST_CONTEXT: authContext
       });
@@ -189,25 +249,12 @@ class AuthenticationMiddleware {
 
       return updatedResponseFuture;
     }).getOrElse(() {
+      if (!allowAnonymousAccess) {
+        _log.finer('denying unauthenticated access');
+        throw new UnauthorizedException();
+      }
       return syncFuture(() => innerHandler(request));
     });
   }
 }
 
-Option<AuthorizationHeader> authorizationHeader(Request request) {
-  return new Option(request.headers['Authorization'])
-    .flatMap((String header) {
-      final List<String> parts = header.split(' ');
-      if (parts.length != 2) {
-        return const None();
-      }
-      return new Some(new AuthorizationHeader(parts[0], parts[1]));
-    });
-}
-
-class AuthorizationHeader {
-  final String realm;
-  final String credentials;
-
-  AuthorizationHeader(this.realm, this.credentials);
-}

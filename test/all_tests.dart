@@ -7,10 +7,12 @@ library constrain.all.test;
 import 'package:unittest/unittest.dart';
 import 'shelf_auth_test.dart' as core;
 import 'authenticators/basic_auth_test.dart' as basic;
+import 'session/jwt/all_jwt_session_tests.dart' as jwt;
 
 
 main() {
   group('[core]', core.main);
   group('[basic]', basic.main);
+  group('[jwt]', jwt.main);
 }
 
