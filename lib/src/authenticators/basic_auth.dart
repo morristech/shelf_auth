@@ -9,15 +9,18 @@ import '../principal/user_lookup.dart';
 import 'package:shelf_exception_response/exception.dart';
 import '../preconditions.dart';
 import '../util.dart';
+import 'core.dart';
 
 const BASIC_AUTH_SCHEME = 'Basic';
 /**
  * An [Authenticator] for Basic Authentication (http://tools.ietf.org/html/rfc2617)
  */
-class BasicAuthenticator<P extends Principal> extends Authenticator<P> {
+class BasicAuthenticator<P extends Principal> extends AbstractAuthenticator<P> {
   final UserLookupByUsernamePassword<P> userLookup;
 
-  BasicAuthenticator(this.userLookup) {
+  BasicAuthenticator(this.userLookup, { bool sessionCreationAllowed: false,
+    bool sessionUpdateAllowed: false })
+      : super(sessionCreationAllowed, sessionUpdateAllowed){
     ensure(userLookup, isNotNull);
   }
 
@@ -39,7 +42,7 @@ class BasicAuthenticator<P extends Principal> extends Authenticator<P> {
 
       return new Some(principalFuture.then((principalOption) =>
           principalOption.map((principal) =>
-              new AuthenticationContext(principal))));
+              createContext(principal))));
     })
     .getOrElse(() => new Future(() => const None()));
 

@@ -15,10 +15,12 @@ class JwtSessionHandler<P extends Principal> implements SessionHandler<P> {
   final Duration totalSessionTimeout;
   final JwtSessionAuthenticator<P> authenticator;
 
-  JwtSessionHandler(this.issuer, String secret, this.idleTimeout,
-      this.totalSessionTimeout, UserLookupByUsername<P> userLookup)
+  JwtSessionHandler(this.issuer, String secret,
+      UserLookupByUsername<P> userLookup,
+      { this.idleTimeout: const Duration(minutes: 30),
+        this.totalSessionTimeout: const Duration(days: 1) })
       : this.secret = secret,
-        this.authenticator = new JwtSessionAuthenticator<P>(userLookup, secret){
+        this.authenticator = new JwtSessionAuthenticator<P>(userLookup, secret) {
     ensure(issuer, isNotNull);
     ensure(secret, isNotNull);
     ensure(idleTimeout, isNotNull);
@@ -32,7 +34,7 @@ class JwtSessionHandler<P extends Principal> implements SessionHandler<P> {
     final sessionContext = _getSessionContext(context);
     final noSessionRenewalAfter = sessionContext.noSessionRenewalAfter;
 
-    if (noSessionRenewalAfter.isAfter(now)) {
+    if (noSessionRenewalAfter.isBefore(now)) {
       return response;
     }
 

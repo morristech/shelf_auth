@@ -10,16 +10,20 @@ import 'package:dart_jwt/dart_jwt.dart';
 import 'package:shelf_exception_response/exception.dart';
 import '../../preconditions.dart';
 import '../../util.dart';
+import '../../authenticators/core.dart';
 
 
 /**
  * An [Authenticator] for Shelf Auth Jwt Session Token
  */
-class JwtSessionAuthenticator<P extends Principal> extends Authenticator<P> {
+class JwtSessionAuthenticator<P extends Principal> extends
+      AbstractAuthenticator<P> {
   final UserLookupByUsername<P> userLookup;
   final String secret;
 
-  JwtSessionAuthenticator(this.userLookup, this.secret) {
+  JwtSessionAuthenticator(this.userLookup, this.secret,
+      { bool sessionCreationAllowed: false, bool sessionUpdateAllowed: true })
+      : super(sessionCreationAllowed, sessionUpdateAllowed) {
     ensure(userLookup, isNotNull);
     ensure(secret, isNotNull);
   }
@@ -27,7 +31,7 @@ class JwtSessionAuthenticator<P extends Principal> extends Authenticator<P> {
   @override
   Future<Option<AuthenticationContext<P>>> authenticate(Request request) {
     final authHeaderOpt = authorizationHeader(request, JWT_SESSION_AUTH_SCHEME);
-    return authHeaderOpt.flatMap((authHeader) {
+    return authHeaderOpt.map((authHeader) {
 
       final sessionJwtToken = authHeader.credentials;
 
@@ -43,11 +47,11 @@ class JwtSessionAuthenticator<P extends Principal> extends Authenticator<P> {
       final SessionClaimSet claimSet = sessionJwt.claimSet;
       final principalFuture = userLookup(claimSet.subject);
 
-      return new Some(principalFuture.then((principalOption) =>
+      return principalFuture.then((principalOption) =>
           principalOption.map((principal) =>
               new SessionAuthenticationContext(principal,
                   claimSet.issuedAt, new DateTime.now(),
-                  claimSet.totalSessionExpiry))));
+                  claimSet.totalSessionExpiry)));
     })
     .getOrElse(() => new Future(() => const None()));
 

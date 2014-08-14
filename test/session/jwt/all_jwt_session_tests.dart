@@ -7,9 +7,11 @@ library shelf_auth.session.jwt.all.test;
 import 'package:unittest/unittest.dart';
 import 'jwt_session_test.dart' as jwt_session;
 import 'jwt_session_auth_test.dart' as auth;
+import 'jwt_session_handler_test.dart' as handler;
 
 main() {
   group('[jwt_session]', jwt_session.main);
   group('[auth]', auth.main);
+  group('[handler]', handler.main);
 }
 

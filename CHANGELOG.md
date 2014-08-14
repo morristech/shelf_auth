@@ -1,3 +1,8 @@
+## 0.1.0
+
+* Added Jwt Session Mechanism
+* SessionHandlers now have an associated Authenticator
+
 ## 0.0.3
 
 * Added Basic Auth

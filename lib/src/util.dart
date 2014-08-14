@@ -73,8 +73,9 @@ Response addAuthorizationHeader(Response response,
   List<String> authHeaders = _authHeaders(response);
 
   final newAuthHeaders = []..addAll(authHeaders)..add(credentials);
+  final newAuthHeadersStr = newAuthHeaders.join(',');
 
-  return response.change(headers: { HttpHeaders.AUTHORIZATION: newAuthHeaders });
+  return response.change(headers: { HttpHeaders.AUTHORIZATION: newAuthHeadersStr });
 }
 
 // TODO: raise issue on shelf to expose the Message class
