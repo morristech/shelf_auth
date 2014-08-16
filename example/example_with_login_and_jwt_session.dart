@@ -15,46 +15,12 @@ import 'package:shelf_route/shelf_route.dart';
 import 'package:shelf_bind/shelf_bind.dart';
 import 'package:shelf_auth/src/authenticators/username_password_auth.dart';
 
-////typedef Handler Middleware(Handler innerHandler);
-//typedef BindMiddleware(Handler innerHandler);
-//
-//jsonLoginMiddleware(Handler innerHandler) {
-//  return (@RequestBody(format: ContentType.JSON)
-//      LoginCredentials credentials, Request request) {
-//    final newRequest =
-//        request.change(context: { 'shelf_auth.credentials': credentials });
-//    return syncFuture(innerHandler(newRequest));
-//  };
-//}
-//
-//class LoginCredentials {
-//  String username;
-//  String password;
-//
-//  LoginCredentials.fromJson(Map json)
-//      : username = json['username'],
-//        password = json['password'];
-//}
 
-final SessionHandler sessionHandler =
-  new JwtSessionHandler('super app', new Uuid().v4(), testLookup);
-
-
-//// TODO: shelf bind to support inferring content type from headers
-//usernamePasswordBodyParser(@RequestBody(format: ContentType.JSON)
-//             LoginCredentials creds, Request request) {
-//  final UsernamePasswordAuthenticator authenticator =
-//    new UsernamePasswordAuthenticator(testUPLookup, (_) => creds.username,
-//      (_) => creds.password);
-//
-//  return authenticator.authenticate(request).then((contextOpt) {
-//    return contextOpt.map((context) {
-//      return sessionHandler.handle(context, request,
-//          new Response.ok("logged in"));
-//    }).orElse(() => throw new UnauthorizedException());
-//  });
-//}
-
+/**
+ * This example has a login route where username and password are POSTed
+ * and other routes which are autheticated via the JWT session established
+ * via the login route
+ */
 void main() {
 
   Logger.root.level = Level.FINER;
@@ -62,31 +28,39 @@ void main() {
     print('${lr.time} ${lr.level} ${lr.message}');
   });
 
-  // TODO: as this has a session handler it will ignore any new login credentials
-  // in this request. i.e. the session auth will win
-  // That may be ok. The user must log out first
-  var loginMiddleware = authenticate(
-      [new UsernamePasswordAuthenticator(testUPLookup)],
-//      usernamePasswordBodyParser: usernamePasswordBodyParser,
-      sessionHandler: sessionHandler,
-          // allow http for testing with curl. Don't do in production
-          allowHttp: true);
+  var testLookup = new TestUserLookup();
 
-  var rootRouter = router(handlerAdapter: handlerAdapter())
-      ..post('/login', (Request request) => new Response.ok("I'm now logged in as "
-          "${getAuthenticationContext(request).map((ac) => ac.principal.name)
-            .getOrElse(() => 'guest')}\n"),
+  // use Jwt based sessions. Create the secret using a UUID
+  var sessionHandler = new JwtSessionHandler('super app', new Uuid().v4(),
+        testLookup.lookupByUsername);
+
+  // allow http for testing with curl. Don't use in production
+  var allowHttp = true;
+
+  // authentication middleware for a login handler (e.g. submitted from a form)
+  var loginMiddleware = authenticate(
+      [new UsernamePasswordAuthenticator(testLookup.lookupByUsernamePassword)],
+      sessionHandler: sessionHandler, allowHttp: allowHttp,
+      allowAnonymousAccess: false);
+
+  // authentication middleware for routes other than login that require a logged
+  // in user
+  var defaultAuthMiddleware = authenticate([],
+      sessionHandler: sessionHandler, allowHttp: true, allowAnonymousAccess: false);
+
+  var rootRouter = router(handlerAdapter: handlerAdapter());
+
+  // the route where the login form credentials are posted
+  rootRouter.post('/login', (Request request) => new Response.ok(
+          "I'm now logged in as ${loggedInUsername(request)}\n"),
             middleware: loginMiddleware);
 
-  var authMiddleware = authenticate([],
-      sessionHandler: sessionHandler,
-          // allow http for testing with curl. Don't do in production
-          allowHttp: true);
-
-  rootRouter.child('/authenticated', middleware: authMiddleware)
-    ..get('/foo', (Request request) => new Response.ok("I'm in as "
-        "${getAuthenticationContext(request).map((ac) => ac.principal.name)
-          .getOrElse(() => 'guest')}\n"));
+  // the routes which require an authenticated user. Here we are relying
+  // solely on users with a session established via the /login route but
+  // could have additional authenitcators here
+  rootRouter.child('/authenticated', middleware: defaultAuthMiddleware)
+    ..get('/foo', (Request request) => new Response.ok(
+        "Doing foo as ${loggedInUsername(request)}\n"));
 
   printRoutes(rootRouter);
 
@@ -100,33 +74,27 @@ void main() {
   });
 }
 
-class RandomAuthenticator extends Authenticator {
-  bool approve = true;
+String loggedInUsername(Request request) =>
+    getAuthenticationContext(request).map((ac) => ac.principal.name)
+              .getOrElse(() => 'guest');
 
-  @override
-  Future<Option<AuthenticationContext>> authenticate(Request request) {
-    approve = !approve;
 
-    return new Future.value(approve ?
-        new Some(new AuthenticationContext(new Principal("fred")))
-        : throw new UnauthorizedException());
+class TestUserLookup {
+  Future<Option<Principal>> lookupByUsernamePassword(String username, String password) {
+    final validUser = username == 'fred';
+
+    final principalOpt = validUser ? new Some(new Principal(username)) :
+      const None();
+
+    return new Future.value(principalOpt);
   }
-}
 
-Future<Option<Principal>> testUPLookup(String username, String password) {
-  final validUser = username == 'fred';
+  Future<Option<Principal>> lookupByUsername(String username) {
+    final validUser = username == 'fred';
 
-  final principalOpt = validUser ? new Some(new Principal(username)) :
-    const None();
+    final principalOpt = validUser ? new Some(new Principal(username)) :
+      const None();
 
-  return new Future.value(principalOpt);
-}
-
-Future<Option<Principal>> testLookup(String username) {
-  final validUser = username == 'fred';
-
-  final principalOpt = validUser ? new Some(new Principal(username)) :
-    const None();
-
-  return new Future.value(principalOpt);
+    return new Future.value(principalOpt);
+  }
 }
