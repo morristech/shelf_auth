@@ -120,7 +120,7 @@ Shelf Auth provides the following `SessionHandler`s out of the box:
 
 #### JwtSessionHandler
 This uses [JWT](http://self-issued.info/docs/draft-ietf-oauth-json-web-token.html) to create authentication tokens which are returned in the `Authorization` header in the response. Subsequent requests must pass the token back in `Authorization` header. This is a [Bearer style token mechanism](https://auth0.com/blog/2014/01/07/angularjs-authentication-with-cookies-vs-token/). 
-*Note: as with all secuirty credentials passed in HTTP messages, if someone is able to intercept the request or response then they can steal the token and impersonate the user. Make sure you use HTTPS.*
+*Note: as with all security credentials passed in HTTP messages, if someone is able to intercept the request or response then they can steal the token and impersonate the user. Make sure you use HTTPS.*
 
 *Features*
 
