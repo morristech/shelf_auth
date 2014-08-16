@@ -50,9 +50,9 @@ class UsernamePasswordAuthenticator<P extends Principal> extends
   final UserLookupByUsernamePassword<P> userLookup;
 
   UsernamePasswordAuthenticator(this.userLookup,
-      {bool sessionCreationAllowed: false,
-      bool sessionUpdateAllowed: false})
-      : super(sessionCreationAllowed, sessionUpdateAllowed) {
+      { bool sessionCreationAllowed: true,
+        bool sessionUpdateAllowed: true })
+      : super(sessionCreationAllowed, sessionUpdateAllowed, readsBody: true) {
     ensure(userLookup, isNotNull);
   }
 

@@ -14,7 +14,10 @@ abstract class AbstractAuthenticator<P extends Principal> extends Authenticator<
   /// a result of this authentication
   final bool sessionUpdateAllowed;
 
-  AbstractAuthenticator(this.sessionCreationAllowed, this.sessionUpdateAllowed) {
+  final bool readsBody;
+
+  AbstractAuthenticator(this.sessionCreationAllowed, this.sessionUpdateAllowed,
+      { this.readsBody: false }) {
     ensure(sessionCreationAllowed, isNotNull);
     ensure(sessionUpdateAllowed, isNotNull);
   }

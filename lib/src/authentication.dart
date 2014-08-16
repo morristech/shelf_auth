@@ -162,6 +162,8 @@ abstract class Authenticator<P extends Principal> {
    * or similar is used to turn exceptions into suitable http responses.
    */
   Future<Option<AuthenticationContext<P>>> authenticate(Request request);
+
+  bool get readsBody;
 }
 
 /**
@@ -234,7 +236,16 @@ class AuthenticationMiddleware {
         throw new UnauthorizedException();
       }
 
-      final newRequest = request.change(context: {
+      final bodyConsumed = authenticators.any((a) => a.readsBody);
+      final initalRequest = bodyConsumed ?
+          new Request(request.method, request.requestedUri,
+              protocolVersion: request.protocolVersion,
+              headers: request.headers, url: request.url,
+              scriptName: request.scriptName, body:
+                null, context: request.context)
+          : request;
+
+      final newRequest = initalRequest.change(context: {
         _SHELF_AUTH_REQUEST_CONTEXT: authContext
       });
       final responseFuture = syncFuture(() => innerHandler(newRequest));
