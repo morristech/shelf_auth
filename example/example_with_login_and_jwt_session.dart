@@ -15,33 +15,45 @@ import 'package:shelf_route/shelf_route.dart';
 import 'package:shelf_bind/shelf_bind.dart';
 import 'package:shelf_auth/src/authenticators/username_password_auth.dart';
 
-
-class LoginCredentials {
-  String username;
-  String password;
-
-  LoginCredentials.fromJson(Map json)
-      : username = json['username'],
-        password = json['password'];
-}
+////typedef Handler Middleware(Handler innerHandler);
+//typedef BindMiddleware(Handler innerHandler);
+//
+//jsonLoginMiddleware(Handler innerHandler) {
+//  return (@RequestBody(format: ContentType.JSON)
+//      LoginCredentials credentials, Request request) {
+//    final newRequest =
+//        request.change(context: { 'shelf_auth.credentials': credentials });
+//    return syncFuture(innerHandler(newRequest));
+//  };
+//}
+//
+//class LoginCredentials {
+//  String username;
+//  String password;
+//
+//  LoginCredentials.fromJson(Map json)
+//      : username = json['username'],
+//        password = json['password'];
+//}
 
 final SessionHandler sessionHandler =
   new JwtSessionHandler('super app', new Uuid().v4(), testLookup);
 
 
-loginHandler(@RequestBody(format: ContentType.JSON)
-             LoginCredentials creds, Request request) {
-  final UsernamePasswordAuthenticator authenticator =
-    new UsernamePasswordAuthenticator(testUPLookup, (_) => creds.username,
-      (_) => creds.password);
-
-  return authenticator.authenticate(request).then((contextOpt) {
-    return contextOpt.map((context) {
-      return sessionHandler.handle(context, request,
-          new Response.ok("logged in"));
-    }).orElse(() => throw new UnauthorizedException());
-  });
-}
+//// TODO: shelf bind to support inferring content type from headers
+//usernamePasswordBodyParser(@RequestBody(format: ContentType.JSON)
+//             LoginCredentials creds, Request request) {
+//  final UsernamePasswordAuthenticator authenticator =
+//    new UsernamePasswordAuthenticator(testUPLookup, (_) => creds.username,
+//      (_) => creds.password);
+//
+//  return authenticator.authenticate(request).then((contextOpt) {
+//    return contextOpt.map((context) {
+//      return sessionHandler.handle(context, request,
+//          new Response.ok("logged in"));
+//    }).orElse(() => throw new UnauthorizedException());
+//  });
+//}
 
 void main() {
 
@@ -50,8 +62,21 @@ void main() {
     print('${lr.time} ${lr.level} ${lr.message}');
   });
 
+  // TODO: as this has a session handler it will ignore any new login credentials
+  // in this request. i.e. the session auth will win
+  // That may be ok. The user must log out first
+  var loginMiddleware = authenticate(
+      [new UsernamePasswordAuthenticator(testUPLookup)],
+//      usernamePasswordBodyParser: usernamePasswordBodyParser,
+      sessionHandler: sessionHandler,
+          // allow http for testing with curl. Don't do in production
+          allowHttp: true);
+
   var rootRouter = router(handlerAdapter: handlerAdapter())
-      ..post('/login', loginHandler);
+      ..post('/login', (Request request) => new Response.ok("I'm now logged in as "
+          "${getAuthenticationContext(request).map((ac) => ac.principal.name)
+            .getOrElse(() => 'guest')}\n"),
+            middleware: loginMiddleware);
 
   var authMiddleware = authenticate([],
       sessionHandler: sessionHandler,
