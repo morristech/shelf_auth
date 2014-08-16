@@ -32,7 +32,7 @@ class JwtSessionHandler<P extends Principal> implements SessionHandler<P> {
   }
 
   @override
-  Response handle(AuthenticationContext context, Request request,
+  Response handle(AuthenticatedContext context, Request request,
                   Response response) {
     final now = new DateTime.now();
 
@@ -56,11 +56,11 @@ class JwtSessionHandler<P extends Principal> implements SessionHandler<P> {
         new AuthorizationHeader(JWT_SESSION_AUTH_SCHEME, sessionToken));
   }
 
-  SessionAuthenticationContext _getSessionContext(AuthenticationContext context) {
+  SessionAuthenticatedContext _getSessionContext(AuthenticatedContext context) {
     final now = new DateTime.now();
 
-    return context is SessionAuthenticationContext ? context :
-      new SessionAuthenticationContext(context.principal, now, now,
+    return context is SessionAuthenticatedContext ? context :
+      new SessionAuthenticatedContext(context.principal, now, now,
           now.add(totalSessionTimeout));
   }
 }

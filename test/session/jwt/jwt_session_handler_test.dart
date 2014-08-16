@@ -34,7 +34,7 @@ main() {
   DateTime activeNoSessionRenewalAfter = new DateTime.now().add(
       const Duration(seconds: 10));
 
-  AuthenticationContext context(bool expired) => new SessionAuthenticationContext(
+  AuthenticatedContext context(bool expired) => new SessionAuthenticatedContext(
       new Principal('fred'), sessionFirstCreated, sessionLastRefreshed,
       expired ? expiredNoSessionRenewalAfter : activeNoSessionRenewalAfter);
 

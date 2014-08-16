@@ -23,7 +23,7 @@ You then add this `Middleware` at the appropriate place in your shelf pipeline
       .addMiddleware(exceptionResponse())
       .addMiddleware(authMiddleware)
       .addHandler((Request request) => new Response.ok("I'm in with "
-          "${getAuthenticationContext(request).map((ac) => ac.principal.name)}\n"));
+          "${getAuthenticatedContext(request).map((ac) => ac.principal.name)}\n"));
 
   io.serve(handler, 'localhost', 8080);
 
@@ -37,7 +37,7 @@ When the authentication middleware is invoked it goes through the authenticators
 
 The first `Authenticator` that either returns a successful authentication or throws an exception wins. If an `Authenticator` indicates it did not find relevant credentials, the next authenticator in the list is called.
 
-If no exception is thrown, then the `innerHandler` passed to the middleware will be called. If the authentication was successful then the request will contain authentication related data in the request context. This can be retrieved via the `getAuthenticationContext` function.
+If no exception is thrown, then the `innerHandler` passed to the middleware will be called. If the authentication was successful then the request will contain authentication related data in the request context. This can be retrieved via the `getAuthenticatedContext` function.
 
 If none of the authenticators handle the request, then the `innerHandler` is invoked without any authentication context. Downstream handlers should treat this is access by an unauthenticated (guest) user. You can deny anonymous access by invoking the `authenticate` function with `allowAnonymousAccess: false`.
 
@@ -52,7 +52,7 @@ var authMiddleware = authenticate([new RandomAuthenticator()],
       new JwtSessionHandler('super app', 'shhh secret', testLookup));
 ```
 
-The `SessionHandler` will be invoked on successful authentication if the resulting `AuthenticationContext` supports sessions. 
+The `SessionHandler` will be invoked on successful authentication if the resulting `AuthenticatedContext` supports sessions. 
 
 *Note that in addition to indicating whether authentication succeeded, `Authenticator`s also indicate whether session creation is allowed. For some authentication mechanisms (e.g. server to server calls) it may not be desirable to create a session.*
 

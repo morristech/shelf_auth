@@ -47,7 +47,7 @@ main() {
   Request request() => new Request('GET', Uri.parse('https://blah/foo'));
   Request httpRequest() => new Request('GET', Uri.parse('http://blah/foo'));
   final okResponse = new Response.ok('sweet');
-  final defaultAuthContext = new AuthenticationContext(new Principal("fred"));
+  final defaultAuthContext = new AuthenticatedContext(new Principal("fred"));
 
   setUp(() {
     authenticator1 = new MockAuthenticator();
@@ -355,7 +355,7 @@ main() {
 
     group('does not call sessionHandler when session creation and update not allowed', () {
       MockSessionHandler sessionHandler;
-      final authContext = new AuthenticationContext(new Principal("fred"),
+      final authContext = new AuthenticatedContext(new Principal("fred"),
           sessionCreationAllowed: false, sessionUpdateAllowed: false);
       var authHandler;
 

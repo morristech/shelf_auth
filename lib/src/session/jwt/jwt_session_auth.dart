@@ -34,7 +34,7 @@ class JwtSessionAuthenticator<P extends Principal> extends
   }
 
   @override
-  Future<Option<AuthenticationContext<P>>> authenticate(Request request) {
+  Future<Option<AuthenticatedContext<P>>> authenticate(Request request) {
     final authHeaderOpt = authorizationHeader(request, JWT_SESSION_AUTH_SCHEME);
     return authHeaderOpt.map((authHeader) {
 
@@ -54,7 +54,7 @@ class JwtSessionAuthenticator<P extends Principal> extends
 
       return principalFuture.then((principalOption) =>
           principalOption.map((principal) =>
-              new SessionAuthenticationContext(principal,
+              new SessionAuthenticatedContext(principal,
                   claimSet.issuedAt, new DateTime.now(),
                   claimSet.totalSessionExpiry)));
     })

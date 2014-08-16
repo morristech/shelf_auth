@@ -76,7 +76,7 @@ void main() {
 }
 
 String loggedInUsername(Request request) =>
-    getAuthenticationContext(request).map((ac) => ac.principal.name)
+    getAuthenticatedContext(request).map((ac) => ac.principal.name)
               .getOrElse(() => 'guest');
 
 

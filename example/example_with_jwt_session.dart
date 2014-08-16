@@ -30,7 +30,7 @@ void main() {
       .addMiddleware(exceptionResponse())
       .addMiddleware(authMiddleware)
       .addHandler((Request request) => new Response.ok("I'm in with "
-          "${getAuthenticationContext(request).map((ac) => ac.principal.name)}\n"));
+          "${getAuthenticatedContext(request).map((ac) => ac.principal.name)}\n"));
 
   io.serve(handler, 'localhost', 8080).then((server) {
     print('Serving at http://${server.address.host}:${server.port}');
@@ -42,11 +42,11 @@ class RandomAuthenticator extends Authenticator {
   bool readsBody = false;
 
   @override
-  Future<Option<AuthenticationContext>> authenticate(Request request) {
+  Future<Option<AuthenticatedContext>> authenticate(Request request) {
     approve = !approve;
 
     return new Future.value(approve ?
-        new Some(new AuthenticationContext(new Principal("fred")))
+        new Some(new AuthenticatedContext(new Principal("fred")))
         : throw new UnauthorizedException());
   }
 }

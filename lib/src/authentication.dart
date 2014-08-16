@@ -27,7 +27,7 @@ final Logger _log = new Logger('shelf_auth.authentication');
  * implementations.
  *
  * The [SessionHandler] if provided will be invoked on successful authentication
- * if the resulting [AuthenticationContext] supports sessions.
+ * if the resulting [AuthenticatedContext] supports sessions.
  *
  * By default authentication must occur over https and anonymous access is
  * allowed. These can be overriden with the flags [allowHttp] and
@@ -54,10 +54,10 @@ Middleware authenticate(Iterable<Authenticator> authenticators,
       .middleware;
 
 /**
- * Retrieves the current [AuthenticationContext] from the [request] if one
+ * Retrieves the current [AuthenticatedContext] from the [request] if one
  * exists
  */
-Option<AuthenticationContext> getAuthenticationContext(Request request) {
+Option<AuthenticatedContext> getAuthenticatedContext(Request request) {
   return new Option(request.context[_SHELF_AUTH_REQUEST_CONTEXT]);
 }
 
@@ -88,9 +88,7 @@ class Principal {
  * for server to server interaction, but true for user to system interaction
  *
  */
-// TODO: AuthenticationContext sounds more like something you pass into an
-// authenticator than something that you get out
-class AuthenticationContext<P extends Principal> {
+class AuthenticatedContext<P extends Principal> {
   final P principal;
 
   /// contains the [Principal] that the actions are being performed on behalf of
@@ -104,24 +102,24 @@ class AuthenticationContext<P extends Principal> {
   /// a result of this authentication
   final bool sessionUpdateAllowed;
 
-  AuthenticationContext(this.principal,
+  AuthenticatedContext(this.principal,
       { this.onBehalfOf: const None(),
         this.sessionCreationAllowed: true, this.sessionUpdateAllowed: true });
 }
 
 /**
- * An [AuthenticationContext] established by authenticating via a session
+ * An [AuthenticatedContext] established by authenticating via a session
  * token mechanism
  */
-class SessionAuthenticationContext<P extends Principal>
-        extends AuthenticationContext<P> {
+class SessionAuthenticatedContext<P extends Principal>
+        extends AuthenticatedContext<P> {
   final DateTime sessionFirstCreated;
 
   final DateTime sessionLastRefreshed;
 
   final DateTime noSessionRenewalAfter;
 
-  SessionAuthenticationContext(P principal,
+  SessionAuthenticatedContext(P principal,
       this.sessionFirstCreated, this.sessionLastRefreshed,
           this.noSessionRenewalAfter,
       { Option<P> onBehalfOf: const None(),
@@ -138,11 +136,11 @@ class SessionAuthenticationContext<P extends Principal>
  *
  * Implementations must respect the values of
  * [sessionCreationAllowed] and [sessionUpdateAllowed] in the given
- * [AuthenticationContext]
+ * [AuthenticatedContext]
  */
 abstract class SessionHandler<P extends Principal> {
   /// Update the [response] with a session token as appropriate
-  Response handle(AuthenticationContext context, Request request,
+  Response handle(AuthenticatedContext context, Request request,
                   Response response);
 
   /// authenticator for session tokens created by the [handle] method
@@ -159,14 +157,14 @@ abstract class Authenticator<P extends Principal> {
    * * [None] to indicate that no authentication credentials exist for this
    * authenticator. Other authenicators can now get their turn to authenticate
    *
-   * * [Some] [AuthenticationContext] when authentication succeeds
+   * * [Some] [AuthenticatedContext] when authentication succeeds
    *
    * * An exception if authentication fails (e.g. [UnauthorizedException])
    *
    * Note: *shelf_auth* assumes that the *shelf_exception_response* package
    * or similar is used to turn exceptions into suitable http responses.
    */
-  Future<Option<AuthenticationContext<P>>> authenticate(Request request);
+  Future<Option<AuthenticatedContext<P>>> authenticate(Request request);
 
   bool get readsBody;
 }
@@ -214,11 +212,11 @@ class AuthenticationMiddleware {
   }
 
   Future<Response> _handle(Request request, Handler innerHandler) {
-    final Stream<Option<AuthenticationContext>> optAuthContexts =
+    final Stream<Option<AuthenticatedContext>> optAuthContexts =
         new Stream.fromIterable(authenticators).asyncMap((a) =>
             a.authenticate(request));
 
-    final Future<Option<AuthenticationContext>> optAuthFuture =
+    final Future<Option<AuthenticatedContext>> optAuthFuture =
         optAuthContexts.firstWhere(
             (authOpt) => authOpt.nonEmpty(),
             defaultValue: () => const None());
@@ -232,7 +230,7 @@ class AuthenticationMiddleware {
   }
 
   Future<Response> _createResponse(
-      Option<AuthenticationContext> authContextOpt,
+      Option<AuthenticatedContext> authContextOpt,
       Request request, Handler innerHandler) {
 
     return authContextOpt.map((authContext) {

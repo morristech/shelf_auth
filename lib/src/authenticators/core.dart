@@ -27,8 +27,8 @@ abstract class AbstractAuthenticator<P extends Principal> extends Authenticator<
     ensure(sessionUpdateAllowed, isNotNull);
   }
 
-  AuthenticationContext<P> createContext(principal) {
-    return new AuthenticationContext(principal,
+  AuthenticatedContext<P> createContext(principal) {
+    return new AuthenticatedContext(principal,
         sessionCreationAllowed: sessionCreationAllowed,
         sessionUpdateAllowed: sessionUpdateAllowed);
   }

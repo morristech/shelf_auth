@@ -67,7 +67,7 @@ class UsernamePasswordAuthenticator<P extends Principal> extends
   }
 
   @override
-  Future<Option<AuthenticationContext<P>>> authenticate(Request request) {
+  Future<Option<AuthenticatedContext<P>>> authenticate(Request request) {
     final credentialsFuture = _extractCredentials(request);
 
     final principalFuture = credentialsFuture.then((credentials) =>

@@ -30,7 +30,7 @@ class BasicAuthenticator<P extends Principal> extends AbstractAuthenticator<P> {
   }
 
   @override
-  Future<Option<AuthenticationContext<P>>> authenticate(Request request) {
+  Future<Option<AuthenticatedContext<P>>> authenticate(Request request) {
     final authHeaderOpt = authorizationHeader(request, BASIC_AUTH_SCHEME);
     return authHeaderOpt.map((authHeader) {
 
