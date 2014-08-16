@@ -52,6 +52,10 @@ main() {
     handler = new MockHandler();
     when(handler.call(argThat(new isInstanceOf<Request>())))
       .thenReturn(okResponse);
+    when(authenticator1.readsBody).thenReturn(false);
+    when(authenticator2.readsBody).thenReturn(false);
+    when(authenticator3.readsBody).thenReturn(false);
+    when(sessionAuthenticator.readsBody).thenReturn(false);
   });
 
   group('authenticationMiddleware', () {
