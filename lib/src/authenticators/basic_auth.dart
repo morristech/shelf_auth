@@ -1,3 +1,8 @@
+// Copyright (c) 2014, The Shelf Auth project authors.
+// Please see the AUTHORS file for details.
+// All rights reserved. Use of this source code is governed by
+// a BSD 2-Clause License that can be found in the LICENSE file.
+
 library shelf_auth.authentication.basic;
 
 import '../authentication.dart';
@@ -27,7 +32,7 @@ class BasicAuthenticator<P extends Principal> extends AbstractAuthenticator<P> {
   @override
   Future<Option<AuthenticationContext<P>>> authenticate(Request request) {
     final authHeaderOpt = authorizationHeader(request, BASIC_AUTH_SCHEME);
-    return authHeaderOpt.flatMap((authHeader) {
+    return authHeaderOpt.map((authHeader) {
 
       final usernamePasswordStr = _getCredentials(authHeader);
 
@@ -40,9 +45,9 @@ class BasicAuthenticator<P extends Principal> extends AbstractAuthenticator<P> {
       final principalFuture = userLookup(usernamePassword[0],
           usernamePassword[1]);
 
-      return new Some(principalFuture.then((principalOption) =>
+      return principalFuture.then((principalOption) =>
           principalOption.map((principal) =>
-              createContext(principal))));
+              createContext(principal)));
     })
     .getOrElse(() => new Future(() => const None()));
 

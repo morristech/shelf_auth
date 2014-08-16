@@ -1,3 +1,8 @@
+// Copyright (c) 2014, The Shelf Auth project authors.
+// Please see the AUTHORS file for details.
+// All rights reserved. Use of this source code is governed by
+// a BSD 2-Clause License that can be found in the LICENSE file.
+
 library shelf_auth.authentication.session.jwt.test;
 
 import 'package:shelf/shelf.dart';
@@ -19,7 +24,7 @@ const String subject = 'el subjecto';
 main() {
   final String sessionToken = createSessionToken(secret, issuer, subject);
   final String expiredToken = createExpiredSessionToken(secret, issuer, subject);
-  
+
   request() => new Request('GET', Uri.parse('http://localhost/foo'),
     headers: { 'Authorization': '$JWT_SESSION_AUTH_SCHEME $sessionToken' });
 
@@ -66,7 +71,7 @@ main() {
           expect(() => authenticator.authenticate(requestInvalidCredentials()), throws);
         });
       });
-      
+
       group('and session expired', () {
         test('throws', () {
           expect(() => authenticator.authenticate(requestExpired()), throws);

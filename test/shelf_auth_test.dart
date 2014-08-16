@@ -1,3 +1,8 @@
+// Copyright (c) 2014, The Shelf Auth project authors.
+// Please see the AUTHORS file for details.
+// All rights reserved. Use of this source code is governed by
+// a BSD 2-Clause License that can be found in the LICENSE file.
+
 library shelf_auth.test;
 
 import 'package:shelf_auth/shelf_auth.dart';
@@ -52,6 +57,10 @@ main() {
     handler = new MockHandler();
     when(handler.call(argThat(new isInstanceOf<Request>())))
       .thenReturn(okResponse);
+    when(authenticator1.readsBody).thenReturn(false);
+    when(authenticator2.readsBody).thenReturn(false);
+    when(authenticator3.readsBody).thenReturn(false);
+    when(sessionAuthenticator.readsBody).thenReturn(false);
   });
 
   group('authenticationMiddleware', () {

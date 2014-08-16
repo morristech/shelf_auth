@@ -39,6 +39,7 @@ void main() {
 
 class RandomAuthenticator extends Authenticator {
   bool approve = true;
+  bool readsBody = false;
 
   @override
   Future<Option<AuthenticationContext>> authenticate(Request request) {

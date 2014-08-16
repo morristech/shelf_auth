@@ -1,3 +1,8 @@
+// Copyright (c) 2014, The Shelf Auth project authors.
+// Please see the AUTHORS file for details.
+// All rights reserved. Use of this source code is governed by
+// a BSD 2-Clause License that can be found in the LICENSE file.
+
 library shelf_auth.authentication;
 
 import 'package:shelf/shelf.dart';
@@ -162,6 +167,8 @@ abstract class Authenticator<P extends Principal> {
    * or similar is used to turn exceptions into suitable http responses.
    */
   Future<Option<AuthenticationContext<P>>> authenticate(Request request);
+
+  bool get readsBody;
 }
 
 /**
@@ -212,11 +219,13 @@ class AuthenticationMiddleware {
             a.authenticate(request));
 
     final Future<Option<AuthenticationContext>> optAuthFuture =
-        optAuthContexts.firstWhere((authOpt) => authOpt.nonEmpty(),
+        optAuthContexts.firstWhere(
+            (authOpt) => authOpt.nonEmpty(),
             defaultValue: () => const None());
 
     final Future<Response> responseFuture =
-        optAuthFuture.then((authOpt) =>
+        optAuthFuture.then(
+            (authOpt) =>
             _createResponse(authOpt, request, innerHandler));
 
     return responseFuture;
@@ -232,7 +241,16 @@ class AuthenticationMiddleware {
         throw new UnauthorizedException();
       }
 
-      final newRequest = request.change(context: {
+      final bodyConsumed = authenticators.any((a) => a.readsBody);
+      final initalRequest = bodyConsumed ?
+          new Request(request.method, request.requestedUri,
+              protocolVersion: request.protocolVersion,
+              headers: request.headers, url: request.url,
+              scriptName: request.scriptName, body:
+                null, context: request.context)
+          : request;
+
+      final newRequest = initalRequest.change(context: {
         _SHELF_AUTH_REQUEST_CONTEXT: authContext
       });
       final responseFuture = syncFuture(() => innerHandler(newRequest));

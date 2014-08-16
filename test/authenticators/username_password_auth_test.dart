@@ -3,13 +3,13 @@
 // All rights reserved. Use of this source code is governed by
 // a BSD 2-Clause License that can be found in the LICENSE file.
 
-library shelf_auth.authentication.basic.test;
+library shelf_auth.authentication.usernamepassword.test;
 
 import 'package:shelf/shelf.dart';
 import 'dart:async';
 import 'package:option/option.dart';
 import 'package:shelf_auth/src/authentication.dart';
-import 'package:shelf_auth/src/authenticators/basic_auth.dart';
+import 'package:shelf_auth/src/authenticators/username_password_auth.dart';
 import 'package:unittest/unittest.dart';
 import 'package:shelf_auth/src/principal/user_lookup.dart';
 
@@ -17,19 +17,19 @@ import 'package:shelf_auth/src/principal/user_lookup.dart';
 final UserLookupByUsernamePassword lookup = testLookup;
 
 main() {
-  request() => new Request('GET', Uri.parse('http://localhost/foo'),
-    headers: { 'Authorization': 'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==' });
+  request() => new Request('POST', Uri.parse('http://localhost/login'),
+    headers: { 'Content-type': "application/x-www-form-urlencoded" },
+    body: new Stream.fromIterable(["username=Aladdin&password=opensesame".codeUnits]));
 
-  requestInvalidCredentials() => new Request('GET', Uri.parse('http://localhost/foo'),
-    headers: { 'Authorization': 'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQXXXXXX==' });
+  requestInvalidCredentials() => new Request('POST',
+      Uri.parse('http://localhost/login'),
+      headers: { 'Content-type': "application/x-www-form-urlencoded" },
+      body: new Stream.fromIterable(["username=Aladdin&password=foo".codeUnits]));
 
-  requestWrongRealm() => new Request('GET', Uri.parse('http://localhost/foo'),
-    headers: { 'Authorization': 'Complex QWxhZGRpbjpvcGVuIHNlc2FtZQ==' });
-
-  requestNoAuth() => new Request('GET', Uri.parse('http://localhost/foo'),
+  requestNoAuth() => new Request('POST', Uri.parse('http://localhost/login'),
     headers: { 'Foo': 'bar' });
 
-  final authenticator = new BasicAuthenticator(lookup);
+  final authenticator = new UsernamePasswordAuthenticator(lookup);
 
   group('authenticate', () {
 
@@ -57,36 +57,29 @@ main() {
 
       group('and credentials is for invalid user', () {
         test('throws', () {
-          expect(() => authenticator.authenticate(requestInvalidCredentials()), throws);
-        });
-
-//        test('completes with None', () {
-//          expect(authenticator.authenticate(requestInvalidCredentials()),
-//          completion(new isInstanceOf<None>()));
-//        });
-      });
-
-      group('and Realm is not Basic', () {
-        test('completes', () {
-          expect(authenticator.authenticate(requestWrongRealm()), completes);
-        });
-
-        test('completes with None', () {
-          expect(authenticator.authenticate(requestWrongRealm()),
-          completion(new isInstanceOf<None>()));
+          expect(authenticator.authenticate(requestInvalidCredentials()), throws);
         });
       });
+
     });
 
     group('when no Authorization header is present', () {
-      test('completes', () {
-        expect(authenticator.authenticate(requestNoAuth()), completes);
+      test('throws', () {
+        expect(authenticator.authenticate(requestNoAuth()), throws);
       });
 
-      test('completes with None', () {
-        expect(authenticator.authenticate(requestNoAuth()),
-        completion(new isInstanceOf<None>()));
-      });
+      // This is different to normal authenticators as it is used in routes
+      // that are dedicated to login so we throw when no credentials rather
+      // that returning None.
+
+//      test('completes', () {
+//        expect(authenticator.authenticate(requestNoAuth()), completes);
+//      });
+//
+//      test('completes with None', () {
+//        expect(authenticator.authenticate(requestNoAuth()),
+//        completion(new isInstanceOf<None>()));
+//      });
 
 
     });
@@ -97,7 +90,7 @@ main() {
 }
 
 Future<Option<Principal>> testLookup(String username, String password) {
-  final validUser = username == 'Aladdin' && password == 'open sesame';
+  final validUser = username == 'Aladdin' && password == 'opensesame';
 
   final principalOpt = validUser ? new Some(new Principal(username)) :
     const None();

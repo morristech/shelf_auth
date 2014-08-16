@@ -15,4 +15,6 @@ dependencies:
 dev_dependencies:
   mock: '>=0.11.0+1 <0.12.0'
   mockito: '>=0.8.1 <0.9.0'
+  shelf_bind: any
+  shelf_route: any
   unittest: '>=0.10.1+2 <0.12.0'
