@@ -1,3 +1,8 @@
+// Copyright (c) 2014, The Shelf Auth project authors.
+// Please see the AUTHORS file for details.
+// All rights reserved. Use of this source code is governed by
+// a BSD 2-Clause License that can be found in the LICENSE file.
+
 library shelf_auth.authentication;
 
 import 'package:shelf/shelf.dart';
@@ -5,8 +10,11 @@ import 'dart:async';
 import 'package:option/option.dart';
 import 'util.dart';
 import 'package:shelf_exception_response/exception.dart';
+import 'package:logging/logging.dart';
 
 const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
+
+final Logger _log = new Logger('shelf_auth.authentication');
 
 /**
  * Creates *Shelf* middleware for performing authentication and optionally
@@ -19,7 +27,11 @@ const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
  * implementations.
  *
  * The [SessionHandler] if provided will be invoked on successful authentication
- * if the resulting [AuthenticationContext] supports sessions.
+ * if the resulting [AuthenticatedContext] supports sessions.
+ *
+ * By default authentication must occur over https and anonymous access is
+ * allowed. These can be overriden with the flags [allowHttp] and
+ * [allowAnonymousAccess] respectively.
  *
  * Example use
  *
@@ -33,16 +45,19 @@ const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
   * ```
  */
 Middleware authenticate(Iterable<Authenticator> authenticators,
-                                    [ SessionHandler sessionHandler ]) =>
+                        { SessionHandler sessionHandler,
+                          bool allowHttp: false,
+                          bool allowAnonymousAccess: true }) =>
     new AuthenticationMiddleware(authenticators.toList(growable: false),
-        new Option(sessionHandler))
+        new Option(sessionHandler), allowHttp: allowHttp,
+        allowAnonymousAccess: allowAnonymousAccess)
       .middleware;
 
 /**
- * Retrieves the current [AuthenticationContext] from the [request] if one
+ * Retrieves the current [AuthenticatedContext] from the [request] if one
  * exists
  */
-Option<AuthenticationContext> getAuthenticationContext(Request request) {
+Option<AuthenticatedContext> getAuthenticatedContext(Request request) {
   return new Option(request.context[_SHELF_AUTH_REQUEST_CONTEXT]);
 }
 
@@ -73,9 +88,7 @@ class Principal {
  * for server to server interaction, but true for user to system interaction
  *
  */
-// TODO: AuthenticationContext sounds more like something you pass into an
-// authenticator than something that you get out
-class AuthenticationContext<P extends Principal> {
+class AuthenticatedContext<P extends Principal> {
   final P principal;
 
   /// contains the [Principal] that the actions are being performed on behalf of
@@ -89,22 +102,49 @@ class AuthenticationContext<P extends Principal> {
   /// a result of this authentication
   final bool sessionUpdateAllowed;
 
-  AuthenticationContext(this.principal,
+  AuthenticatedContext(this.principal,
       { this.onBehalfOf: const None(),
         this.sessionCreationAllowed: true, this.sessionUpdateAllowed: true });
 }
 
 /**
+ * An [AuthenticatedContext] established by authenticating via a session
+ * token mechanism
+ */
+class SessionAuthenticatedContext<P extends Principal>
+        extends AuthenticatedContext<P> {
+  final DateTime sessionFirstCreated;
+
+  final DateTime sessionLastRefreshed;
+
+  final DateTime noSessionRenewalAfter;
+
+  SessionAuthenticatedContext(P principal,
+      this.sessionFirstCreated, this.sessionLastRefreshed,
+          this.noSessionRenewalAfter,
+      { Option<P> onBehalfOf: const None(),
+         bool sessionCreationAllowed: true, bool sessionUpdateAllowed: true })
+      : super(principal, sessionCreationAllowed: sessionCreationAllowed,
+            sessionUpdateAllowed: sessionUpdateAllowed);
+}
+
+
+/**
  * A class that may establish and / or update a session for the authenticated
- * principal.
+ * principal. It has an accompanying [Authenticator] to authenticate session
+ * tokens on incoming requests.
  *
  * Implementations must respect the values of
  * [sessionCreationAllowed] and [sessionUpdateAllowed] in the given
- * [AuthenticationContext]
+ * [AuthenticatedContext]
  */
-abstract class SessionHandler {
-  Response handle(AuthenticationContext context,
-                  Request request, Response response);
+abstract class SessionHandler<P extends Principal> {
+  /// Update the [response] with a session token as appropriate
+  Response handle(AuthenticatedContext context, Request request,
+                  Response response);
+
+  /// authenticator for session tokens created by the [handle] method
+  Authenticator<P> get authenticator;
 }
 
 /**
@@ -117,14 +157,16 @@ abstract class Authenticator<P extends Principal> {
    * * [None] to indicate that no authentication credentials exist for this
    * authenticator. Other authenicators can now get their turn to authenticate
    *
-   * * [Some] [AuthenticationContext] when authentication succeeds
+   * * [Some] [AuthenticatedContext] when authentication succeeds
    *
    * * An exception if authentication fails (e.g. [UnauthorizedException])
    *
    * Note: *shelf_auth* assumes that the *shelf_exception_response* package
    * or similar is used to turn exceptions into suitable http responses.
    */
-  Future<Option<AuthenticationContext<P>>> authenticate(Request request);
+  Future<Option<AuthenticatedContext<P>>> authenticate(Request request);
+
+  bool get readsBody;
 }
 
 /**
@@ -133,16 +175,34 @@ abstract class Authenticator<P extends Principal> {
  *
  * An optional [SessionHandler] can be provided to create /
  * update a session as a result (e.g. by setting a cookie or token etc).
+ * The [sessionHandler]s associated [Authenticator] will be
+ * the first authenticator called when authenticating requests
  *
  * If no [SessionHandler] is provided then no session will be created if none
  * currently exists and no changes will be made to an existing one if one does
  * exist
+ *
+ * By default authentication is only allowed via HTTPS to avoid eavesdropping of
+ * security credentials. This can be overriden by setting [allowHttp] to true.
+ *
+ * By default if no authenticators either return a successful authentication or
+ * throw an exception, the request is allowed to continue as anonymous (guest).
+ * This can be overriden by setting [allowAnonymousAccess] to false.
  */
 class AuthenticationMiddleware {
   final List<Authenticator> authenticators;
   final Option<SessionHandler> sessionHandler;
+  final bool allowHttp;
+  final bool allowAnonymousAccess;
 
-  AuthenticationMiddleware(this.authenticators, this.sessionHandler);
+  AuthenticationMiddleware(List<Authenticator> authenticators,
+                           Option<SessionHandler> sessionHandler,
+                           { this.allowHttp: false,
+                             this.allowAnonymousAccess: true })
+      : this.authenticators = (sessionHandler.nonEmpty() ?
+          ([]..add(sessionHandler.get().authenticator)..addAll(authenticators))
+          : authenticators),
+          this.sessionHandler = sessionHandler;
 
 
   Middleware get middleware => _createHandler;
@@ -152,27 +212,43 @@ class AuthenticationMiddleware {
   }
 
   Future<Response> _handle(Request request, Handler innerHandler) {
-    final Stream<Option<AuthenticationContext>> optAuthContexts =
+    final Stream<Option<AuthenticatedContext>> optAuthContexts =
         new Stream.fromIterable(authenticators).asyncMap((a) =>
             a.authenticate(request));
 
-    final Future<Option<AuthenticationContext>> optAuthFuture =
-        optAuthContexts.firstWhere((authOpt) => authOpt.nonEmpty(),
+    final Future<Option<AuthenticatedContext>> optAuthFuture =
+        optAuthContexts.firstWhere(
+            (authOpt) => authOpt.nonEmpty(),
             defaultValue: () => const None());
 
     final Future<Response> responseFuture =
-        optAuthFuture.then((authOpt) =>
+        optAuthFuture.then(
+            (authOpt) =>
             _createResponse(authOpt, request, innerHandler));
 
     return responseFuture;
   }
 
   Future<Response> _createResponse(
-      Option<AuthenticationContext> authContextOpt,
+      Option<AuthenticatedContext> authContextOpt,
       Request request, Handler innerHandler) {
 
     return authContextOpt.map((authContext) {
-      final newRequest = request.change(context: {
+      if (!allowHttp && request.requestedUri.scheme != 'https') {
+        _log.finer('denying access over http');
+        throw new UnauthorizedException();
+      }
+
+      final bodyConsumed = authenticators.any((a) => a.readsBody);
+      final initalRequest = bodyConsumed ?
+          new Request(request.method, request.requestedUri,
+              protocolVersion: request.protocolVersion,
+              headers: request.headers, url: request.url,
+              scriptName: request.scriptName, body:
+                null, context: request.context)
+          : request;
+
+      final newRequest = initalRequest.change(context: {
         _SHELF_AUTH_REQUEST_CONTEXT: authContext
       });
       final responseFuture = syncFuture(() => innerHandler(newRequest));
@@ -189,25 +265,12 @@ class AuthenticationMiddleware {
 
       return updatedResponseFuture;
     }).getOrElse(() {
+      if (!allowAnonymousAccess) {
+        _log.finer('denying unauthenticated access');
+        throw new UnauthorizedException();
+      }
       return syncFuture(() => innerHandler(request));
     });
   }
 }
 
-Option<AuthorizationHeader> authorizationHeader(Request request) {
-  return new Option(request.headers['Authorization'])
-    .flatMap((String header) {
-      final List<String> parts = header.split(' ');
-      if (parts.length != 2) {
-        return const None();
-      }
-      return new Some(new AuthorizationHeader(parts[0], parts[1]));
-    });
-}
-
-class AuthorizationHeader {
-  final String realm;
-  final String credentials;
-
-  AuthorizationHeader(this.realm, this.credentials);
-}
