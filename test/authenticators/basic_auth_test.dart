@@ -1,4 +1,4 @@
-library shelf_auth.authentication.jwtsession.test;
+library shelf_auth.authentication.basic.test;
 
 import 'package:shelf/shelf.dart';
 import 'dart:async';

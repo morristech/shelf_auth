@@ -6,13 +6,13 @@ library constrain.all.test;
 
 import 'package:unittest/unittest.dart';
 import 'shelf_auth_test.dart' as core;
-import 'authenticators/basic_auth_test.dart' as basic;
+import 'authenticators/all_authenticator_tests.dart' as authenticators;
 import 'session/jwt/all_jwt_session_tests.dart' as jwt;
 
 
 main() {
   group('[core]', core.main);
-  group('[basic]', basic.main);
+  group('[authenticators]', authenticators.main);
   group('[jwt]', jwt.main);
 }
 

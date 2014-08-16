@@ -64,7 +64,8 @@ class UsernamePasswordAuthenticator<P extends Principal> extends
         userLookup(credentials.username, credentials.password));
 
     return principalFuture.then((principalOption) =>
-        principalOption.map((principal) => createContext(principal)));
+        principalOption.map((principal) => createContext(principal))
+        .orElse(() => throw new UnauthorizedException()));
   }
 
   Future<StdUserCredentials> _extractCredentials(Request request) {
@@ -82,13 +83,14 @@ class UsernamePasswordAuthenticator<P extends Principal> extends
   }
 
   Future<StdUserCredentials> _extractFormCredentials(Request request) {
-    final contentType = ContentType.parse(
-        request.headers[HttpHeaders.CONTENT_TYPE]);
+    final contentTypeStr = request.headers[HttpHeaders.CONTENT_TYPE];
+    if (contentTypeStr != null) {
+      final contentType = ContentType.parse(contentTypeStr);
 
-    if (contentType.mimeType == "application/x-www-form-urlencoded") {
-      return request.readAsString().then((s) =>
-          new StdUserCredentials.fromJson(Uri.splitQueryString(s)));
-
+      if (contentType.mimeType == "application/x-www-form-urlencoded") {
+        return request.readAsString().then((s) =>
+            new StdUserCredentials.fromJson(Uri.splitQueryString(s)));
+      }
     }
 
     return new Future.value(null);
