@@ -44,9 +44,13 @@ void main() {
       allowAnonymousAccess: false);
 
   // authentication middleware for routes other than login that require a logged
-  // in user
+  // in user. Here we are relying
+  // solely on users with a session established via the /login route but
+  // could have additional authenitcators here.
+  // We are disabling anonymous access to these routes
   var defaultAuthMiddleware = authenticate([],
-      sessionHandler: sessionHandler, allowHttp: true, allowAnonymousAccess: false);
+      sessionHandler: sessionHandler, allowHttp: true,
+      allowAnonymousAccess: false);
 
   var rootRouter = router(handlerAdapter: handlerAdapter());
 
@@ -55,9 +59,7 @@ void main() {
           "I'm now logged in as ${loggedInUsername(request)}\n"),
             middleware: loginMiddleware);
 
-  // the routes which require an authenticated user. Here we are relying
-  // solely on users with a session established via the /login route but
-  // could have additional authenitcators here
+  // the routes which require an authenticated user
   rootRouter.child('/authenticated', middleware: defaultAuthMiddleware)
     ..get('/foo', (Request request) => new Response.ok(
         "Doing foo as ${loggedInUsername(request)}\n"));
