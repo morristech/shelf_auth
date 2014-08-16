@@ -1,3 +1,8 @@
+// Copyright (c) 2014, The Shelf Auth project authors.
+// Please see the AUTHORS file for details.
+// All rights reserved. Use of this source code is governed by
+// a BSD 2-Clause License that can be found in the LICENSE file.
+
 library shelf_auth.authentication.usernamepassword;
 
 import '../authentication.dart';
@@ -44,6 +49,11 @@ class StdUserCredentials {
  * 1. add Middleware before the authenicator that extracts the username and
  * password from the request (somehow) and use the `setStdUserCredentials`
  * to add them to the context
+ *
+ * Note: this authenticator is intended for dedicated login routes. It behaves
+ * differently to other authenticators as it treats missing credentials the
+ * same as invalid credentials and throws in both cases. It also reads the body
+ * and passes a request on to the innerHandler which has no body
  */
 class UsernamePasswordAuthenticator<P extends Principal> extends
     AbstractAuthenticator<P> {
