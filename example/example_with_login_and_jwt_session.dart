@@ -13,7 +13,6 @@ import 'package:uuid/uuid.dart';
 import 'package:logging/logging.dart';
 import 'package:shelf_route/shelf_route.dart';
 import 'package:shelf_bind/shelf_bind.dart';
-import 'package:shelf_auth/src/authenticators/username_password_auth.dart';
 
 
 /**
