@@ -1,3 +1,7 @@
+## 0.1.0+1
+
+* Added missing dependency on shelf_path
+
 ## 0.1.0
 
 * Added Jwt Session Mechanism
