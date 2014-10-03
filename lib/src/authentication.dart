@@ -222,8 +222,7 @@ class AuthenticationMiddleware {
             defaultValue: () => const None());
 
     final Future<Response> responseFuture =
-        optAuthFuture.then(
-            (authOpt) =>
+        optAuthFuture.then((authOpt) =>
             _createResponse(authOpt, request, innerHandler));
 
     return responseFuture;
