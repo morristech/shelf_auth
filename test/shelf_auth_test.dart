@@ -212,29 +212,30 @@ main() {
         expect(middlewareHandler(request()), completes);
       });
 
-      test("calls handler with auth context in request", () {
-        final f = middlewareHandler(request());
-        f.then((response) {
+      group('on completion', () {
+        var response;
+        setUp(() {
+          final f = middlewareHandler(request());
+          return f.then((resp) {
+            response = resp;
+          });
+        });
+
+        test("calls handler with auth context in request", () {
           verify(handler.call(argThat(requestWithContextValue(
               SHELF_AUTH_REQUEST_CONTEXT, equals(defaultAuthContext)))))
               .called(1);
         });
-        expect(f, completes);
-      });
 
-      test("calls first 2 authenticators but not last", () {
-        final f = middlewareHandler(request());
-        f.then((response) {
+        test("calls first 2 authenticators but not last", () {
           verify(authenticator1.authenticate(any)).called(1);
           verify(authenticator2.authenticate(any)).called(1);
           verifyNever(authenticator3.authenticate(any));
         });
-        expect(f, completes);
 
-      });
-
-      test('returns 200 response', () {
-        expect(middlewareHandler(request()), completion(responseWithStatus(200)));
+        test('returns 200 response', () {
+          expect(response, responseWithStatus(200));
+        });
       });
     });
 
