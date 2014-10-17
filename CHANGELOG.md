@@ -1,3 +1,8 @@
+## 0.2.1
+
+* Added builder to simplify creating authentication middleware. Use the new 
+`builder` function to create a builder
+
 ## 0.2.0
 
 * Added AuthenticatedContext as a Zone variable. Available via a new function 
