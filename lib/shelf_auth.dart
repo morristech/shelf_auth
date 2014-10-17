@@ -11,3 +11,4 @@ export 'src/authenticators/core.dart';
 export 'src/authenticators/username_password_auth.dart';
 export 'src/session/jwt/jwt_session_handler.dart';
 export 'src/principal/user_lookup.dart';
+export 'src/builder.dart';
