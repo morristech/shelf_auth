@@ -6,6 +6,7 @@
 library shelf_auth.test;
 
 import 'package:shelf_auth/shelf_auth.dart';
+import 'package:shelf_auth/src/internal.dart';
 
 import 'package:unittest/unittest.dart';
 import 'package:mockito/mockito.dart';
@@ -15,8 +16,6 @@ import 'dart:async';
 import 'package:shelf_exception_response/exception.dart';
 import 'src/matchers.dart';
 
-// TODO: avoid the dupe
-const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
 
 
 class MockAuthenticator extends Mock implements Authenticator {
@@ -79,7 +78,7 @@ main() {
         final f = middlewareHandler(request());
         f.then((response) {
           verify(handler.call(argThat(requestWithContextValue(
-                _SHELF_AUTH_REQUEST_CONTEXT, isNull))))
+                SHELF_AUTH_REQUEST_CONTEXT, isNull))))
                 .called(1);
         });
         expect(f, completes);
@@ -110,7 +109,7 @@ main() {
         final f = middlewareHandler(request());
         f.then((response) {
           verify(handler.call(argThat(requestWithContextValue(
-                _SHELF_AUTH_REQUEST_CONTEXT, isNull))))
+                SHELF_AUTH_REQUEST_CONTEXT, isNull))))
                 .called(1);
         });
         expect(f, completes);
@@ -217,7 +216,7 @@ main() {
         final f = middlewareHandler(request());
         f.then((response) {
           verify(handler.call(argThat(requestWithContextValue(
-              _SHELF_AUTH_REQUEST_CONTEXT, equals(defaultAuthContext)))))
+              SHELF_AUTH_REQUEST_CONTEXT, equals(defaultAuthContext)))))
               .called(1);
         });
         expect(f, completes);
