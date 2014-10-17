@@ -74,18 +74,24 @@ main() {
         expect(middlewareHandler(request()), completes);
       });
 
-      test("calls handler with no auth context in request", () {
-        final f = middlewareHandler(request());
-        f.then((response) {
+      group('on completion', () {
+        var response;
+        setUp(() {
+          final f = middlewareHandler(request());
+          return f.then((resp) {
+            response = resp;
+          });
+        });
+
+        test("calls handler with no auth context in request", () {
           verify(handler.call(argThat(requestWithContextValue(
                 SHELF_AUTH_REQUEST_CONTEXT, isNull))))
                 .called(1);
         });
-        expect(f, completes);
-      });
 
-      test('returns 200 response', () {
-        expect(middlewareHandler(request()), completion(responseWithStatus(200)));
+        test('returns 200 response', () {
+          expect(response, responseWithStatus(200));
+        });
       });
     });
 
