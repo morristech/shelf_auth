@@ -42,6 +42,7 @@ main() {
   MockAuthenticator authenticator3;
   MockAuthenticator sessionAuthenticator;
   MockHandler handler;
+  Option<AuthenticatedContext> contextInZoneDuringHandler;
 
   Request request() => new Request('GET', Uri.parse('https://blah/foo'));
   Request httpRequest() => new Request('GET', Uri.parse('http://blah/foo'));
@@ -54,8 +55,12 @@ main() {
     authenticator3 = new MockAuthenticator();
     sessionAuthenticator = new MockAuthenticator();
     handler = new MockHandler();
+    contextInZoneDuringHandler = const None();
     when(handler.call(argThat(new isInstanceOf<Request>())))
-      .thenReturn(okResponse);
+      .thenAnswer((invocation) {
+        contextInZoneDuringHandler = authenticatedContext();
+        return okResponse;
+    });
     when(authenticator1.readsBody).thenReturn(false);
     when(authenticator2.readsBody).thenReturn(false);
     when(authenticator3.readsBody).thenReturn(false);
@@ -87,6 +92,10 @@ main() {
           verify(handler.call(argThat(requestWithContextValue(
                 SHELF_AUTH_REQUEST_CONTEXT, isNull))))
                 .called(1);
+        });
+
+        test("calls handler with no auth context in zone", () {
+          expect(contextInZoneDuringHandler, new isInstanceOf<None>());
         });
 
         test('returns 200 response', () {
@@ -124,6 +133,10 @@ main() {
           verify(handler.call(argThat(requestWithContextValue(
                 SHELF_AUTH_REQUEST_CONTEXT, isNull))))
                 .called(1);
+        });
+
+        test("calls handler with no auth context in zone", () {
+          expect(contextInZoneDuringHandler, new isInstanceOf<None>());
         });
 
         test("calls all authenticators", () {
@@ -234,6 +247,12 @@ main() {
               SHELF_AUTH_REQUEST_CONTEXT, equals(defaultAuthContext)))))
               .called(1);
         });
+
+        test("calls handler with auth context in zone", () {
+          expect(contextInZoneDuringHandler, new isInstanceOf<Some>());
+          expect(contextInZoneDuringHandler.get(), equals(defaultAuthContext));
+        });
+
 
         test("calls first 2 authenticators but not last", () {
           verify(authenticator1.authenticate(any)).called(1);
