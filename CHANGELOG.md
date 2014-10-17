@@ -1,7 +1,10 @@
-## 0.1.1
+## 0.2.0
 
 * Added AuthenticatedContext as a Zone variable. Available via a new function 
 `authenticatedContext()`
+
+Note the AuthenticationMiddleware class is no longer exposed. If you depended
+on it then this change is backwards incompatible. Otherwise all good
 
 ## 0.1.0+1
 
