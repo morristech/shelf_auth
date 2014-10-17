@@ -7,5 +7,7 @@ library shelf_auth;
 
 export 'src/authentication.dart';
 export 'src/authenticators/basic_auth.dart';
+export 'src/authenticators/core.dart';
 export 'src/authenticators/username_password_auth.dart';
 export 'src/session/jwt/jwt_session_handler.dart';
+export 'src/principal/user_lookup.dart';
