@@ -9,6 +9,8 @@ Provides [Shelf](https://api.dartlang.org/apidocs/channels/be/dartdoc-viewer/she
 
 ## Usage
 
+*Note: For an alternative way to build authentication middleware, see the Authentication Builder section below.*
+
 ```
 var authMiddleware = authenticate([
           new BasicAuthenticator(new TestLookup()),
@@ -132,3 +134,21 @@ This uses [JWT](http://self-issued.info/docs/draft-ietf-oauth-json-web-token.htm
 
 
 *Other session handlers like a cookie based mechanism is likely to be added in the future*
+
+### Authentication Builder
+
+To make it simpler to create authentication middleware, particularly when you use the bundled authenticators and session handlers, a builder is provided.
+
+For example
+
+```
+ var authMiddleware = (builder()
+    .basic(userNamePasswordLookup, 
+      sessionCreationAllowed: true)
+    .jwtSession('me', 'sshh', usernameLookup)
+    ..allowHttp=true)
+  .build();
+```
+
+*Note: this example is a bit convoluted as you don't typically want session creation with basic auth*
+
