@@ -1,3 +1,8 @@
+## 0.1.1
+
+* Added AuthenticatedContext as a Zone variable. Available via a new function 
+`authenticatedContext()`
+
 ## 0.1.0+1
 
 * Added missing dependency on shelf_path
