@@ -13,6 +13,7 @@ import 'package:shelf_exception_response/exception.dart';
 import 'package:logging/logging.dart';
 
 const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
+const Symbol _SHELF_AUTH_ZONE_CONTEXT = #shelf.auth.context;
 
 final Logger _log = new Logger('shelf_auth.authentication');
 
@@ -60,6 +61,14 @@ Middleware authenticate(Iterable<Authenticator> authenticators,
 Option<AuthenticatedContext> getAuthenticatedContext(Request request) {
   return new Option(request.context[_SHELF_AUTH_REQUEST_CONTEXT]);
 }
+
+/**
+ * Retrieves the current [AuthenticatedContext] from the current [Zone] if one
+ * exists
+ */
+Option<AuthenticatedContext> authenticatedContext() =>
+    new Option(Zone.current[_SHELF_AUTH_ZONE_CONTEXT]);
+
 
 /**
  * Someone or system that can be authenicated
@@ -251,7 +260,8 @@ class AuthenticationMiddleware {
       final newRequest = initalRequest.change(context: {
         _SHELF_AUTH_REQUEST_CONTEXT: authContext
       });
-      final responseFuture = syncFuture(() => innerHandler(newRequest));
+      final responseFuture = syncFuture(() =>
+          _runInNewZone(innerHandler, newRequest, authContext));
 
       final bool canHandleSession = sessionHandler.nonEmpty() &&
           (authContext.sessionCreationAllowed ||
@@ -274,3 +284,15 @@ class AuthenticationMiddleware {
   }
 }
 
+_runInNewZone(Handler innerHandler, Request request,
+              AuthenticatedContext authContext) {
+  var response;
+
+  runZoned(() {
+    response = innerHandler(request);
+  }, zoneValues: <Symbol, Object>{
+    _SHELF_AUTH_ZONE_CONTEXT: authContext
+  });
+
+  return response;
+}
