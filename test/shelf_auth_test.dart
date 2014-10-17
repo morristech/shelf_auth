@@ -6,6 +6,7 @@
 library shelf_auth.test;
 
 import 'package:shelf_auth/shelf_auth.dart';
+import 'package:shelf_auth/src/internal.dart';
 
 import 'package:unittest/unittest.dart';
 import 'package:mockito/mockito.dart';
@@ -15,8 +16,6 @@ import 'dart:async';
 import 'package:shelf_exception_response/exception.dart';
 import 'src/matchers.dart';
 
-// TODO: avoid the dupe
-const String _SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
 
 
 class MockAuthenticator extends Mock implements Authenticator {
@@ -43,6 +42,7 @@ main() {
   MockAuthenticator authenticator3;
   MockAuthenticator sessionAuthenticator;
   MockHandler handler;
+  Option<AuthenticatedContext> contextInZoneDuringHandler;
 
   Request request() => new Request('GET', Uri.parse('https://blah/foo'));
   Request httpRequest() => new Request('GET', Uri.parse('http://blah/foo'));
@@ -55,8 +55,12 @@ main() {
     authenticator3 = new MockAuthenticator();
     sessionAuthenticator = new MockAuthenticator();
     handler = new MockHandler();
+    contextInZoneDuringHandler = const None();
     when(handler.call(argThat(new isInstanceOf<Request>())))
-      .thenReturn(okResponse);
+      .thenAnswer((invocation) {
+        contextInZoneDuringHandler = authenticatedContext();
+        return okResponse;
+    });
     when(authenticator1.readsBody).thenReturn(false);
     when(authenticator2.readsBody).thenReturn(false);
     when(authenticator3.readsBody).thenReturn(false);
@@ -75,18 +79,28 @@ main() {
         expect(middlewareHandler(request()), completes);
       });
 
-      test("calls handler with no auth context in request", () {
-        final f = middlewareHandler(request());
-        f.then((response) {
+      group('on completion', () {
+        var response;
+        setUp(() {
+          final f = middlewareHandler(request());
+          return f.then((resp) {
+            response = resp;
+          });
+        });
+
+        test("calls handler with no auth context in request", () {
           verify(handler.call(argThat(requestWithContextValue(
-                _SHELF_AUTH_REQUEST_CONTEXT, isNull))))
+                SHELF_AUTH_REQUEST_CONTEXT, isNull))))
                 .called(1);
         });
-        expect(f, completes);
-      });
 
-      test('returns 200 response', () {
-        expect(middlewareHandler(request()), completion(responseWithStatus(200)));
+        test("calls handler with no auth context in zone", () {
+          expect(contextInZoneDuringHandler, new isInstanceOf<None>());
+        });
+
+        test('returns 200 response', () {
+          expect(response, responseWithStatus(200));
+        });
       });
     });
 
@@ -106,27 +120,33 @@ main() {
         expect(middlewareHandler(request()), completes);
       });
 
-      test("calls handler with no auth context in request", () {
-        final f = middlewareHandler(request());
-        f.then((response) {
+      group('on completion', () {
+        var response;
+        setUp(() {
+          final f = middlewareHandler(request());
+          return f.then((resp) {
+            response = resp;
+          });
+        });
+
+        test("calls handler with no auth context in request", () {
           verify(handler.call(argThat(requestWithContextValue(
-                _SHELF_AUTH_REQUEST_CONTEXT, isNull))))
+                SHELF_AUTH_REQUEST_CONTEXT, isNull))))
                 .called(1);
         });
-        expect(f, completes);
-      });
 
-      test("calls all authenticators", () {
-        final f = middlewareHandler(request());
-        f.then((response) {
+        test("calls handler with no auth context in zone", () {
+          expect(contextInZoneDuringHandler, new isInstanceOf<None>());
+        });
+
+        test("calls all authenticators", () {
           verify(authenticator1.authenticate(any)).called(1);
           verify(authenticator2.authenticate(any)).called(1);
         });
-        expect(f, completes);
-      });
 
-      test('returns 200 response', () {
-        expect(middlewareHandler(request()), completion(responseWithStatus(200)));
+        test('returns 200 response', () {
+          expect(response, responseWithStatus(200));
+        });
       });
     });
 
@@ -213,29 +233,36 @@ main() {
         expect(middlewareHandler(request()), completes);
       });
 
-      test("calls handler with auth context in request", () {
-        final f = middlewareHandler(request());
-        f.then((response) {
+      group('on completion', () {
+        var response;
+        setUp(() {
+          final f = middlewareHandler(request());
+          return f.then((resp) {
+            response = resp;
+          });
+        });
+
+        test("calls handler with auth context in request", () {
           verify(handler.call(argThat(requestWithContextValue(
-              _SHELF_AUTH_REQUEST_CONTEXT, equals(defaultAuthContext)))))
+              SHELF_AUTH_REQUEST_CONTEXT, equals(defaultAuthContext)))))
               .called(1);
         });
-        expect(f, completes);
-      });
 
-      test("calls first 2 authenticators but not last", () {
-        final f = middlewareHandler(request());
-        f.then((response) {
+        test("calls handler with auth context in zone", () {
+          expect(contextInZoneDuringHandler, new isInstanceOf<Some>());
+          expect(contextInZoneDuringHandler.get(), equals(defaultAuthContext));
+        });
+
+
+        test("calls first 2 authenticators but not last", () {
           verify(authenticator1.authenticate(any)).called(1);
           verify(authenticator2.authenticate(any)).called(1);
           verifyNever(authenticator3.authenticate(any));
         });
-        expect(f, completes);
 
-      });
-
-      test('returns 200 response', () {
-        expect(middlewareHandler(request()), completion(responseWithStatus(200)));
+        test('returns 200 response', () {
+          expect(response, responseWithStatus(200));
+        });
       });
     });
 

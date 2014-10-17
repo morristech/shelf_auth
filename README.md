@@ -1,6 +1,7 @@
 # Authentication Middleware for Dart Shelf
 
 [![Build Status](https://drone.io/bitbucket.org/andersmholmgren/shelf_auth/status.png)](https://drone.io/bitbucket.org/andersmholmgren/shelf_auth/latest)
+[![Pub Version](http://img.shields.io/pub/v/shelf_auth.svg)](https://pub.dartlang.org/packages/shelf_auth)
 
 ## Introduction
 
@@ -37,7 +38,9 @@ When the authentication middleware is invoked it goes through the authenticators
 
 The first `Authenticator` that either returns a successful authentication or throws an exception wins. If an `Authenticator` indicates it did not find relevant credentials, the next authenticator in the list is called.
 
-If no exception is thrown, then the `innerHandler` passed to the middleware will be called. If the authentication was successful then the request will contain authentication related data in the request context. This can be retrieved via the `getAuthenticatedContext` function.
+If no exception is thrown, then the `innerHandler` passed to the middleware will be called. If the authentication was successful then the request will contain authentication related data in the request context. This can be retrieved from the current request via the `getAuthenticatedContext` function or from the current zone via `authenticatedContext`. 
+
+*Successful authentication results in a new zone created with the authenticated context set as a zone variable. This can be accessed with the `authenticatedContext` function.*
 
 If none of the authenticators handle the request, then the `innerHandler` is invoked without any authentication context. Downstream handlers should treat this is access by an unauthenticated (guest) user. You can deny anonymous access by invoking the `authenticate` function with `allowAnonymousAccess: false`.
 
