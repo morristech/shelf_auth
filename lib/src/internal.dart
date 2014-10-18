@@ -12,9 +12,9 @@ import 'util.dart';
 import 'package:shelf_exception_response/exception.dart';
 import 'package:logging/logging.dart';
 import 'core.dart';
+import 'zone_context.dart';
 
 const String SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
-const Symbol SHELF_AUTH_ZONE_CONTEXT = #shelf.auth.context;
 
 final Logger _log = new Logger('shelf_auth.authentication.internal');
 
@@ -126,13 +126,5 @@ class AuthenticationMiddleware {
 
 _runInNewZone(Handler innerHandler, Request request,
               AuthenticatedContext authContext) {
-  var response;
-
-  runZoned(() {
-    response = innerHandler(request);
-  }, zoneValues: <Symbol, Object>{
-    SHELF_AUTH_ZONE_CONTEXT: authContext
-  });
-
-  return response;
+  return runInNewZone(authContext, () => innerHandler(request));
 }
