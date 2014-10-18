@@ -1,3 +1,8 @@
+## 0.2.2
+
+* Exposed zone functionality via an spi so other libs can manually set 
+auth context
+
 ## 0.2.1
 
 * Added builder to simplify creating authentication middleware. Use the new 

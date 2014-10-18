@@ -18,6 +18,7 @@ const Symbol SHELF_AUTH_ZONE_CONTEXT = #shelf.auth.context;
 Option<AuthenticatedContext> authenticatedContext() =>
     new Option(Zone.current[SHELF_AUTH_ZONE_CONTEXT]);
 
+/// Runs the given [body] in a new [Zone] with the given [AuthenticatedContext]
 runInNewZone(AuthenticatedContext authContext, body()) {
   var response;
 
