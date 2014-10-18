@@ -62,10 +62,4 @@ Option<AuthenticatedContext> getAuthenticatedContext(Request request) {
   return new Option(request.context[SHELF_AUTH_REQUEST_CONTEXT]);
 }
 
-/**
- * Retrieves the current [AuthenticatedContext] from the current [Zone] if one
- * exists
- */
-Option<AuthenticatedContext> authenticatedContext() =>
-    new Option(Zone.current[SHELF_AUTH_ZONE_CONTEXT]);
 
