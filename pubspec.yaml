@@ -10,7 +10,8 @@ dependencies:
   dart_jwt: '>=0.1.1 <0.2.0'
   option: '>=0.3.3 <0.4.0'
   shelf: '>=0.5.1 <0.6.0'
-  shelf_exception_response: '>=0.1.0 <0.2.0'
+  shelf_exception_response:
+    git: https://github.com/Andersmholmgren/shelf_exception_response.git
   shelf_path: '>=0.1.1+1 <0.2.0'
   uuid: '>=0.4.0 <0.5.0'
 dev_dependencies:
