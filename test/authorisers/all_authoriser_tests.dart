@@ -6,10 +6,12 @@
 library shelf_auth.authorisers.all.test;
 
 import 'package:unittest/unittest.dart';
+import 'authorisation_test.dart' as authorisation;
 import 'same_origin_authoriser_test.dart' as same_origin;
 import 'principal_whitelist_authoriser_test.dart' as principal_whitelist;
 
 main() {
+  group('[authorisation]', authorisation.main);
   group('[same_origin]', same_origin.main);
   group('[principal_whitelist]', principal_whitelist.main);
 }

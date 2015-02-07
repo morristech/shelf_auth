@@ -50,4 +50,3 @@ class FriendlyAuthenticator extends Authenticator {
         new Some(new AuthenticatedContext(new Principal("fred"))));
   }
 }
-
