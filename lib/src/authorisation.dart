@@ -8,7 +8,7 @@ library shelf_auth.authorisation;
 import 'package:shelf/shelf.dart';
 import 'dart:async';
 import 'package:logging/logging.dart';
-
+import 'authorisation_impl.dart';
 export 'core.dart';
 
 final Logger _log = new Logger('shelf_auth.authorisation');
