@@ -22,17 +22,17 @@ const String subject = 'el subjecto';
 final UserLookupByUsername lookup = testLookup;
 
 main() {
+  JwtSessionHandler sessionHandler() =>
+      new JwtSessionHandler(issuer, secret, lookup);
 
-  JwtSessionHandler sessionHandler() => new JwtSessionHandler(
-      issuer, secret, lookup);
-
-  DateTime sessionFirstCreated = new DateTime.now().subtract(const Duration(hours: 10));
+  DateTime sessionFirstCreated =
+      new DateTime.now().subtract(const Duration(hours: 10));
   DateTime sessionLastRefreshed = new DateTime.now();
-  DateTime expiredNoSessionRenewalAfter = new DateTime.now().subtract(
-      const Duration(seconds: 1));
+  DateTime expiredNoSessionRenewalAfter =
+      new DateTime.now().subtract(const Duration(seconds: 1));
 
-  DateTime activeNoSessionRenewalAfter = new DateTime.now().add(
-      const Duration(seconds: 10));
+  DateTime activeNoSessionRenewalAfter =
+      new DateTime.now().add(const Duration(seconds: 10));
 
   AuthenticatedContext context(bool expired) => new SessionAuthenticatedContext(
       new Principal('fred'), sessionFirstCreated, sessionLastRefreshed,
@@ -43,10 +43,7 @@ main() {
       new Request('GET', Uri.parse('http://localhost/foo'), headers: headers);
   response() => new Response.ok('foo');
 
-
-
   group('handle', () {
-
     group('does not change response', () {
       group('when total session timeout expired', () {
         final resp = response();
@@ -60,7 +57,6 @@ main() {
       Response handle(Response resp) =>
           sessionHandler().handle(context(false), request(), resp);
 
-
       test('and changes response', () {
         final resp = response();
         expect(handle(resp), isNot(same(resp)));
@@ -71,8 +67,8 @@ main() {
       });
 
       test('and adds an authorization header', () {
-        expect(handle(response()).headers[HttpHeaders.AUTHORIZATION],
-            isNotNull);
+        expect(
+            handle(response()).headers[HttpHeaders.AUTHORIZATION], isNotNull);
       });
 
       test('and adds an authorization header with correct auth scheme', () {
@@ -80,9 +76,11 @@ main() {
             startsWith(JWT_SESSION_AUTH_SCHEME));
       });
 
-      test('and adds an authorization header which would validate successfully', () {
-        final authheader = handle(response()).headers[HttpHeaders.AUTHORIZATION];
-        final req = requestWithHeader({ HttpHeaders.AUTHORIZATION: authheader });
+      test('and adds an authorization header which would validate successfully',
+          () {
+        final authheader =
+            handle(response()).headers[HttpHeaders.AUTHORIZATION];
+        final req = requestWithHeader({HttpHeaders.AUTHORIZATION: authheader});
 
         expect(sessionHandler().authenticator.authenticate(req), completes);
         expect(sessionHandler().authenticator.authenticate(req),
@@ -90,9 +88,7 @@ main() {
       });
     });
   });
-
 }
-
 
 Future<Option<Principal>> testLookup(String username) {
   return new Future.value(new Some(new Principal(username)));

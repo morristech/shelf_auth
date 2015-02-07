@@ -16,14 +16,12 @@ const String JWT_SESSION_AUTH_SCHEME = 'ShelfAuthJwtSession';
  * Creates a Jwt token containing claims about a session
  */
 String createSessionToken(String secret, String issuer, String subject,
-    { Duration idleTimeout: const Duration(minutes: 30),
-      Duration totalSessionTimeout: const Duration(days: 1),
-      String audience }) {
-
+    {Duration idleTimeout: const Duration(minutes: 30),
+    Duration totalSessionTimeout: const Duration(days: 1), String audience}) {
   final now = new DateTime.now();
 
-  final claimSet = new SessionClaimSet(issuer, subject,
-    now.add(idleTimeout), now, audience, now.add(totalSessionTimeout));
+  final claimSet = new SessionClaimSet(issuer, subject, now.add(idleTimeout),
+      now, audience, now.add(totalSessionTimeout));
 
   _log.finest('created claimSet: \n${claimSet.toJson()}');
   final jwt = new JsonWebToken.jws(claimSet, new JwaSignatureContext(secret));
@@ -34,36 +32,33 @@ String createSessionToken(String secret, String issuer, String subject,
  * Decodes a Jwt token containing claims about a session
  */
 JsonWebToken<SessionClaimSet> decodeSessionToken(String jwtToken,
-                       { JwsValidationContext validationContext }) {
+    {JwsValidationContext validationContext}) {
   return new JsonWebToken.decode(jwtToken,
       validationContext: validationContext,
       claimSetParser: (Map json) => new SessionClaimSet.fromJson(json));
 }
 
-
 class SessionClaimSet extends JwtClaimSet {
   final DateTime totalSessionExpiry;
 
   SessionClaimSet(String issuer, String subject, DateTime expiry,
-      DateTime issuedAt, String audience, this.totalSessionExpiry) :
-        super(issuer, subject, expiry, issuedAt, audience);
+      DateTime issuedAt, String audience, this.totalSessionExpiry)
+      : super(issuer, subject, expiry, issuedAt, audience);
 
-  SessionClaimSet.build({ String issuer, String subject, DateTime expiry,
-      DateTime issuedAt, String audience,
-      DateTime totalSessionExpiry}) :
-        this(issuer, subject, expiry, issuedAt, audience,
-            totalSessionExpiry);
+  SessionClaimSet.build({String issuer, String subject, DateTime expiry,
+      DateTime issuedAt, String audience, DateTime totalSessionExpiry})
+      : this(issuer, subject, expiry, issuedAt, audience, totalSessionExpiry);
 
   SessionClaimSet.fromJson(Map json)
       : this.totalSessionExpiry = decodeIntDate(json['tse']),
         super.fromJson(json);
 
-  Map toJson() => super.toJson()..addAll({
-    'tse': encodeIntDate(totalSessionExpiry)
-  });
+  Map toJson() =>
+      super.toJson()..addAll({'tse': encodeIntDate(totalSessionExpiry)});
 
   @override
-  Set<ConstraintViolation> validate(JwtClaimSetValidationContext validationContext) {
+  Set<ConstraintViolation> validate(
+      JwtClaimSetValidationContext validationContext) {
     return super.validate(validationContext)
       ..addAll(_validateTotalSessionExpiry(validationContext));
   }
@@ -76,15 +71,13 @@ class SessionClaimSet extends JwtClaimSet {
       if (diff > validationContext.expiryTolerance) {
         return new Set()
           ..add(new ConstraintViolation(
-            'JWT expired. totalSessionExpiry ($totalSessionExpiry) is more than tolerance '
-            '(${validationContext.expiryTolerance}) before now ($now)'));
+              'JWT expired. totalSessionExpiry ($totalSessionExpiry) is more than tolerance '
+              '(${validationContext.expiryTolerance}) before now ($now)'));
       }
     }
 
     return new Set();
   }
-
-
 }
 
 //class SessionClaimSetValidationContext extends JwtClaimSetValidationContext {
@@ -92,11 +85,9 @@ class SessionClaimSet extends JwtClaimSet {
 //   : super(expiryTolerance: expiryTolerance);
 //}
 
-
 // TODO: these were copied from dart-jwt. Should expose them there instead
 
 DateTime decodeIntDate(int secondsSinceEpoch) =>
     new DateTime.fromMillisecondsSinceEpoch(secondsSinceEpoch * 1000);
 
-int encodeIntDate(DateTime dateTime) =>
-    dateTime.millisecondsSinceEpoch ~/ 1000;
+int encodeIntDate(DateTime dateTime) => dateTime.millisecondsSinceEpoch ~/ 1000;

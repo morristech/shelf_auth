@@ -16,25 +16,22 @@ Matcher requestWithUrlPath(matcher) =>
 Matcher requestWithUrl(matcher) =>
     requestMatcher("url", matcher, (Request request) => request.url);
 
-Matcher requestWithScriptName(matcher) =>
-    requestMatcher("scriptName", matcher, (Request request) =>
-        request.scriptName);
+Matcher requestWithScriptName(matcher) => requestMatcher(
+    "scriptName", matcher, (Request request) => request.scriptName);
 
-Matcher requestWithHeaderValue(String headerName, matcher) =>
-    requestMatcher("headers", matcher, (Request request) =>
-        request.headers[headerName]);
+Matcher requestWithHeaderValue(String headerName, matcher) => requestMatcher(
+    "headers", matcher, (Request request) => request.headers[headerName]);
 
 Matcher requestWithContextValue(String contextParamName, matcher) =>
-    requestMatcher("context", matcher, (Request request) =>
-        request.context[contextParamName]);
+    requestMatcher("context", matcher,
+        (Request request) => request.context[contextParamName]);
 
-Matcher requestMatcher(String fieldName, matcher, Getter getter)
-    => fieldMatcher("Request", fieldName, matcher, getter);
+Matcher requestMatcher(String fieldName, matcher, Getter getter) =>
+    fieldMatcher("Request", fieldName, matcher, getter);
 
-Matcher fieldMatcher(String className, String fieldName, matcher,
-                     Getter getter) =>
-    new FieldMatcher(className, fieldName, matcher, getter);
-
+Matcher fieldMatcher(
+    String className, String fieldName, matcher, Getter getter) =>
+        new FieldMatcher(className, fieldName, matcher, getter);
 
 class FieldMatcher extends CustomMatcher {
   final Getter getter;

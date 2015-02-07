@@ -15,9 +15,7 @@ import 'core.dart';
 import 'authorisation.dart';
 import 'zone_context.dart';
 
-
 final Logger _log = new Logger('shelf_auth.authorisation.internal');
-
 
 /**
  * [Middleware] for performing authorisation using a provided list of
@@ -52,25 +50,21 @@ class AuthorisationMiddleware {
 
   Future<Response> _handle(Request request, Handler innerHandler) {
     final Stream<Option<AuthenticatedContext>> optAuthContexts =
-        new Stream.fromIterable(authorisers).asyncMap((a) =>
-            a.authenticate(request));
+        new Stream.fromIterable(authorisers)
+            .asyncMap((a) => a.authenticate(request));
 
-    final Future<Option<AuthenticatedContext>> optAuthFuture =
-        optAuthContexts.firstWhere(
-            (authOpt) => authOpt.nonEmpty(),
+    final Future<Option<AuthenticatedContext>> optAuthFuture = optAuthContexts
+        .firstWhere((authOpt) => authOpt.nonEmpty(),
             defaultValue: () => const None());
 
-    final Future<Response> responseFuture =
-        optAuthFuture.then((authOpt) =>
-            _createResponse(authOpt, request, innerHandler));
+    final Future<Response> responseFuture = optAuthFuture
+        .then((authOpt) => _createResponse(authOpt, request, innerHandler));
 
     return responseFuture;
   }
 
-  Future<Response> _createResponse(
-      Option<AuthenticatedContext> authContextOpt,
+  Future<Response> _createResponse(Option<AuthenticatedContext> authContextOpt,
       Request request, Handler innerHandler) {
-
     return authContextOpt.map((authContext) {
       if (!allowHttp && request.requestedUri.scheme != 'https') {
         _log.finer('denying access over http');
@@ -78,28 +72,28 @@ class AuthorisationMiddleware {
       }
 
       final bodyConsumed = authorisers.any((a) => a.readsBody);
-      final initalRequest = bodyConsumed ?
-          new Request(request.method, request.requestedUri,
+      final initalRequest = bodyConsumed
+          ? new Request(request.method, request.requestedUri,
               protocolVersion: request.protocolVersion,
-              headers: request.headers, url: request.url,
-              scriptName: request.scriptName, body:
-                null, context: request.context)
+              headers: request.headers,
+              url: request.url,
+              scriptName: request.scriptName,
+              body: null,
+              context: request.context)
           : request;
 
-      final newRequest = initalRequest.change(context: {
-        SHELF_AUTH_REQUEST_CONTEXT: authContext
-      });
-      final responseFuture = syncFuture(() =>
-          _runInNewZone(innerHandler, newRequest, authContext));
+      final newRequest = initalRequest.change(
+          context: {SHELF_AUTH_REQUEST_CONTEXT: authContext});
+      final responseFuture = syncFuture(
+          () => _runInNewZone(innerHandler, newRequest, authContext));
 
       final bool canHandleSession = sessionHandler.nonEmpty() &&
           (authContext.sessionCreationAllowed ||
               authContext.sessionUpdateAllowed);
 
-      final updatedResponseFuture = canHandleSession ?
-          responseFuture.then((response) =>
-              newFuture(() =>
-                  sessionHandler.get().handle(authContext, request, response)))
+      final updatedResponseFuture = canHandleSession
+          ? responseFuture.then((response) => newFuture(() =>
+              sessionHandler.get().handle(authContext, request, response)))
           : responseFuture;
 
       return updatedResponseFuture;
@@ -113,7 +107,7 @@ class AuthorisationMiddleware {
   }
 }
 
-_runInNewZone(Handler innerHandler, Request request,
-              AuthenticatedContext authContext) {
+_runInNewZone(
+    Handler innerHandler, Request request, AuthenticatedContext authContext) {
   return runInNewZone(authContext, () => innerHandler(request));
 }

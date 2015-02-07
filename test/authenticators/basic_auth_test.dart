@@ -13,26 +13,25 @@ import 'package:shelf_auth/src/authenticators/basic_auth.dart';
 import 'package:unittest/unittest.dart';
 import 'package:shelf_auth/src/principal/user_lookup.dart';
 
-
 final UserLookupByUsernamePassword lookup = testLookup;
 
 main() {
   request() => new Request('GET', Uri.parse('http://localhost/foo'),
-    headers: { 'Authorization': 'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==' });
+      headers: {'Authorization': 'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=='});
 
-  requestInvalidCredentials() => new Request('GET', Uri.parse('http://localhost/foo'),
-    headers: { 'Authorization': 'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQXXXXXX==' });
+  requestInvalidCredentials() => new Request(
+      'GET', Uri.parse('http://localhost/foo'),
+      headers: {'Authorization': 'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQXXXXXX=='});
 
   requestWrongRealm() => new Request('GET', Uri.parse('http://localhost/foo'),
-    headers: { 'Authorization': 'Complex QWxhZGRpbjpvcGVuIHNlc2FtZQ==' });
+      headers: {'Authorization': 'Complex QWxhZGRpbjpvcGVuIHNlc2FtZQ=='});
 
   requestNoAuth() => new Request('GET', Uri.parse('http://localhost/foo'),
-    headers: { 'Foo': 'bar' });
+      headers: {'Foo': 'bar'});
 
   final authenticator = new BasicAuthenticator(lookup);
 
   group('authenticate', () {
-
     group('when Authorization header is present', () {
       group('and credentials is for valid user', () {
         test('completes', () {
@@ -46,18 +45,19 @@ main() {
 
         test('completes with a principal', () {
           expect(authenticator.authenticate(request()),
-            completion((optContext) => optContext.get().principal != null));
+              completion((optContext) => optContext.get().principal != null));
         });
 
         test('completes with correct principal', () {
-          expect(authenticator.authenticate(request()),
-            completion((optContext) => optContext.get().principal.name == 'Aladdin'));
+          expect(authenticator.authenticate(request()), completion(
+              (optContext) => optContext.get().principal.name == 'Aladdin'));
         });
       });
 
       group('and credentials is for invalid user', () {
         test('throws', () {
-          expect(() => authenticator.authenticate(requestInvalidCredentials()), throws);
+          expect(() => authenticator.authenticate(requestInvalidCredentials()),
+              throws);
         });
 
 //        test('completes with None', () {
@@ -73,7 +73,7 @@ main() {
 
         test('completes with None', () {
           expect(authenticator.authenticate(requestWrongRealm()),
-          completion(new isInstanceOf<None>()));
+              completion(new isInstanceOf<None>()));
         });
       });
     });
@@ -85,22 +85,17 @@ main() {
 
       test('completes with None', () {
         expect(authenticator.authenticate(requestNoAuth()),
-        completion(new isInstanceOf<None>()));
+            completion(new isInstanceOf<None>()));
       });
-
-
     });
-
-
   });
-
 }
 
 Future<Option<Principal>> testLookup(String username, String password) {
   final validUser = username == 'Aladdin' && password == 'open sesame';
 
-  final principalOpt = validUser ? new Some(new Principal(username)) :
-    const None();
+  final principalOpt =
+      validUser ? new Some(new Principal(username)) : const None();
 
   return new Future.value(principalOpt);
 }

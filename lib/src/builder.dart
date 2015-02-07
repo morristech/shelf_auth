@@ -15,7 +15,6 @@ import 'session/jwt/jwt_session_handler.dart';
 
 export 'core.dart';
 
-
 final Logger _log = new Logger('shelf_auth.builder');
 
 /// Creates a builder to help with the creation of shelf_auth middleware.
@@ -36,15 +35,14 @@ AuthenticationBuilder builder() => new AuthenticationBuilder();
 
 /// A builder to help with the creation of shelf_auth middleware
 class AuthenticationBuilder {
-  List <Authenticator> _authenticators = [];
+  List<Authenticator> _authenticators = [];
   SessionHandler _sessionHandler;
   bool allowHttp = false;
   bool allowAnonymousAccess = true;
 
   /// adds a BASIC AUTH authenticator to the list of authenticators
   AuthenticationBuilder basic(UserLookupByUsernamePassword userLookup,
-                              { bool sessionCreationAllowed: false,
-                                bool sessionUpdateAllowed: false }) =>
+      {bool sessionCreationAllowed: false, bool sessionUpdateAllowed: false}) =>
       authenticator(new BasicAuthenticator(userLookup,
           sessionCreationAllowed: sessionCreationAllowed,
           sessionUpdateAllowed: sessionUpdateAllowed));
@@ -57,13 +55,12 @@ class AuthenticationBuilder {
 
   /// sets the session handler to be a JWT based handler created from the
   /// provided details
-  AuthenticationBuilder jwtSession(String issuer, String secret,
-      UserLookupByUsername userLookup,
-      { Duration idleTimeout: const Duration(minutes: 30),
-        Duration totalSessionTimeout: const Duration(days: 1) }) {
-    return sessionHandler(new JwtSessionHandler(
-        issuer, secret, userLookup, idleTimeout: idleTimeout,
-        totalSessionTimeout: totalSessionTimeout));
+  AuthenticationBuilder jwtSession(
+      String issuer, String secret, UserLookupByUsername userLookup,
+      {Duration idleTimeout: const Duration(minutes: 30),
+      Duration totalSessionTimeout: const Duration(days: 1)}) {
+    return sessionHandler(new JwtSessionHandler(issuer, secret, userLookup,
+        idleTimeout: idleTimeout, totalSessionTimeout: totalSessionTimeout));
   }
 
   /// sets the session handler to be the provided handler
@@ -74,7 +71,7 @@ class AuthenticationBuilder {
 
   /// Creates middleware from the provided details
   Middleware build() => authenticate(_authenticators,
-      sessionHandler: _sessionHandler, allowHttp: allowHttp,
+      sessionHandler: _sessionHandler,
+      allowHttp: allowHttp,
       allowAnonymousAccess: allowAnonymousAccess);
-
 }

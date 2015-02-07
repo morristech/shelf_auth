@@ -11,7 +11,6 @@ import 'package:logging/logging.dart';
 
 export 'core.dart';
 
-
 final Logger _log = new Logger('shelf_auth.authorisation');
 
 /**
@@ -39,10 +38,7 @@ final Logger _log = new Logger('shelf_auth.authorisation');
   * ```
  */
 Middleware authorise(Iterable<Authoriser> authorisers) =>
-    new AuthorisationMiddleware(authorisers.toList(growable: false))
-      .middleware;
-
-
+    new AuthorisationMiddleware(authorisers.toList(growable: false)).middleware;
 
 /**
  * An authoriser of Http Requests for *Shelf*
@@ -55,4 +51,3 @@ abstract class Authoriser {
    */
   Future<bool> isAuthorised(Request request);
 }
-

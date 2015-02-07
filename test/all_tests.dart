@@ -10,10 +10,8 @@ import 'shelf_auth_test.dart' as core;
 import 'authenticators/all_authenticator_tests.dart' as authenticators;
 import 'session/jwt/all_jwt_session_tests.dart' as jwt;
 
-
 main() {
   group('[core]', core.main);
   group('[authenticators]', authenticators.main);
   group('[jwt]', jwt.main);
 }
-

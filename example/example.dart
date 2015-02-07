@@ -17,11 +17,10 @@ void main() {
     print('${lr.time} ${lr.level} ${lr.message}');
   });
 
-  var authMiddleware = authenticate([
-             new BasicAuthenticator(testLookup),
-             new RandomAuthenticator()],
-             // allow http for testing with curl. Don't do in production
-             allowHttp: true);
+  var authMiddleware = authenticate(
+      [new BasicAuthenticator(testLookup), new RandomAuthenticator()],
+      // allow http for testing with curl. Don't do in production
+      allowHttp: true);
 
   var handler = const Pipeline()
       .addMiddleware(logRequests())
@@ -43,8 +42,8 @@ class RandomAuthenticator extends Authenticator {
   Future<Option<AuthenticatedContext>> authenticate(Request request) {
     approve = !approve;
 
-    return new Future.value(approve ?
-        new Some(new AuthenticatedContext(new Principal("fred")))
+    return new Future.value(approve
+        ? new Some(new AuthenticatedContext(new Principal("fred")))
         : throw new UnauthorizedException());
   }
 }
@@ -52,8 +51,8 @@ class RandomAuthenticator extends Authenticator {
 Future<Option<Principal>> testLookup(String username, String password) {
   final validUser = username == 'Aladdin' && password == 'open sesame';
 
-  final principalOpt = validUser ? new Some(new Principal(username)) :
-    const None();
+  final principalOpt =
+      validUser ? new Some(new Principal(username)) : const None();
 
   return new Future.value(principalOpt);
 }

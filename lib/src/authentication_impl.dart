@@ -18,7 +18,6 @@ const String SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
 
 final Logger _log = new Logger('shelf_auth.authentication.internal');
 
-
 /**
  * [Middleware] for performing authentication using a provided list of
  * [Authenticator]s.
@@ -45,15 +44,15 @@ class AuthenticationMiddleware {
   final bool allowHttp;
   final bool allowAnonymousAccess;
 
-  AuthenticationMiddleware(List<Authenticator> authenticators,
-                           Option<SessionHandler> sessionHandler,
-                           { this.allowHttp: false,
-                             this.allowAnonymousAccess: true })
-      : this.authenticators = (sessionHandler.nonEmpty() ?
-          ([]..add(sessionHandler.get().authenticator)..addAll(authenticators))
+  AuthenticationMiddleware(
+      List<Authenticator> authenticators, Option<SessionHandler> sessionHandler,
+      {this.allowHttp: false, this.allowAnonymousAccess: true})
+      : this.authenticators = (sessionHandler.nonEmpty()
+          ? ([]
+        ..add(sessionHandler.get().authenticator)
+        ..addAll(authenticators))
           : authenticators),
-          this.sessionHandler = sessionHandler;
-
+        this.sessionHandler = sessionHandler;
 
   Middleware get middleware => _createHandler;
 
@@ -63,25 +62,21 @@ class AuthenticationMiddleware {
 
   Future<Response> _handle(Request request, Handler innerHandler) {
     final Stream<Option<AuthenticatedContext>> optAuthContexts =
-        new Stream.fromIterable(authenticators).asyncMap((a) =>
-            a.authenticate(request));
+        new Stream.fromIterable(authenticators)
+            .asyncMap((a) => a.authenticate(request));
 
-    final Future<Option<AuthenticatedContext>> optAuthFuture =
-        optAuthContexts.firstWhere(
-            (authOpt) => authOpt.nonEmpty(),
+    final Future<Option<AuthenticatedContext>> optAuthFuture = optAuthContexts
+        .firstWhere((authOpt) => authOpt.nonEmpty(),
             defaultValue: () => const None());
 
-    final Future<Response> responseFuture =
-        optAuthFuture.then((authOpt) =>
-            _createResponse(authOpt, request, innerHandler));
+    final Future<Response> responseFuture = optAuthFuture
+        .then((authOpt) => _createResponse(authOpt, request, innerHandler));
 
     return responseFuture;
   }
 
-  Future<Response> _createResponse(
-      Option<AuthenticatedContext> authContextOpt,
+  Future<Response> _createResponse(Option<AuthenticatedContext> authContextOpt,
       Request request, Handler innerHandler) {
-
     return authContextOpt.map((authContext) {
       if (!allowHttp && request.requestedUri.scheme != 'https') {
         _log.finer('denying access over http');
@@ -89,28 +84,28 @@ class AuthenticationMiddleware {
       }
 
       final bodyConsumed = authenticators.any((a) => a.readsBody);
-      final initalRequest = bodyConsumed ?
-          new Request(request.method, request.requestedUri,
+      final initalRequest = bodyConsumed
+          ? new Request(request.method, request.requestedUri,
               protocolVersion: request.protocolVersion,
-              headers: request.headers, url: request.url,
-              scriptName: request.scriptName, body:
-                null, context: request.context)
+              headers: request.headers,
+              url: request.url,
+              scriptName: request.scriptName,
+              body: null,
+              context: request.context)
           : request;
 
-      final newRequest = initalRequest.change(context: {
-        SHELF_AUTH_REQUEST_CONTEXT: authContext
-      });
-      final responseFuture = syncFuture(() =>
-          _runInNewZone(innerHandler, newRequest, authContext));
+      final newRequest = initalRequest.change(
+          context: {SHELF_AUTH_REQUEST_CONTEXT: authContext});
+      final responseFuture = syncFuture(
+          () => _runInNewZone(innerHandler, newRequest, authContext));
 
       final bool canHandleSession = sessionHandler.nonEmpty() &&
           (authContext.sessionCreationAllowed ||
               authContext.sessionUpdateAllowed);
 
-      final updatedResponseFuture = canHandleSession ?
-          responseFuture.then((response) =>
-              newFuture(() =>
-                  sessionHandler.get().handle(authContext, request, response)))
+      final updatedResponseFuture = canHandleSession
+          ? responseFuture.then((response) => newFuture(() =>
+              sessionHandler.get().handle(authContext, request, response)))
           : responseFuture;
 
       return updatedResponseFuture;
@@ -124,7 +119,7 @@ class AuthenticationMiddleware {
   }
 }
 
-_runInNewZone(Handler innerHandler, Request request,
-              AuthenticatedContext authContext) {
+_runInNewZone(
+    Handler innerHandler, Request request, AuthenticatedContext authContext) {
   return runInNewZone(authContext, () => innerHandler(request));
 }
