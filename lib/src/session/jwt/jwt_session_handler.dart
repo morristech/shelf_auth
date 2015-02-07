@@ -20,20 +20,21 @@ class JwtSessionHandler<P extends Principal> implements SessionHandler<P> {
   final Duration totalSessionTimeout;
   final JwtSessionAuthenticator<P> authenticator;
 
-  JwtSessionHandler(this.issuer, String secret,
-      UserLookupByUsername<P> userLookup,
-      { this.idleTimeout: const Duration(minutes: 30),
-        this.totalSessionTimeout: const Duration(days: 1) })
+  JwtSessionHandler(
+      this.issuer, String secret, UserLookupByUsername<P> userLookup,
+      {this.idleTimeout: const Duration(minutes: 30),
+      this.totalSessionTimeout: const Duration(days: 1)})
       : this.secret = secret,
-        this.authenticator = new JwtSessionAuthenticator<P>(userLookup, secret) {
+        this.authenticator = new JwtSessionAuthenticator<P>(
+            userLookup, secret) {
     ensure(issuer, isNotNull);
     ensure(secret, isNotNull);
     ensure(idleTimeout, isNotNull);
   }
 
   @override
-  Response handle(AuthenticatedContext context, Request request,
-                  Response response) {
+  Response handle(
+      AuthenticatedContext context, Request request, Response response) {
     final now = new DateTime.now();
 
     final sessionContext = _getSessionContext(context);
@@ -45,12 +46,13 @@ class JwtSessionHandler<P extends Principal> implements SessionHandler<P> {
 
     final remainingSessionTime = noSessionRenewalAfter.difference(now);
 
-    final newIdleTimeout = idleTimeout <= remainingSessionTime ?
-        idleTimeout : remainingSessionTime;
+    final newIdleTimeout = idleTimeout <= remainingSessionTime
+        ? idleTimeout
+        : remainingSessionTime;
 
-    final sessionToken = createSessionToken(secret, issuer,
-        context.principal.name, idleTimeout: newIdleTimeout,
-        totalSessionTimeout: remainingSessionTime);
+    final sessionToken = createSessionToken(
+        secret, issuer, context.principal.name,
+        idleTimeout: newIdleTimeout, totalSessionTimeout: remainingSessionTime);
 
     return addAuthorizationHeader(response,
         new AuthorizationHeader(JWT_SESSION_AUTH_SCHEME, sessionToken));
@@ -59,8 +61,9 @@ class JwtSessionHandler<P extends Principal> implements SessionHandler<P> {
   SessionAuthenticatedContext _getSessionContext(AuthenticatedContext context) {
     final now = new DateTime.now();
 
-    return context is SessionAuthenticatedContext ? context :
-      new SessionAuthenticatedContext(context.principal, now, now,
-          now.add(totalSessionTimeout));
+    return context is SessionAuthenticatedContext
+        ? context
+        : new SessionAuthenticatedContext(
+            context.principal, now, now, now.add(totalSessionTimeout));
   }
 }

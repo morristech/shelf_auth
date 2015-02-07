@@ -28,18 +28,17 @@ main() {
 
     test('has expected issuedAt', () {
       expect(claimSet().issuedAt.millisecondsSinceEpoch,
-        closeTo(new DateTime.now().millisecondsSinceEpoch, 1200));
+          closeTo(new DateTime.now().millisecondsSinceEpoch, 1200));
     });
 
     test('has expected expiry offset', () {
       expect(claimSet().expiry.difference(claimSet().issuedAt),
-        equals(const Duration(minutes: 30)));
+          equals(const Duration(minutes: 30)));
     });
 
     test('has expected expiry offset', () {
       expect(claimSet().totalSessionExpiry.difference(claimSet().issuedAt),
-      equals(const Duration(days: 1)));
+          equals(const Duration(days: 1)));
     });
   });
-
 }

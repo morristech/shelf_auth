@@ -13,26 +13,26 @@ import 'package:shelf_auth/src/authenticators/username_password_auth.dart';
 import 'package:unittest/unittest.dart';
 import 'package:shelf_auth/src/principal/user_lookup.dart';
 
-
 final UserLookupByUsernamePassword lookup = testLookup;
 
 main() {
   request() => new Request('POST', Uri.parse('http://localhost/login'),
-    headers: { 'Content-type': "application/x-www-form-urlencoded" },
-    body: new Stream.fromIterable(["username=Aladdin&password=opensesame".codeUnits]));
+      headers: {'Content-type': "application/x-www-form-urlencoded"},
+      body: new Stream.fromIterable(
+          ["username=Aladdin&password=opensesame".codeUnits]));
 
-  requestInvalidCredentials() => new Request('POST',
-      Uri.parse('http://localhost/login'),
-      headers: { 'Content-type': "application/x-www-form-urlencoded" },
-      body: new Stream.fromIterable(["username=Aladdin&password=foo".codeUnits]));
+  requestInvalidCredentials() => new Request(
+      'POST', Uri.parse('http://localhost/login'),
+      headers: {'Content-type': "application/x-www-form-urlencoded"},
+      body: new Stream.fromIterable(
+          ["username=Aladdin&password=foo".codeUnits]));
 
   requestNoAuth() => new Request('POST', Uri.parse('http://localhost/login'),
-    headers: { 'Foo': 'bar' });
+      headers: {'Foo': 'bar'});
 
   final authenticator = new UsernamePasswordAuthenticator(lookup);
 
   group('authenticate', () {
-
     group('when Authorization header is present', () {
       group('and credentials is for valid user', () {
         test('completes', () {
@@ -46,21 +46,21 @@ main() {
 
         test('completes with a principal', () {
           expect(authenticator.authenticate(request()),
-            completion((optContext) => optContext.get().principal != null));
+              completion((optContext) => optContext.get().principal != null));
         });
 
         test('completes with correct principal', () {
-          expect(authenticator.authenticate(request()),
-            completion((optContext) => optContext.get().principal.name == 'Aladdin'));
+          expect(authenticator.authenticate(request()), completion(
+              (optContext) => optContext.get().principal.name == 'Aladdin'));
         });
       });
 
       group('and credentials is for invalid user', () {
         test('throws', () {
-          expect(authenticator.authenticate(requestInvalidCredentials()), throws);
+          expect(
+              authenticator.authenticate(requestInvalidCredentials()), throws);
         });
       });
-
     });
 
     group('when no Authorization header is present', () {
@@ -81,19 +81,15 @@ main() {
 //        completion(new isInstanceOf<None>()));
 //      });
 
-
     });
-
-
   });
-
 }
 
 Future<Option<Principal>> testLookup(String username, String password) {
   final validUser = username == 'Aladdin' && password == 'opensesame';
 
-  final principalOpt = validUser ? new Some(new Principal(username)) :
-    const None();
+  final principalOpt =
+      validUser ? new Some(new Principal(username)) : const None();
 
   return new Future.value(principalOpt);
 }

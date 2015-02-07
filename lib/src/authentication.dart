@@ -6,14 +6,12 @@
 library shelf_auth.authentication;
 
 import 'package:shelf/shelf.dart';
-import 'dart:async';
 import 'package:option/option.dart';
 import 'package:logging/logging.dart';
-import 'internal.dart';
+import 'authentication_impl.dart';
 import 'core.dart';
 
 export 'core.dart';
-
 
 final Logger _log = new Logger('shelf_auth.authentication');
 
@@ -31,7 +29,7 @@ final Logger _log = new Logger('shelf_auth.authentication');
  * if the resulting [AuthenticatedContext] supports sessions.
  *
  * By default authentication must occur over https and anonymous access is
- * allowed. These can be overriden with the flags [allowHttp] and
+ * allowed. These can be overridden with the flags [allowHttp] and
  * [allowAnonymousAccess] respectively.
  *
  * Example use
@@ -46,13 +44,11 @@ final Logger _log = new Logger('shelf_auth.authentication');
   * ```
  */
 Middleware authenticate(Iterable<Authenticator> authenticators,
-                        { SessionHandler sessionHandler,
-                          bool allowHttp: false,
-                          bool allowAnonymousAccess: true }) =>
-    new AuthenticationMiddleware(authenticators.toList(growable: false),
-        new Option(sessionHandler), allowHttp: allowHttp,
-        allowAnonymousAccess: allowAnonymousAccess)
-      .middleware;
+    {SessionHandler sessionHandler, bool allowHttp: false,
+    bool allowAnonymousAccess: true}) => new AuthenticationMiddleware(
+        authenticators.toList(growable: false), new Option(sessionHandler),
+        allowHttp: allowHttp,
+        allowAnonymousAccess: allowAnonymousAccess).middleware;
 
 /**
  * Retrieves the current [AuthenticatedContext] from the [request] if one
@@ -61,5 +57,3 @@ Middleware authenticate(Iterable<Authenticator> authenticators,
 Option<AuthenticatedContext> getAuthenticatedContext(Request request) {
   return new Option(request.context[SHELF_AUTH_REQUEST_CONTEXT]);
 }
-
-

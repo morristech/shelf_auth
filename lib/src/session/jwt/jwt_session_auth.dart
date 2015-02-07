@@ -17,17 +17,16 @@ import '../../preconditions.dart';
 import '../../util.dart';
 import '../../authenticators/core.dart';
 
-
 /**
  * An [Authenticator] for Shelf Auth Jwt Session Token
  */
-class JwtSessionAuthenticator<P extends Principal> extends
-      AbstractAuthenticator<P> {
+class JwtSessionAuthenticator<P extends Principal>
+    extends AbstractAuthenticator<P> {
   final UserLookupByUsername<P> userLookup;
   final String secret;
 
   JwtSessionAuthenticator(this.userLookup, this.secret,
-      { bool sessionCreationAllowed: false, bool sessionUpdateAllowed: true })
+      {bool sessionCreationAllowed: false, bool sessionUpdateAllowed: true})
       : super(sessionCreationAllowed, sessionUpdateAllowed) {
     ensure(userLookup, isNotNull);
     ensure(secret, isNotNull);
@@ -37,12 +36,11 @@ class JwtSessionAuthenticator<P extends Principal> extends
   Future<Option<AuthenticatedContext<P>>> authenticate(Request request) {
     final authHeaderOpt = authorizationHeader(request, JWT_SESSION_AUTH_SCHEME);
     return authHeaderOpt.map((authHeader) {
-
       final sessionJwtToken = authHeader.credentials;
 
       final sessionJwt = decodeSessionToken(sessionJwtToken);
-      final violations = sessionJwt.validate(
-          new JwtValidationContext.withSharedSecret(secret));
+      final violations = sessionJwt
+          .validate(new JwtValidationContext.withSharedSecret(secret));
 
       if (violations.isNotEmpty) {
         // TODO: include error details
@@ -52,14 +50,10 @@ class JwtSessionAuthenticator<P extends Principal> extends
       final SessionClaimSet claimSet = sessionJwt.claimSet;
       final principalFuture = userLookup(claimSet.subject);
 
-      return principalFuture.then((principalOption) =>
-          principalOption.map((principal) =>
-              new SessionAuthenticatedContext(principal,
-                  claimSet.issuedAt, new DateTime.now(),
-                  claimSet.totalSessionExpiry)));
-    })
-    .getOrElse(() => new Future(() => const None()));
-
+      return principalFuture.then((principalOption) => principalOption.map(
+          (principal) => new SessionAuthenticatedContext(principal,
+              claimSet.issuedAt, new DateTime.now(),
+              claimSet.totalSessionExpiry)));
+    }).getOrElse(() => new Future(() => const None()));
   }
-
 }

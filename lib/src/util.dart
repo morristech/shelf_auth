@@ -3,7 +3,6 @@
 // All rights reserved. Use of this source code is governed by
 // a BSD 2-Clause License that can be found in the LICENSE file.
 
-
 library shelf.util;
 
 import 'dart:async';
@@ -44,40 +43,41 @@ catchTopLevelErrors(callback(), void onError(error, StackTrace stackTrace)) {
 Map updateMap(Map original, Map updates) {
   if (updates == null || updates.isEmpty) return original;
 
-  return new Map.from(original)
-      ..addAll(updates);
+  return new Map.from(original)..addAll(updates);
 }
 
-Option<AuthorizationHeader> authorizationHeader(Request request,
-    String authScheme) {
- return new Option(authorizationHeaders(request).firstWhere(
-     (authHeader) => authHeader.authScheme == authScheme,
-     orElse: () => null));
+Option<AuthorizationHeader> authorizationHeader(
+    Request request, String authScheme) {
+  return new Option(authorizationHeaders(request).firstWhere(
+      (authHeader) => authHeader.authScheme == authScheme, orElse: () => null));
 }
 
 Iterable<AuthorizationHeader> authorizationHeaders(Request request) {
   List<String> authHeaders = _authHeaders(request);
 
   return authHeaders.map((header) {
-        final List<String> parts = header.split(' ');
-        if (parts.length != 2) {
-          throw new BadRequestException();
-        }
-        return new AuthorizationHeader(parts[0], parts[1]);
-    });
+    final List<String> parts = header.split(' ');
+    if (parts.length != 2) {
+      throw new BadRequestException();
+    }
+    return new AuthorizationHeader(parts[0], parts[1]);
+  });
 }
 
-Response addAuthorizationHeader(Response response,
-                                AuthorizationHeader authorizationHeader) {
+Response addAuthorizationHeader(
+    Response response, AuthorizationHeader authorizationHeader) {
   final String credentials = '${authorizationHeader.authScheme} '
-    '${authorizationHeader.credentials}';
+      '${authorizationHeader.credentials}';
 
   List<String> authHeaders = _authHeaders(response);
 
-  final newAuthHeaders = []..addAll(authHeaders)..add(credentials);
+  final newAuthHeaders = []
+    ..addAll(authHeaders)
+    ..add(credentials);
   final newAuthHeadersStr = newAuthHeaders.join(',');
 
-  return response.change(headers: { HttpHeaders.AUTHORIZATION: newAuthHeadersStr });
+  return response.change(
+      headers: {HttpHeaders.AUTHORIZATION: newAuthHeadersStr});
 }
 
 // TODO: raise issue on shelf to expose the Message class
@@ -85,7 +85,6 @@ List<String> _authHeaders(message) {
   final authHeadersString = message.headers[HttpHeaders.AUTHORIZATION];
   return authHeadersString == null ? [] : authHeadersString.split(',');
 }
-
 
 class AuthorizationHeader {
   final String authScheme;

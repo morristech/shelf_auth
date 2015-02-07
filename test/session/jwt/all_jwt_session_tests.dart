@@ -15,4 +15,3 @@ main() {
   group('[auth]', auth.main);
   group('[handler]', handler.main);
 }
-
