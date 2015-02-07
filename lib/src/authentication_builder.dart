@@ -3,7 +3,7 @@
 // All rights reserved. Use of this source code is governed by
 // a BSD 2-Clause License that can be found in the LICENSE file.
 
-library shelf_auth.builder;
+library shelf_auth.authentication.builder;
 
 import 'package:shelf/shelf.dart';
 import 'package:logging/logging.dart';
@@ -15,7 +15,7 @@ import 'session/jwt/jwt_session_handler.dart';
 
 export 'core.dart';
 
-final Logger _log = new Logger('shelf_auth.builder');
+final Logger _log = new Logger('shelf_auth.authentication.builder');
 
 /// Creates a builder to help with the creation of shelf_auth middleware.
 ///

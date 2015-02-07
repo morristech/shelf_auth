@@ -10,6 +10,12 @@ import 'package:shelf/shelf.dart';
 
 typedef bool PrincipalWhiteList(Principal p);
 
+/// An [Authoriser] that allows access to any principal that is part of a given
+/// [PrincipalWhiteList].
+///
+/// [PrincipalWhiteList] can be implemented in many ways. For example it check principal
+/// names against a static in memory list of names. Or it might check the users group
+/// against a database for example.
 class PrincipalWhitelistAuthoriser implements Authoriser {
   final PrincipalWhiteList whitelist;
   final bool denyUnauthenticated;

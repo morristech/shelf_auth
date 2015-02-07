@@ -29,8 +29,7 @@ main() {
 
   Request requestAuthenticated() => requestUnauthenticated().change(
       context: {
-    SHELF_AUTH_REQUEST_CONTEXT:
-        new AuthenticatedContext(new Principal('fred'))
+    SHELF_AUTH_REQUEST_CONTEXT: new AuthenticatedContext(new Principal('fred'))
   });
 //  return new Option(request.context[SHELF_AUTH_REQUEST_CONTEXT]);
 
