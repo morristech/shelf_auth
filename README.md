@@ -5,10 +5,11 @@
 
 ## Introduction
 
-Provides [Shelf](https://api.dartlang.org/apidocs/channels/be/dartdoc-viewer/shelf) middleware for authenticating users (or systems) and establishing sessions.
+Provides [Shelf](https://api.dartlang.org/apidocs/channels/be/dartdoc-viewer/shelf) middleware for authenticating users (or systems) and establishing sessions, as well as authorising access to resources.
 
 ## Usage
 
+### Authentication
 *Note: For an alternative way to build authentication middleware, see the Authentication Builder section below.*
 
 ```
@@ -46,7 +47,7 @@ If no exception is thrown, then the `innerHandler` passed to the middleware will
 
 If none of the authenticators handle the request, then the `innerHandler` is invoked without any authentication context. Downstream handlers should treat this is access by an unauthenticated (guest) user. You can deny anonymous access by invoking the `authenticate` function with `allowAnonymousAccess: false`.
 
-### Establishing a Session on Login
+#### Establishing a Session on Login
 
 If no `SesionHandler` is provided to the `authenticate` function then no session will be established. This means each request needs to be authenticated. This is suitable for system to system calls as well as authentication mechanisms like Basic Authentication.
 
@@ -65,11 +66,11 @@ The `SessionHandler` will be invoked on successful authentication if the resulti
 
 *Note that Shelf Auth does not cover the storage (adding / retrieving) of session attributes. This is out of scope. Only the authentication related parts of session handling are in scope. Any session storage libraries that support Shelf Auth headers or can be integrated with them will work with Shelf auth.*
 
-### Authenticators
+#### Authenticators
 
 Shelf Auth provides the following authenticators out of the box:
 
-#### BasicAuthenticator
+##### BasicAuthenticator
 Supports Basic Authentication (http://tools.ietf.org/html/rfc2617)
 
 By default the `BasicAuthenticator` does not support session creation. This can be overriden when creating the authenticator as follows
@@ -78,7 +79,7 @@ By default the `BasicAuthenticator` does not support session creation. This can 
 new BasicAuthenticator(new TestLookup(), sessionCreationAllowed: true)
 ```
 
-#### UsernamePasswordAuthenticator
+##### UsernamePasswordAuthenticator
 An `Authenticator` that is intended for use with a dedicated login route. It defaults to assuming a form based POST with form fields called `username` and `password` such as.
 
 ```
@@ -119,11 +120,11 @@ In this example all routes starting with `/authenticated` will require a valid s
 
 In addition you can easily create your own custom authenticators.
 
-### Session Handlers
+#### Session Handlers
 
 Shelf Auth provides the following `SessionHandler`s out of the box:
 
-#### JwtSessionHandler
+##### JwtSessionHandler
 This uses [JWT](http://self-issued.info/docs/draft-ietf-oauth-json-web-token.html) to create authentication tokens which are returned in the `Authorization` header in the response. Subsequent requests must pass the token back in `Authorization` header. This is a [Bearer style token mechanism](https://auth0.com/blog/2014/01/07/angularjs-authentication-with-cookies-vs-token/). 
 *Note: as with all security credentials passed in HTTP messages, if someone is able to intercept the request or response then they can steal the token and impersonate the user. Make sure you use HTTPS.*
 
@@ -135,7 +136,7 @@ This uses [JWT](http://self-issued.info/docs/draft-ietf-oauth-json-web-token.htm
 
 *Other session handlers like a cookie based mechanism is likely to be added in the future*
 
-### Authentication Builder
+#### Authentication Builder
 
 To make it simpler to create authentication middleware, particularly when you use the bundled authenticators and session handlers, a builder is provided.
 
@@ -151,4 +152,45 @@ For example
 ```
 
 *Note: this example is a bit convoluted as you don't typically want session creation with basic auth*
+
+### Authorisation
+
+```
+var authorisationMiddleware = authorise([new SameOriginAuthoriser()]);
+```
+
+Shelf Auth provides an `authorise` function that takes a list of `Authoriser`s and creates Shelf `Middleware`.
+
+Additionally `authorisationBuilder` provides a builder for creating authorisation middleware including the out of the box authorisers
+
+```
+var authorisationMiddleware = (authorisationBuilder()
+    .sameOrigin()
+    .principalWhitelist((Principal p) => p.name == 'fred'))
+  .build();
+
+```
+
+#### Authorisers
+
+Shelf Auth provides the following authorisers out of the box:
+
+##### SameOriginAuthoriser
+
+Helps protect against XSRF attacks by denying access to requests where the referer is not from the same host as the request url.
+
+##### PrincipalWhitelistAuthoriser
+
+An `Authoriser` that allows access to any principal that is part of a given `PrincipalWhiteList`.
+
+`PrincipalWhiteList` can be implemented in many ways. For example it check principal names against a static in memory list of names. 
+
+```
+final whitelist = [ 'fredlintstone@stone.age' ];
+  
+final whitelistAuthoriser = new PrincipalWhitelistAuthoriser(
+    (Principal p) => whitelist.contains(p.name));
+```
+
+Or it might check the users group against a database for example.
 
