@@ -108,7 +108,7 @@ abstract class Authenticator<P extends Principal> {
    * Authenticates the request returning a Future with one of three outcomes:
    *
    * * [None] to indicate that no authentication credentials exist for this
-   * authenticator. Other authenicators can now get their turn to authenticate
+   * authenticator. Other authenticators can now get their turn to authenticate
    *
    * * [Some] [AuthenticatedContext] when authentication succeeds
    *

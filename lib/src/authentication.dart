@@ -6,10 +6,9 @@
 library shelf_auth.authentication;
 
 import 'package:shelf/shelf.dart';
-import 'dart:async';
 import 'package:option/option.dart';
 import 'package:logging/logging.dart';
-import 'internal.dart';
+import 'authentication_impl.dart';
 import 'core.dart';
 
 export 'core.dart';
@@ -31,7 +30,7 @@ final Logger _log = new Logger('shelf_auth.authentication');
  * if the resulting [AuthenticatedContext] supports sessions.
  *
  * By default authentication must occur over https and anonymous access is
- * allowed. These can be overriden with the flags [allowHttp] and
+ * allowed. These can be overridden with the flags [allowHttp] and
  * [allowAnonymousAccess] respectively.
  *
  * Example use
