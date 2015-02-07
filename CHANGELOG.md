@@ -1,3 +1,7 @@
+## 0.2.3+1
+
+* Added some logging
+
 ## 0.2.3
 
 * Added authorisation support
