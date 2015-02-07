@@ -8,11 +8,8 @@ library shelf_auth.authorisation.builder;
 import 'package:shelf/shelf.dart';
 import 'package:logging/logging.dart';
 import 'authorisation.dart';
-import 'core.dart';
 import 'authorisers/same_origin_authoriser.dart';
 import 'authorisers/principal_whitelist_authoriser.dart';
-import 'principal/user_lookup.dart';
-import 'session/jwt/jwt_session_handler.dart';
 
 export 'core.dart';
 
@@ -22,12 +19,12 @@ final Logger _log = new Logger('shelf_auth.authorisation.builder');
 ///
 /// For example
 ///
-///     var authorisationMiddleware = (builder()
+///     var authorisationMiddleware = (authorisationBuilder()
 ///        .sameOrigin()
 ///        .principalWhitelist((p) => p.name == 'fred')
 ///      .build();
 ///
-AuthorisationBuilder builder() => new AuthorisationBuilder();
+AuthorisationBuilder authorisationBuilder() => new AuthorisationBuilder();
 
 /// A builder to help with the creation of shelf_auth middleware
 class AuthorisationBuilder {

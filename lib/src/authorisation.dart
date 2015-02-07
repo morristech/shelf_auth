@@ -28,14 +28,15 @@ final Logger _log = new Logger('shelf_auth.authorisation');
  *
  * Example use
  *
- * ```
- *   var handler = const Pipeline()
-        .addMiddleware(exceptionResponse())
-        .addMiddleware(authorise([new SameOriginAuthoriser()]))
-        .addHandler((Request request) => new Response.ok("I'm in"));
-
-    io.serve(handler, 'localhost', 8080);
-  * ```
+ *    var handler = const Pipeline()
+ *      .addMiddleware(exceptionResponse())
+ *       .addMiddleware((authorisationBuilder()
+ *           .sameOrigin()
+ *           .principalWhitelist((p) => p.name == 'fred')
+ *         .build()))
+ *       .addHandler((Request request) => new Response.ok("I'm in"));
+ *
+ *    io.serve(handler, 'localhost', 8080);
  */
 Middleware authorise(Iterable<Authoriser> authorisers) =>
     new AuthorisationMiddleware(authorisers.toList(growable: false)).middleware;
