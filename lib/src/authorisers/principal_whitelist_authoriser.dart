@@ -1,4 +1,4 @@
-library shelf_auth.authorisers.userwhitelist;
+library shelf_auth.authorisers.principal.whitelist;
 
 import 'package:option/option.dart';
 import '../preconditions.dart';

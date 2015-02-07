@@ -6,14 +6,8 @@
 library shelf_auth.authorisation.sameorigin.test;
 
 import 'package:shelf/shelf.dart';
-import 'dart:async';
-import 'package:option/option.dart';
-import 'package:shelf_auth/src/authorisation.dart';
 import 'package:shelf_auth/src/authorisers/same_origin_authoriser.dart';
 import 'package:unittest/unittest.dart';
-import 'package:shelf_auth/src/principal/user_lookup.dart';
-
-final UserLookupByUsernamePassword lookup = testLookup;
 
 main() {
   requestNoReferer() => new Request('GET', Uri.parse('http://foo.bar/blah'));
@@ -27,7 +21,7 @@ main() {
 
   final authoriser = new SameOriginAuthoriser();
 
-  group('authorise', () {
+  group('isAuthorised', () {
     group('when referer header is present', () {
       group('and matches request origin', () {
         test('completes', () {
@@ -58,18 +52,8 @@ main() {
       });
 
       test('completes with false', () {
-        expect(authoriser.isAuthorised(requestNoReferer()),
-            completion(false));
+        expect(authoriser.isAuthorised(requestNoReferer()), completion(false));
       });
     });
   });
-}
-
-Future<Option<Principal>> testLookup(String username, String password) {
-  final validUser = username == 'Aladdin' && password == 'open sesame';
-
-  final principalOpt =
-      validUser ? new Some(new Principal(username)) : const None();
-
-  return new Future.value(principalOpt);
 }
