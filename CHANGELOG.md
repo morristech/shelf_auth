@@ -1,3 +1,7 @@
+## 0.2.3
+
+* Added authorisation support
+
 ## 0.2.2+1
 
 * some doco

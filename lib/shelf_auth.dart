@@ -14,3 +14,5 @@ export 'src/session/jwt/jwt_session_handler.dart';
 export 'src/principal/user_lookup.dart';
 export 'src/builder.dart';
 export 'src/authorisation.dart';
+export 'src/authorisers/same_origin_authoriser.dart';
+export 'src/authorisers/principal_whitelist_authoriser.dart';
