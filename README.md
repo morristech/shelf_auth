@@ -171,9 +171,19 @@ var authorisationMiddleware = (authorisationBuilder()
 
 ```
 
+If any `Authoriser` denies access then:
+
+* if there is an authenticated user, a `ForbiddenException` is thrown
+* otherwise a `UnauthorizedException` is thrown.
+
 #### Authorisers
 
 Shelf Auth provides the following authorisers out of the box:
+
+##### AuthenticatedOnlyAuthoriser
+
+Only allows access to authenticated users. If there is not current 
+`AuthenticatedContext` in the request then access is denied.
 
 ##### SameOriginAuthoriser
 
