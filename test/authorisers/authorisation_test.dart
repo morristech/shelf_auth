@@ -163,8 +163,8 @@ Matcher responseMatcher(String fieldName, matcher, Getter getter) =>
     fieldMatcher("Response", fieldName, matcher, getter);
 
 Matcher fieldMatcher(
-    String className, String fieldName, matcher, Getter getter) =>
-        new FieldMatcher(className, fieldName, matcher, getter);
+        String className, String fieldName, matcher, Getter getter) =>
+    new FieldMatcher(className, fieldName, matcher, getter);
 
 typedef Getter(object);
 
