@@ -10,6 +10,7 @@ import 'package:logging/logging.dart';
 import 'authorisation.dart';
 import 'authorisers/same_origin_authoriser.dart';
 import 'authorisers/principal_whitelist_authoriser.dart';
+import 'authorisers/authenticated_only_authoriser.dart';
 
 export 'core.dart';
 
@@ -20,6 +21,7 @@ final Logger _log = new Logger('shelf_auth.authorisation.builder');
 /// For example
 ///
 ///     var authorisationMiddleware = (authorisationBuilder()
+///        .authenticatedOnly()
 ///        .sameOrigin()
 ///        .principalWhitelist((p) => p.name == 'fred')
 ///      .build();
@@ -29,6 +31,11 @@ AuthorisationBuilder authorisationBuilder() => new AuthorisationBuilder();
 /// A builder to help with the creation of shelf_auth middleware
 class AuthorisationBuilder {
   List<Authoriser> _authorisers = [];
+
+  /// adds a [AuthenticatedOnlyAuthoriser] to the list of authorisers.
+  /// This enforces that users must be authenticated to access
+  AuthorisationBuilder authenticatedOnly() =>
+      authoriser(new AuthenticatedOnlyAuthoriser());
 
   /// adds a [SameOriginAuthoriser] to the list of authorisers
   AuthorisationBuilder sameOrigin() => authoriser(new SameOriginAuthoriser());

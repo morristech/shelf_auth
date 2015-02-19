@@ -1,4 +1,4 @@
-// Copyright (c) 2014, The Shelf Auth project authors.
+// Copyright (c) 2015, The Shelf Auth project authors.
 // Please see the AUTHORS file for details.
 // All rights reserved. Use of this source code is governed by
 // a BSD 2-Clause License that can be found in the LICENSE file.
@@ -7,13 +7,11 @@ library shelf_auth.authorisation.impl;
 
 import 'package:shelf/shelf.dart';
 import 'dart:async';
-import 'package:option/option.dart';
-import 'util.dart';
 import 'package:shelf_exception_response/exception.dart';
 import 'package:logging/logging.dart';
-import 'core.dart';
 import 'authorisation.dart';
-import 'zone_context.dart';
+import 'authentication.dart';
+import 'package:option/option.dart';
 
 final Logger _log = new Logger('shelf_auth.authorisation.internal');
 
@@ -47,7 +45,11 @@ class AuthorisationMiddleware {
   Future<Response> _createResponse(
       bool isAuthorised, Request request, Handler innerHandler) {
     if (!isAuthorised) {
-      throw new ForbiddenException();
+      if (getAuthenticatedContext(request) is Some) {
+        throw new ForbiddenException();
+      } else {
+        throw new UnauthorizedException();
+      }
     }
 
     return new Future.sync(() => innerHandler(request));

@@ -19,7 +19,9 @@ final Logger _log = new Logger('shelf_auth.authorisation');
  * Supports a chain of [Authoriser]s where access will be denied if any [Authoriser]
  * denies access (returns false).
  *
- * If access is denied then a [ForbiddenException] will be thrown. It is recommended to use
+ * If access is denied then a [ForbiddenException] will be thrown if there is
+ * an authenticated user, or [UnauthorizedException] if there isn't.
+ * It is recommended to use
  * together with the [shelf_exception_response](https://pub.dartlang.org/packages/shelf_exception_response)
  * package or similar to convert exceptions into appropriate Http response
  *
