@@ -11,8 +11,8 @@ export 'package:matcher/matcher.dart';
 const FailureHandler _failureHandler = const _PreconditionFailureHandler();
 
 void ensure(value, Matcher matcher, [String failureMessage]) {
-  expect(value, matcher, reason: failureMessage,
-      failureHandler: _failureHandler);
+  expect(value, matcher,
+      reason: failureMessage, failureHandler: _failureHandler);
 }
 
 class _PreconditionFailureHandler implements FailureHandler {
@@ -22,15 +22,15 @@ class _PreconditionFailureHandler implements FailureHandler {
     throw new ArgumentError(reason);
   }
 
-  void failMatch(actual, Matcher matcher, String reason,
-      Map matchState, bool verbose) {
+  void failMatch(
+      actual, Matcher matcher, String reason, Map matchState, bool verbose) {
     fail(_defaultErrorFormatter(actual, matcher, reason, matchState, verbose));
   }
 }
 
 // copied from matcher/expect.dart
-String _defaultErrorFormatter(actual, Matcher matcher, String reason,
-    Map matchState, bool verbose) {
+String _defaultErrorFormatter(
+    actual, Matcher matcher, String reason, Map matchState, bool verbose) {
   var description = new StringDescription();
   description.add('Expected: ').addDescriptionOf(matcher).add('\n');
   description.add('  Actual: ').addDescriptionOf(actual).add('\n');

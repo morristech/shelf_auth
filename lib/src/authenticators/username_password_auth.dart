@@ -21,10 +21,11 @@ const String SHELF_AUTH_STD_USER_CREDENTIALS =
     'shelf_auth.std.user.credentials';
 
 StdUserCredentials getStdUserCredentials(Request request) =>
-  getPathParameter(request, SHELF_AUTH_STD_USER_CREDENTIALS);
+    getPathParameter(request, SHELF_AUTH_STD_USER_CREDENTIALS);
 
-Request setStdUserCredentials(Request request, StdUserCredentials credentials) =>
-  addPathParameters(request, { SHELF_AUTH_STD_USER_CREDENTIALS: credentials} );
+Request setStdUserCredentials(
+        Request request, StdUserCredentials credentials) =>
+    addPathParameters(request, {SHELF_AUTH_STD_USER_CREDENTIALS: credentials});
 
 class StdUserCredentials {
   final String username;
@@ -55,13 +56,12 @@ class StdUserCredentials {
  * same as invalid credentials and throws in both cases. It also reads the body
  * and passes a request on to the innerHandler which has no body
  */
-class UsernamePasswordAuthenticator<P extends Principal> extends
-    AbstractAuthenticator<P> {
+class UsernamePasswordAuthenticator<P extends Principal>
+    extends AbstractAuthenticator<P> {
   final UserLookupByUsernamePassword<P> userLookup;
 
   UsernamePasswordAuthenticator(this.userLookup,
-      { bool sessionCreationAllowed: true,
-        bool sessionUpdateAllowed: true })
+      {bool sessionCreationAllowed: true, bool sessionUpdateAllowed: true})
       : super(sessionCreationAllowed, sessionUpdateAllowed, readsBody: true) {
     ensure(userLookup, isNotNull);
   }
@@ -73,15 +73,16 @@ class UsernamePasswordAuthenticator<P extends Principal> extends
     final principalFuture = credentialsFuture.then((credentials) =>
         userLookup(credentials.username, credentials.password));
 
-    return principalFuture.then((principalOption) =>
-        principalOption.map((principal) => createContext(principal))
+    return principalFuture.then((principalOption) => principalOption
+        .map((principal) => createContext(principal))
         .orElse(() => throw new UnauthorizedException()));
   }
 
   Future<StdUserCredentials> _extractCredentials(Request request) {
     final contextCredentials = getStdUserCredentials(request);
-    final credentialsFuture = syncFuture(() => contextCredentials != null ?
-        contextCredentials : _extractFormCredentials(request));
+    final credentialsFuture = syncFuture(() => contextCredentials != null
+        ? contextCredentials
+        : _extractFormCredentials(request));
 
     return credentialsFuture.then((credentials) {
       if (credentials == null || credentials.username == null) {
@@ -98,8 +99,8 @@ class UsernamePasswordAuthenticator<P extends Principal> extends
       final contentType = ContentType.parse(contentTypeStr);
 
       if (contentType.mimeType == "application/x-www-form-urlencoded") {
-        return request.readAsString().then((s) =>
-            new StdUserCredentials.fromJson(Uri.splitQueryString(s)));
+        return request.readAsString().then(
+            (s) => new StdUserCredentials.fromJson(Uri.splitQueryString(s)));
       }
     }
 

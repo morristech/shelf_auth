@@ -17,42 +17,36 @@ void main() {
     print('${lr.time} ${lr.level} ${lr.message}');
   });
 
-  var authMiddleware = authenticate(
-      [new BasicAuthenticator(testLookup), new RandomAuthenticator()],
-      // allow http for testing with curl. Don't do in production
-      allowHttp: true);
+  var authenticationMiddleware = (builder()
+      .authenticator(new FriendlyAuthenticator())..allowHttp = true).build();
+
+  var authorisationMiddleware = (authorisationBuilder()
+      .sameOrigin()
+      .principalWhitelist((Principal p) => p.name == 'fred')).build();
 
   var handler = const Pipeline()
       .addMiddleware(logRequests())
       .addMiddleware(exceptionResponse())
-      .addMiddleware(authMiddleware)
+      .addMiddleware(authenticationMiddleware)
+      .addMiddleware(authorisationMiddleware)
       .addHandler((Request request) => new Response.ok("I'm in with "
           "${getAuthenticatedContext(request).map((ac) => ac.principal.name)}\n"));
 
   io.serve(handler, 'localhost', 8080).then((server) {
     print('Serving at http://${server.address.host}:${server.port}');
   });
+
+  // try with curl -i  'http://localhost:8080' -H 'referer: http://localhost/foo'
+  // and you should get in
+  // but if you omit or change the referer you will be denied
 }
 
-class RandomAuthenticator extends Authenticator {
-  bool approve = true;
+class FriendlyAuthenticator extends Authenticator {
   bool readsBody = false;
 
   @override
   Future<Option<AuthenticatedContext>> authenticate(Request request) {
-    approve = !approve;
-
-    return new Future.value(approve
-        ? new Some(new AuthenticatedContext(new Principal("fred")))
-        : throw new UnauthorizedException());
+    return new Future.value(
+        new Some(new AuthenticatedContext(new Principal("fred"))));
   }
-}
-
-Future<Option<Principal>> testLookup(String username, String password) {
-  final validUser = username == 'Aladdin' && password == 'open sesame';
-
-  final principalOpt =
-      validUser ? new Some(new Principal(username)) : const None();
-
-  return new Future.value(principalOpt);
 }

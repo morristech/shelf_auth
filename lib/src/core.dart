@@ -11,7 +11,6 @@ import 'package:option/option.dart';
 import 'package:shelf_exception_response/exception.dart';
 import 'package:logging/logging.dart';
 
-
 final Logger _log = new Logger('shelf_auth.authentication.model');
 
 /**
@@ -55,9 +54,8 @@ class AuthenticatedContext<P extends Principal> {
   /// a result of this authentication
   final bool sessionUpdateAllowed;
 
-  AuthenticatedContext(this.principal,
-      { this.onBehalfOf: const None(),
-        this.sessionCreationAllowed: true, this.sessionUpdateAllowed: true });
+  AuthenticatedContext(this.principal, {this.onBehalfOf: const None(),
+      this.sessionCreationAllowed: true, this.sessionUpdateAllowed: true});
 }
 
 /**
@@ -65,22 +63,21 @@ class AuthenticatedContext<P extends Principal> {
  * token mechanism
  */
 class SessionAuthenticatedContext<P extends Principal>
-        extends AuthenticatedContext<P> {
+    extends AuthenticatedContext<P> {
   final DateTime sessionFirstCreated;
 
   final DateTime sessionLastRefreshed;
 
   final DateTime noSessionRenewalAfter;
 
-  SessionAuthenticatedContext(P principal,
-      this.sessionFirstCreated, this.sessionLastRefreshed,
-          this.noSessionRenewalAfter,
-      { Option<P> onBehalfOf: const None(),
-         bool sessionCreationAllowed: true, bool sessionUpdateAllowed: true })
-      : super(principal, sessionCreationAllowed: sessionCreationAllowed,
-            sessionUpdateAllowed: sessionUpdateAllowed);
+  SessionAuthenticatedContext(P principal, this.sessionFirstCreated,
+      this.sessionLastRefreshed, this.noSessionRenewalAfter,
+      {Option<P> onBehalfOf: const None(), bool sessionCreationAllowed: true,
+      bool sessionUpdateAllowed: true})
+      : super(principal,
+          sessionCreationAllowed: sessionCreationAllowed,
+          sessionUpdateAllowed: sessionUpdateAllowed);
 }
-
 
 /**
  * A class that may establish and / or update a session for the authenticated
@@ -93,8 +90,8 @@ class SessionAuthenticatedContext<P extends Principal>
  */
 abstract class SessionHandler<P extends Principal> {
   /// Update the [response] with a session token as appropriate
-  Response handle(AuthenticatedContext context, Request request,
-                  Response response);
+  Response handle(
+      AuthenticatedContext context, Request request, Response response);
 
   /// authenticator for session tokens created by the [handle] method
   Authenticator<P> get authenticator;
@@ -108,7 +105,7 @@ abstract class Authenticator<P extends Principal> {
    * Authenticates the request returning a Future with one of three outcomes:
    *
    * * [None] to indicate that no authentication credentials exist for this
-   * authenticator. Other authenicators can now get their turn to authenticate
+   * authenticator. Other authenticators can now get their turn to authenticate
    *
    * * [Some] [AuthenticatedContext] when authentication succeeds
    *

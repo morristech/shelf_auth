@@ -11,7 +11,8 @@ import '../preconditions.dart';
 /**
  * An base class for [Authenticator]s
  */
-abstract class AbstractAuthenticator<P extends Principal> extends Authenticator<P> {
+abstract class AbstractAuthenticator<P extends Principal>
+    extends Authenticator<P> {
   /// true if a session may be established as a result of this authentication
   final bool sessionCreationAllowed;
 
@@ -22,7 +23,7 @@ abstract class AbstractAuthenticator<P extends Principal> extends Authenticator<
   final bool readsBody;
 
   AbstractAuthenticator(this.sessionCreationAllowed, this.sessionUpdateAllowed,
-      { this.readsBody: false }) {
+      {this.readsBody: false}) {
     ensure(sessionCreationAllowed, isNotNull);
     ensure(sessionUpdateAllowed, isNotNull);
   }
@@ -32,5 +33,4 @@ abstract class AbstractAuthenticator<P extends Principal> extends Authenticator<
         sessionCreationAllowed: sessionCreationAllowed,
         sessionUpdateAllowed: sessionUpdateAllowed);
   }
-
 }

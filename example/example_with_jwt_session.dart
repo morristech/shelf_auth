@@ -13,17 +13,16 @@ import 'package:uuid/uuid.dart';
 import 'package:logging/logging.dart';
 
 void main() {
-
   Logger.root.level = Level.FINER;
   Logger.root.onRecord.listen((lr) {
     print('${lr.time} ${lr.level} ${lr.message}');
   });
 
   var authMiddleware = authenticate([new RandomAuthenticator()],
-      sessionHandler: new JwtSessionHandler('super app', new Uuid().v4(),
-          testLookup),
-          // allow http for testing with curl. Don't do in production
-          allowHttp: true);
+      sessionHandler: new JwtSessionHandler(
+          'super app', new Uuid().v4(), testLookup),
+      // allow http for testing with curl. Don't do in production
+      allowHttp: true);
 
   var handler = const Pipeline()
       .addMiddleware(logRequests())
@@ -45,8 +44,8 @@ class RandomAuthenticator extends Authenticator {
   Future<Option<AuthenticatedContext>> authenticate(Request request) {
     approve = !approve;
 
-    return new Future.value(approve ?
-        new Some(new AuthenticatedContext(new Principal("fred")))
+    return new Future.value(approve
+        ? new Some(new AuthenticatedContext(new Principal("fred")))
         : throw new UnauthorizedException());
   }
 }
@@ -54,8 +53,8 @@ class RandomAuthenticator extends Authenticator {
 Future<Option<Principal>> testLookup(String username) {
   final validUser = username == 'fred';
 
-  final principalOpt = validUser ? new Some(new Principal(username)) :
-    const None();
+  final principalOpt =
+      validUser ? new Some(new Principal(username)) : const None();
 
   return new Future.value(principalOpt);
 }

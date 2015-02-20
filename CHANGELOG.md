@@ -1,3 +1,15 @@
+## 0.2.4
+
+* Added authenticated only authoriser
+
+## 0.2.3+1
+
+* Added some logging
+
+## 0.2.3
+
+* Added authorisation support
+
 ## 0.2.2+1
 
 * some doco

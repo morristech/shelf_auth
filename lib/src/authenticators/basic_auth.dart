@@ -23,9 +23,9 @@ const BASIC_AUTH_SCHEME = 'Basic';
 class BasicAuthenticator<P extends Principal> extends AbstractAuthenticator<P> {
   final UserLookupByUsernamePassword<P> userLookup;
 
-  BasicAuthenticator(this.userLookup, { bool sessionCreationAllowed: false,
-    bool sessionUpdateAllowed: false })
-      : super(sessionCreationAllowed, sessionUpdateAllowed){
+  BasicAuthenticator(this.userLookup,
+      {bool sessionCreationAllowed: false, bool sessionUpdateAllowed: false})
+      : super(sessionCreationAllowed, sessionUpdateAllowed) {
     ensure(userLookup, isNotNull);
   }
 
@@ -33,7 +33,6 @@ class BasicAuthenticator<P extends Principal> extends AbstractAuthenticator<P> {
   Future<Option<AuthenticatedContext<P>>> authenticate(Request request) {
     final authHeaderOpt = authorizationHeader(request, BASIC_AUTH_SCHEME);
     return authHeaderOpt.map((authHeader) {
-
       final usernamePasswordStr = _getCredentials(authHeader);
 
       final usernamePassword = usernamePasswordStr.split(':');
@@ -42,22 +41,19 @@ class BasicAuthenticator<P extends Principal> extends AbstractAuthenticator<P> {
         throw new BadRequestException();
       }
 
-      final principalFuture = userLookup(usernamePassword[0],
-          usernamePassword[1]);
+      final principalFuture =
+          userLookup(usernamePassword[0], usernamePassword[1]);
 
       return principalFuture.then((principalOption) =>
-          principalOption.map((principal) =>
-              createContext(principal)));
-    })
-    .getOrElse(() => new Future(() => const None()));
-
+          principalOption.map((principal) => createContext(principal)));
+    }).getOrElse(() => new Future(() => const None()));
   }
 
   String _getCredentials(AuthorizationHeader authHeader) {
     try {
       return new String.fromCharCodes(
           CryptoUtils.base64StringToBytes(authHeader.credentials));
-    } on FormatException catch(e) {
+    } on FormatException catch (e) {
       return '';
     }
   }

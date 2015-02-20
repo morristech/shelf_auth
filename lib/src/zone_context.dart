@@ -24,9 +24,7 @@ runInNewZone(AuthenticatedContext authContext, body()) {
 
   runZoned(() {
     response = body();
-  }, zoneValues: <Symbol, Object>{
-    SHELF_AUTH_ZONE_CONTEXT: authContext
-  });
+  }, zoneValues: <Symbol, Object>{SHELF_AUTH_ZONE_CONTEXT: authContext});
 
   return response;
 }

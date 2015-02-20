@@ -14,7 +14,6 @@ import 'package:logging/logging.dart';
 import 'package:shelf_route/shelf_route.dart';
 import 'package:shelf_bind/shelf_bind.dart';
 
-
 /**
  * This example has a login route where username and password are POSTed
  * and other routes which are authenticated via the JWT session established
@@ -56,7 +55,6 @@ import 'package:shelf_bind/shelf_bind.dart';
  *
  */
 void main() {
-
   Logger.root.level = Level.FINER;
   Logger.root.onRecord.listen((lr) {
     print('${lr.time} ${lr.level} ${lr.message}');
@@ -65,8 +63,8 @@ void main() {
   var testLookup = new TestUserLookup();
 
   // use Jwt based sessions. Create the secret using a UUID
-  var sessionHandler = new JwtSessionHandler('super app', new Uuid().v4(),
-        testLookup.lookupByUsername);
+  var sessionHandler = new JwtSessionHandler(
+      'super app', new Uuid().v4(), testLookup.lookupByUsername);
 
   // allow http for testing with curl. Don't use in production
   var allowHttp = true;
@@ -74,7 +72,8 @@ void main() {
   // authentication middleware for a login handler (e.g. submitted from a form)
   var loginMiddleware = authenticate(
       [new UsernamePasswordAuthenticator(testLookup.lookupByUsernamePassword)],
-      sessionHandler: sessionHandler, allowHttp: allowHttp,
+      sessionHandler: sessionHandler,
+      allowHttp: allowHttp,
       allowAnonymousAccess: false);
 
   // authentication middleware for routes other than login that require a logged
@@ -83,7 +82,8 @@ void main() {
   // could have additional authenticators here.
   // We are disabling anonymous access to these routes
   var defaultAuthMiddleware = authenticate([],
-      sessionHandler: sessionHandler, allowHttp: true,
+      sessionHandler: sessionHandler,
+      allowHttp: true,
       allowAnonymousAccess: false);
 
   var rootRouter = router(handlerAdapter: handlerAdapter());
@@ -91,12 +91,12 @@ void main() {
   // the route where the login form credentials are posted
   rootRouter.post('/login', (Request request) => new Response.ok(
           "I'm now logged in as ${loggedInUsername(request)}\n"),
-            middleware: loginMiddleware);
+      middleware: loginMiddleware);
 
   // the routes which require an authenticated user
   rootRouter.child('/authenticated', middleware: defaultAuthMiddleware)
-    ..get('/foo', (Request request) => new Response.ok(
-        "Doing foo as ${loggedInUsername(request)}\n"));
+    ..get('/foo', (Request request) =>
+        new Response.ok("Doing foo as ${loggedInUsername(request)}\n"));
 
   printRoutes(rootRouter);
 
@@ -110,17 +110,17 @@ void main() {
   });
 }
 
-String loggedInUsername(Request request) =>
-    getAuthenticatedContext(request).map((ac) => ac.principal.name)
-              .getOrElse(() => 'guest');
-
+String loggedInUsername(Request request) => getAuthenticatedContext(request)
+    .map((ac) => ac.principal.name)
+    .getOrElse(() => 'guest');
 
 class TestUserLookup {
-  Future<Option<Principal>> lookupByUsernamePassword(String username, String password) {
+  Future<Option<Principal>> lookupByUsernamePassword(
+      String username, String password) {
     final validUser = username == 'fred';
 
-    final principalOpt = validUser ? new Some(new Principal(username)) :
-      const None();
+    final principalOpt =
+        validUser ? new Some(new Principal(username)) : const None();
 
     return new Future.value(principalOpt);
   }
@@ -128,8 +128,8 @@ class TestUserLookup {
   Future<Option<Principal>> lookupByUsername(String username) {
     final validUser = username == 'fred';
 
-    final principalOpt = validUser ? new Some(new Principal(username)) :
-      const None();
+    final principalOpt =
+        validUser ? new Some(new Principal(username)) : const None();
 
     return new Future.value(principalOpt);
   }
