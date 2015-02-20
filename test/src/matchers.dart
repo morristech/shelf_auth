@@ -30,8 +30,8 @@ Matcher requestMatcher(String fieldName, matcher, Getter getter) =>
     fieldMatcher("Request", fieldName, matcher, getter);
 
 Matcher fieldMatcher(
-    String className, String fieldName, matcher, Getter getter) =>
-        new FieldMatcher(className, fieldName, matcher, getter);
+        String className, String fieldName, matcher, Getter getter) =>
+    new FieldMatcher(className, fieldName, matcher, getter);
 
 class FieldMatcher extends CustomMatcher {
   final Getter getter;

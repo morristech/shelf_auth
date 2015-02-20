@@ -42,10 +42,11 @@ class AuthenticationBuilder {
 
   /// adds a BASIC AUTH authenticator to the list of authenticators
   AuthenticationBuilder basic(UserLookupByUsernamePassword userLookup,
-      {bool sessionCreationAllowed: false, bool sessionUpdateAllowed: false}) =>
-      authenticator(new BasicAuthenticator(userLookup,
-          sessionCreationAllowed: sessionCreationAllowed,
-          sessionUpdateAllowed: sessionUpdateAllowed));
+      {bool sessionCreationAllowed: false,
+      bool sessionUpdateAllowed: false}) => authenticator(
+          new BasicAuthenticator(userLookup,
+              sessionCreationAllowed: sessionCreationAllowed,
+              sessionUpdateAllowed: sessionUpdateAllowed));
 
   /// adds the given authenticator to the list of authenticators
   AuthenticationBuilder authenticator(Authenticator authenticator) {

@@ -24,8 +24,8 @@ StdUserCredentials getStdUserCredentials(Request request) =>
     getPathParameter(request, SHELF_AUTH_STD_USER_CREDENTIALS);
 
 Request setStdUserCredentials(
-    Request request, StdUserCredentials credentials) => addPathParameters(
-        request, {SHELF_AUTH_STD_USER_CREDENTIALS: credentials});
+        Request request, StdUserCredentials credentials) =>
+    addPathParameters(request, {SHELF_AUTH_STD_USER_CREDENTIALS: credentials});
 
 class StdUserCredentials {
   final String username;

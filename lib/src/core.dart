@@ -73,7 +73,8 @@ class SessionAuthenticatedContext<P extends Principal>
   SessionAuthenticatedContext(P principal, this.sessionFirstCreated,
       this.sessionLastRefreshed, this.noSessionRenewalAfter,
       {Option<P> onBehalfOf: const None(), bool sessionCreationAllowed: true,
-      bool sessionUpdateAllowed: true}) : super(principal,
+      bool sessionUpdateAllowed: true})
+      : super(principal,
           sessionCreationAllowed: sessionCreationAllowed,
           sessionUpdateAllowed: sessionUpdateAllowed);
 }

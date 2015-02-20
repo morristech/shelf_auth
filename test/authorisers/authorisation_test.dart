@@ -6,15 +6,13 @@
 library shelf_auth.authorisation.test;
 
 import 'package:shelf_auth/shelf_auth.dart';
-import 'package:shelf_auth/src/authorisation_impl.dart';
+import 'package:shelf_auth/src/authentication_impl.dart';
 
 import 'package:unittest/unittest.dart';
 import 'package:mockito/mockito.dart';
-import 'package:option/option.dart';
 import 'package:shelf/shelf.dart';
 import 'dart:async';
 import 'package:shelf_exception_response/exception.dart';
-import '../src/matchers.dart';
 
 class MockAuthoriser extends Mock implements Authoriser {
   noSuchMethod(_) => super.noSuchMethod(_);
@@ -43,6 +41,10 @@ main() {
 
   Request request() => new Request('GET', Uri.parse('https://blah/foo'));
   Request httpRequest() => new Request('GET', Uri.parse('http://blah/foo'));
+  Request requestAuthenticated() => request().change(
+      context: {
+    SHELF_AUTH_REQUEST_CONTEXT: new AuthenticatedContext(new Principal('fred'))
+  });
   final okResponse = new Response.ok('sweet');
 
   setUp(() {
@@ -132,8 +134,13 @@ main() {
         middlewareHandler = mw(handler);
       });
 
-      test('throws a ForbiddenException', () {
+      test('and request unauthenticated throws an UnauthorizedException', () {
         expect(middlewareHandler(request()),
+            throwsA(new isInstanceOf<UnauthorizedException>()));
+      });
+
+      test('and request authenticated throws a ForbiddenException', () {
+        expect(middlewareHandler(requestAuthenticated()),
             throwsA(new isInstanceOf<ForbiddenException>()));
       });
 
@@ -163,8 +170,8 @@ Matcher responseMatcher(String fieldName, matcher, Getter getter) =>
     fieldMatcher("Response", fieldName, matcher, getter);
 
 Matcher fieldMatcher(
-    String className, String fieldName, matcher, Getter getter) =>
-        new FieldMatcher(className, fieldName, matcher, getter);
+        String className, String fieldName, matcher, Getter getter) =>
+    new FieldMatcher(className, fieldName, matcher, getter);
 
 typedef Getter(object);
 

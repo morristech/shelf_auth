@@ -78,8 +78,8 @@ main() {
 
       test('and adds an authorization header which would validate successfully',
           () {
-        final authheader =
-            handle(response()).headers[HttpHeaders.AUTHORIZATION];
+        final authheader = handle(response()).headers[
+            HttpHeaders.AUTHORIZATION];
         final req = requestWithHeader({HttpHeaders.AUTHORIZATION: authheader});
 
         expect(sessionHandler().authenticator.authenticate(req), completes);
