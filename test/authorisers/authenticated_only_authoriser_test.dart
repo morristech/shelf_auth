@@ -28,7 +28,6 @@ main() {
     });
 
     group('when user unauthenticated', () {
-
       test('completes', () {
         expect(authoriser.isAuthorised(requestUnauthenticated()), completes);
       });
@@ -45,8 +44,8 @@ main() {
       });
 
       test('completes with true', () {
-        expect(authoriser.isAuthorised(requestAuthenticated()),
-            completion(true));
+        expect(
+            authoriser.isAuthorised(requestAuthenticated()), completion(true));
       });
     });
   });
