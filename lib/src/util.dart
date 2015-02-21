@@ -12,6 +12,7 @@ import 'package:stack_trace/stack_trace.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_exception_response/exception.dart';
 import 'package:option/option.dart';
+import 'core.dart';
 
 /// Like [new Future], but avoids around issue 11911 by using [new Future.value]
 /// under the covers.
@@ -91,4 +92,25 @@ class AuthorizationHeader {
   final String credentials;
 
   AuthorizationHeader(this.authScheme, this.credentials);
+}
+
+Middleware withOptionalExclusions(
+        Middleware middleware, RequestWhiteList excluded) =>
+    excluded != null ? withExclusions(middleware, excluded) : middleware;
+
+Middleware withExclusions(Middleware middleware, RequestWhiteList excluded) {
+  return (Handler innerHandler) {
+    return _wrappedHandler(innerHandler, middleware, excluded);
+  };
+}
+
+Handler _wrappedHandler(
+    Handler innerHandler, Middleware middleware, RequestWhiteList excluded) {
+  return (Request request) {
+    if (excluded(request)) {
+      return innerHandler(request);
+    } else {
+      return middleware(innerHandler)(request);
+    }
+  };
 }
