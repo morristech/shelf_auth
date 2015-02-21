@@ -1,3 +1,7 @@
+## 0.2.5
+
+* Added support for excluding some requests from authorisation checks
+
 ## 0.2.4
 
 * Added authenticated only authoriser

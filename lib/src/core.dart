@@ -118,3 +118,11 @@ abstract class Authenticator<P extends Principal> {
 
   bool get readsBody;
 }
+
+/// Represents a whitelist for requests
+typedef bool RequestWhiteList(Request request);
+
+/// creates a [RequestWhiteList] from an [Iterable] of whitelisted paths
+RequestWhiteList requestPathWhiteList(Iterable<String> whitelistedPaths) {
+  return (Request request) => whitelistedPaths.contains(request.url.path);
+}

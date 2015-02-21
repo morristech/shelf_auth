@@ -9,6 +9,7 @@ import 'package:shelf/shelf.dart';
 import 'package:logging/logging.dart';
 import 'authorisation.dart';
 import 'authorisers/same_origin_authoriser.dart';
+import 'authorisers/authoriser_with_exclusions.dart';
 import 'authorisers/principal_whitelist_authoriser.dart';
 import 'authorisers/authenticated_only_authoriser.dart';
 
@@ -33,22 +34,32 @@ class AuthorisationBuilder {
   List<Authoriser> _authorisers = [];
 
   /// adds a [AuthenticatedOnlyAuthoriser] to the list of authorisers.
-  /// This enforces that users must be authenticated to access
-  AuthorisationBuilder authenticatedOnly() =>
-      authoriser(new AuthenticatedOnlyAuthoriser());
+  /// This enforces that users must be authenticated to access.
+  /// A [RequestWhiteList] can be provided to allow some requests to be excluded
+  /// from the authorisation checks. Any such request will be allowed through
+  AuthorisationBuilder authenticatedOnly({RequestWhiteList excluded}) =>
+      authoriser(new AuthenticatedOnlyAuthoriser(), excluded: excluded);
 
   /// adds a [SameOriginAuthoriser] to the list of authorisers
-  AuthorisationBuilder sameOrigin() => authoriser(new SameOriginAuthoriser());
+  /// A [RequestWhiteList] can be provided to allow some requests to be excluded
+  /// from the authorisation checks. Any such request will be allowed through
+  AuthorisationBuilder sameOrigin({RequestWhiteList excluded}) =>
+      authoriser(new SameOriginAuthoriser(), excluded: excluded);
 
   /// adds a [PrincipalWhitelistAuthoriser] to the list of authorisers
+  /// A [RequestWhiteList] can be provided to allow some requests to be excluded
+  /// from the authorisation checks. Any such request will be allowed through
   AuthorisationBuilder principalWhitelist(PrincipalWhiteList whitelist,
-      {bool denyUnauthenticated: false}) => authoriser(
-          new PrincipalWhitelistAuthoriser(whitelist,
-              denyUnauthenticated: denyUnauthenticated));
+          {bool denyUnauthenticated: false, RequestWhiteList excluded}) =>
+      authoriser(new PrincipalWhitelistAuthoriser(whitelist,
+          denyUnauthenticated: denyUnauthenticated), excluded: excluded);
 
   /// adds the given authoriser to the list of authorisers
-  AuthorisationBuilder authoriser(Authoriser authoriser) {
-    _authorisers.add(authoriser);
+  AuthorisationBuilder authoriser(Authoriser authoriser,
+      {RequestWhiteList excluded}) {
+    _authorisers.add(excluded != null
+        ? new AuthoriserWithExclusions(excluded, authoriser)
+        : authoriser);
     return this;
   }
 
