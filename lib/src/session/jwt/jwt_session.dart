@@ -7,6 +7,7 @@ library shelf_auth.session.jwt;
 
 import 'package:dart_jwt/dart_jwt.dart';
 import 'package:logging/logging.dart';
+import '../../preconditions.dart';
 
 Logger _log = new Logger('shelf_auth.session.jwt');
 
@@ -15,13 +16,14 @@ const String JWT_SESSION_AUTH_SCHEME = 'ShelfAuthJwtSession';
 /**
  * Creates a Jwt token containing claims about a session
  */
-String createSessionToken(String secret, String issuer, String subject,
+String createSessionToken(
+    String secret, String issuer, String subject, String sessionIdentifier,
     {Duration idleTimeout: const Duration(minutes: 30),
     Duration totalSessionTimeout: const Duration(days: 1), String audience}) {
   final now = new DateTime.now();
 
   final claimSet = new SessionClaimSet(issuer, subject, now.add(idleTimeout),
-      now, audience, now.add(totalSessionTimeout));
+      now, audience, sessionIdentifier, now.add(totalSessionTimeout));
 
   _log.finest('created claimSet: \n${claimSet.toJson()}');
   final jwt = new JsonWebToken.jws(claimSet, new JwaSignatureContext(secret));
@@ -40,21 +42,33 @@ JsonWebToken<SessionClaimSet> decodeSessionToken(String jwtToken,
 
 class SessionClaimSet extends JwtClaimSet {
   final DateTime totalSessionExpiry;
+  final String sessionIdentifier;
 
   SessionClaimSet(String issuer, String subject, DateTime expiry,
-      DateTime issuedAt, String audience, this.totalSessionExpiry)
-      : super(issuer, subject, expiry, issuedAt, audience);
+      DateTime issuedAt, String audience, this.sessionIdentifier,
+      this.totalSessionExpiry)
+      : super(issuer, subject, expiry, issuedAt, audience) {
+    ensure(sessionIdentifier, isNotNull);
+    ensure(totalSessionExpiry, isNotNull);
+  }
 
   SessionClaimSet.build({String issuer, String subject, DateTime expiry,
-      DateTime issuedAt, String audience, DateTime totalSessionExpiry})
-      : this(issuer, subject, expiry, issuedAt, audience, totalSessionExpiry);
+      DateTime issuedAt, String audience, DateTime totalSessionExpiry,
+      String sessionIdentifier})
+      : this(issuer, subject, expiry, issuedAt, audience, sessionIdentifier,
+          totalSessionExpiry);
 
   SessionClaimSet.fromJson(Map json)
       : this.totalSessionExpiry = decodeIntDate(json['tse']),
-        super.fromJson(json);
+        this.sessionIdentifier = json['sid'],
+        super.fromJson(json) {
+    ensure(sessionIdentifier, isNotNull);
+    ensure(totalSessionExpiry, isNotNull);
+  }
 
-  Map toJson() =>
-      super.toJson()..addAll({'tse': encodeIntDate(totalSessionExpiry)});
+  Map toJson() => super.toJson()
+    ..addAll(
+        {'sid': sessionIdentifier, 'tse': encodeIntDate(totalSessionExpiry)});
 
   @override
   Set<ConstraintViolation> validate(

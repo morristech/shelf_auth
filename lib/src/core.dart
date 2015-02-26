@@ -58,22 +58,26 @@ class AuthenticatedContext<P extends Principal> {
       this.sessionCreationAllowed: true, this.sessionUpdateAllowed: true});
 }
 
+typedef String SessionIdentifierFactory();
+
 /**
  * An [AuthenticatedContext] established by authenticating via a session
  * token mechanism
  */
 class SessionAuthenticatedContext<P extends Principal>
     extends AuthenticatedContext<P> {
+  final String sessionIdentifier;
+
   final DateTime sessionFirstCreated;
 
   final DateTime sessionLastRefreshed;
 
   final DateTime noSessionRenewalAfter;
 
-  SessionAuthenticatedContext(P principal, this.sessionFirstCreated,
-      this.sessionLastRefreshed, this.noSessionRenewalAfter,
-      {Option<P> onBehalfOf: const None(), bool sessionCreationAllowed: true,
-      bool sessionUpdateAllowed: true})
+  SessionAuthenticatedContext(P principal, this.sessionIdentifier,
+      this.sessionFirstCreated, this.sessionLastRefreshed,
+      this.noSessionRenewalAfter, {Option<P> onBehalfOf: const None(),
+      bool sessionCreationAllowed: true, bool sessionUpdateAllowed: true})
       : super(principal,
           sessionCreationAllowed: sessionCreationAllowed,
           sessionUpdateAllowed: sessionUpdateAllowed);

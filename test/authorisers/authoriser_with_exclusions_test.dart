@@ -26,8 +26,7 @@ class MockRequestWhiteList extends Mock implements RequestWhiteListClass {
 }
 
 main() {
-  Request request() =>
-      new Request('GET', Uri.parse('http://foo.bar/blah'));
+  Request request() => new Request('GET', Uri.parse('http://foo.bar/blah'));
 
   Authoriser authoriser;
   MockRequestWhiteList whitelist;
@@ -50,8 +49,7 @@ main() {
       });
 
       test('completes with true', () {
-        expect(authoriser.isAuthorised(request()),
-            completion(true));
+        expect(authoriser.isAuthorised(request()), completion(true));
       });
 
       test('doesnt call realAuthoriser', () {
@@ -68,7 +66,8 @@ main() {
 
       group('when realAuthoriser returns false', () {
         setUp(() {
-          when(realAuthoriser.isAuthorised(any)).thenReturn(new Future.value(false));
+          when(realAuthoriser.isAuthorised(any))
+              .thenReturn(new Future.value(false));
         });
 
         test('completes', () {
@@ -76,8 +75,7 @@ main() {
         });
 
         test('completes with false', () {
-          expect(authoriser.isAuthorised(request()),
-              completion(false));
+          expect(authoriser.isAuthorised(request()), completion(false));
         });
 
         test('does call realAuthoriser', () {
@@ -88,7 +86,8 @@ main() {
       });
       group('when realAuthoriser returns true', () {
         setUp(() {
-          when(realAuthoriser.isAuthorised(any)).thenReturn(new Future.value(true));
+          when(realAuthoriser.isAuthorised(any))
+              .thenReturn(new Future.value(true));
         });
 
         test('completes', () {
@@ -96,8 +95,7 @@ main() {
         });
 
         test('completes with true', () {
-          expect(authoriser.isAuthorised(request()),
-              completion(true));
+          expect(authoriser.isAuthorised(request()), completion(true));
         });
 
         test('does call realAuthoriser', () {
@@ -107,6 +105,5 @@ main() {
         });
       });
     });
-
   });
 }
