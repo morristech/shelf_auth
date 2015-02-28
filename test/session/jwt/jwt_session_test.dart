@@ -13,8 +13,10 @@ main() {
   group('encode decode rountrip', () {
     final issuer = 'da issuer';
     final subject = 'el subjecto';
+    const String sessionId = 'id1234';
 
-    String token() => createSessionToken('secret sauce', issuer, subject);
+    String token() =>
+        createSessionToken('secret sauce', issuer, subject, sessionId);
     JsonWebToken<SessionClaimSet> roundTrip() => decodeSessionToken(token());
     SessionClaimSet claimSet() => roundTrip().claimSet;
 
@@ -24,6 +26,10 @@ main() {
 
     test('has matching subject', () {
       expect(claimSet().subject, equals(subject));
+    });
+
+    test('has matching sessionId', () {
+      expect(claimSet().sessionIdentifier, equals(sessionId));
     });
 
     test('has expected issuedAt', () {

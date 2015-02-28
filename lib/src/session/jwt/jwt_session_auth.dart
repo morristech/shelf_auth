@@ -52,7 +52,7 @@ class JwtSessionAuthenticator<P extends Principal>
 
       return principalFuture.then((principalOption) => principalOption.map(
           (principal) => new SessionAuthenticatedContext(principal,
-              claimSet.issuedAt, new DateTime.now(),
+              claimSet.sessionIdentifier, claimSet.issuedAt, new DateTime.now(),
               claimSet.totalSessionExpiry)));
     }).getOrElse(() => new Future(() => const None()));
   }

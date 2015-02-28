@@ -19,9 +19,11 @@ final UserLookupByUsername lookup = testLookup;
 const String secret = 'sshhh  its a secret';
 const String issuer = 'da issuer';
 const String subject = 'el subjecto';
+const String sessionId = 'id1234';
 
 main() {
-  final String sessionToken = createSessionToken(secret, issuer, subject);
+  final String sessionToken =
+      createSessionToken(secret, issuer, subject, sessionId);
   final String expiredToken =
       createExpiredSessionToken(secret, issuer, subject);
 
@@ -66,6 +68,10 @@ main() {
         test('completes with correct principal', () {
           expect(authenticator.authenticate(request()), completion(
               (optContext) => optContext.get().principal.name == subject));
+        });
+        test('completes with correct sessionId', () {
+          expect(authenticator.authenticate(request()), completion(
+              (optContext) => optContext.get().sessionIdentifier == sessionId));
         });
       });
 
@@ -122,7 +128,7 @@ String createExpiredSessionToken(String secret, String issuer, String subject,
   final iat = new DateTime.now().subtract(const Duration(days: 2));
 
   final claimSet = new SessionClaimSet(issuer, subject, iat.add(idleTimeout),
-      iat, audience, iat.add(totalSessionTimeout));
+      iat, audience, sessionId, iat.add(totalSessionTimeout));
 
   final jwt = new JsonWebToken.jws(claimSet, new JwaSignatureContext(secret));
   return jwt.encode();
