@@ -12,6 +12,7 @@ import 'package:shelf/shelf.dart';
 import '../../preconditions.dart';
 import '../../util.dart';
 import '../../principal/user_lookup.dart';
+import '../session_core.dart';
 
 class JwtSessionHandler<P extends Principal> implements SessionHandler<P> {
   final String issuer;
@@ -19,17 +20,20 @@ class JwtSessionHandler<P extends Principal> implements SessionHandler<P> {
   final Duration idleTimeout;
   final Duration totalSessionTimeout;
   final JwtSessionAuthenticator<P> authenticator;
+  final SessionIdentifierFactory createSessionId;
 
   JwtSessionHandler(
       this.issuer, String secret, UserLookupByUsername<P> userLookup,
       {this.idleTimeout: const Duration(minutes: 30),
-      this.totalSessionTimeout: const Duration(days: 1)})
+      this.totalSessionTimeout: const Duration(days: 1),
+      this.createSessionId: defaultCreateSessionIdentifier})
       : this.secret = secret,
         this.authenticator = new JwtSessionAuthenticator<P>(
             userLookup, secret) {
     ensure(issuer, isNotNull);
     ensure(secret, isNotNull);
     ensure(idleTimeout, isNotNull);
+    ensure(createSessionId, isNotNull);
   }
 
   @override
@@ -51,7 +55,7 @@ class JwtSessionHandler<P extends Principal> implements SessionHandler<P> {
         : remainingSessionTime;
 
     final sessionToken = createSessionToken(
-        secret, issuer, context.principal.name,
+        secret, issuer, context.principal.name, createSessionId(),
         idleTimeout: newIdleTimeout, totalSessionTimeout: remainingSessionTime);
 
     return addAuthorizationHeader(response,
@@ -63,7 +67,7 @@ class JwtSessionHandler<P extends Principal> implements SessionHandler<P> {
 
     return context is SessionAuthenticatedContext
         ? context
-        : new SessionAuthenticatedContext(
-            context.principal, now, now, now.add(totalSessionTimeout));
+        : new SessionAuthenticatedContext(context.principal, createSessionId(),
+            now, now, now.add(totalSessionTimeout));
   }
 }

@@ -1,3 +1,14 @@
+## 0.3.0
+
+* BREAKING CHANGE: Made sessionIdentifier mandatory for jwt sessions.
+    * If you are using jwt sessions in production then release a version with
+      0.2.6 first. Otherwise you will get errors from any existing sessions
+      as they won't have sessionIdentifiers.
+
+## 0.2.6
+
+* Added an optional sessionIdentifier
+
 ## 0.2.5
 
 * Added support for excluding some requests from authorisation checks

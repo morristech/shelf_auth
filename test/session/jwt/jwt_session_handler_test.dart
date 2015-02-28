@@ -18,6 +18,7 @@ import 'dart:io';
 const String secret = 'sshhh  its a secret';
 const String issuer = 'da issuer';
 const String subject = 'el subjecto';
+const String sessionId = 'id1234';
 
 final UserLookupByUsername lookup = testLookup;
 
@@ -35,7 +36,8 @@ main() {
       new DateTime.now().add(const Duration(seconds: 10));
 
   AuthenticatedContext context(bool expired) => new SessionAuthenticatedContext(
-      new Principal('fred'), sessionFirstCreated, sessionLastRefreshed,
+      new Principal('fred'), sessionId, sessionFirstCreated,
+      sessionLastRefreshed,
       expired ? expiredNoSessionRenewalAfter : activeNoSessionRenewalAfter);
 
   request() => new Request('GET', Uri.parse('http://localhost/foo'));
