@@ -1,3 +1,7 @@
+## 0.2.6
+
+* Added an optional sessionIdentifier
+
 ## 0.2.5
 
 * Added support for excluding some requests from authorisation checks

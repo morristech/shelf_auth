@@ -48,7 +48,6 @@ class SessionClaimSet extends JwtClaimSet {
       DateTime issuedAt, String audience, this.sessionIdentifier,
       this.totalSessionExpiry)
       : super(issuer, subject, expiry, issuedAt, audience) {
-    ensure(sessionIdentifier, isNotNull);
     ensure(totalSessionExpiry, isNotNull);
   }
 
@@ -62,7 +61,6 @@ class SessionClaimSet extends JwtClaimSet {
       : this.totalSessionExpiry = decodeIntDate(json['tse']),
         this.sessionIdentifier = json['sid'],
         super.fromJson(json) {
-    ensure(sessionIdentifier, isNotNull);
     ensure(totalSessionExpiry, isNotNull);
   }
 
