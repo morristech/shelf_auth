@@ -36,7 +36,8 @@ main() {
       new DateTime.now().add(const Duration(seconds: 10));
 
   AuthenticatedContext context(bool expired) => new SessionAuthenticatedContext(
-      new Principal('fred'), sessionId, sessionFirstCreated, sessionLastRefreshed,
+      new Principal('fred'), sessionId, sessionFirstCreated,
+      sessionLastRefreshed,
       expired ? expiredNoSessionRenewalAfter : activeNoSessionRenewalAfter);
 
   request() => new Request('GET', Uri.parse('http://localhost/foo'));

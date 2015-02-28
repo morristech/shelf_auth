@@ -15,7 +15,8 @@ main() {
     final subject = 'el subjecto';
     const String sessionId = 'id1234';
 
-    String token() => createSessionToken('secret sauce', issuer, subject, sessionId);
+    String token() =>
+        createSessionToken('secret sauce', issuer, subject, sessionId);
     JsonWebToken<SessionClaimSet> roundTrip() => decodeSessionToken(token());
     SessionClaimSet claimSet() => roundTrip().claimSet;
 

@@ -22,7 +22,8 @@ const String subject = 'el subjecto';
 const String sessionId = 'id1234';
 
 main() {
-  final String sessionToken = createSessionToken(secret, issuer, subject, sessionId);
+  final String sessionToken =
+      createSessionToken(secret, issuer, subject, sessionId);
   final String expiredToken =
       createExpiredSessionToken(secret, issuer, subject);
 

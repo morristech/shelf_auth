@@ -67,8 +67,8 @@ Iterable<AuthorizationHeader> authorizationHeaders(Request request) {
 
 Response addAuthorizationHeader(
     Response response, AuthorizationHeader authorizationHeader) {
-  final String credentials = '${authorizationHeader.authScheme} '
-      '${authorizationHeader.credentials}';
+  final String credentials =
+      '${authorizationHeader.authScheme} ' '${authorizationHeader.credentials}';
 
   List<String> authHeaders = _authHeaders(response);
 
