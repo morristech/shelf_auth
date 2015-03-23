@@ -26,7 +26,8 @@ String createSessionToken(
       now, audience, sessionIdentifier, now.add(totalSessionTimeout));
 
   _log.finest('created claimSet: \n${claimSet.toJson()}');
-  final jwt = new JsonWebToken.jws(claimSet, new JwaSignatureContext(secret));
+  final jwt = new JsonWebToken.jws(
+      claimSet, new JwaSymmetricKeySignatureContext(secret));
   return jwt.encode();
 }
 
@@ -40,14 +41,14 @@ JsonWebToken<SessionClaimSet> decodeSessionToken(String jwtToken,
       claimSetParser: (Map json) => new SessionClaimSet.fromJson(json));
 }
 
-class SessionClaimSet extends JwtClaimSet {
+class SessionClaimSet extends OpenIdJwtClaimSet {
   final DateTime totalSessionExpiry;
   final String sessionIdentifier;
 
   SessionClaimSet(String issuer, String subject, DateTime expiry,
       DateTime issuedAt, String audience, this.sessionIdentifier,
       this.totalSessionExpiry)
-      : super(issuer, subject, expiry, issuedAt, audience) {
+      : super(issuer, subject, expiry, issuedAt, [audience]) {
     ensure(sessionIdentifier, isNotNull);
     ensure(totalSessionExpiry, isNotNull);
   }

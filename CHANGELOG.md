@@ -1,3 +1,7 @@
+## 0.4.0
+
+* Upgraded dart-jwt and shelf versions
+
 ## 0.3.0
 
 * BREAKING CHANGE: Made sessionIdentifier mandatory for jwt sessions.

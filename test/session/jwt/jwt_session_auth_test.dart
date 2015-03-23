@@ -130,6 +130,7 @@ String createExpiredSessionToken(String secret, String issuer, String subject,
   final claimSet = new SessionClaimSet(issuer, subject, iat.add(idleTimeout),
       iat, audience, sessionId, iat.add(totalSessionTimeout));
 
-  final jwt = new JsonWebToken.jws(claimSet, new JwaSignatureContext(secret));
+  final jwt = new JsonWebToken.jws(
+      claimSet, new JwaSymmetricKeySignatureContext(secret));
   return jwt.encode();
 }

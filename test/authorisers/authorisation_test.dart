@@ -36,11 +36,9 @@ class MockSessionHandler extends Mock implements SessionHandler {
 main() {
   MockAuthoriser authoriser1;
   MockAuthoriser authoriser2;
-  MockAuthoriser authoriser3;
   MockHandler handler;
 
   Request request() => new Request('GET', Uri.parse('https://blah/foo'));
-  Request httpRequest() => new Request('GET', Uri.parse('http://blah/foo'));
   Request requestAuthenticated() => request().change(
       context: {
     SHELF_AUTH_REQUEST_CONTEXT: new AuthenticatedContext(new Principal('fred'))
@@ -50,7 +48,6 @@ main() {
   setUp(() {
     authoriser1 = new MockAuthoriser();
     authoriser2 = new MockAuthoriser();
-    authoriser3 = new MockAuthoriser();
     handler = new MockHandler();
     when(handler.call(argThat(new isInstanceOf<Request>())))
         .thenReturn(okResponse);

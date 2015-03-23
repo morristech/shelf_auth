@@ -55,8 +55,8 @@ main() {
     sessionAuthenticator = new MockAuthenticator();
     handler = new MockHandler();
     contextInZoneDuringHandler = const None();
-    when(handler.call(argThat(new isInstanceOf<Request>()))).thenAnswer(
-        (invocation) {
+    when(handler.call(argThat(new isInstanceOf<Request>())))
+        .thenAnswer((invocation) {
       contextInZoneDuringHandler = authenticatedContext();
       return okResponse;
     });
