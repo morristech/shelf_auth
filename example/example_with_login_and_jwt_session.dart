@@ -6,7 +6,7 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_auth/shelf_auth.dart';
-import 'package:shelf_exception_response/exception_response.dart';
+import 'package:shelf_exception_handler/shelf_exception_handler.dart';
 import 'dart:async';
 import 'package:option/option.dart';
 import 'package:uuid/uuid.dart';
@@ -102,7 +102,7 @@ void main() {
 
   var handler = const Pipeline()
       .addMiddleware(logRequests())
-      .addMiddleware(exceptionResponse())
+      .addMiddleware(exceptionHandler())
       .addHandler(rootRouter.handler);
 
   io.serve(handler, 'localhost', 8080).then((server) {

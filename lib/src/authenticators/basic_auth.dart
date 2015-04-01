@@ -11,7 +11,7 @@ import 'dart:async';
 import 'package:option/option.dart';
 import 'package:crypto/crypto.dart';
 import '../principal/user_lookup.dart';
-import 'package:shelf_exception_response/exception.dart';
+import 'package:http_exception/http_exception.dart';
 import '../preconditions.dart';
 import '../util.dart';
 import 'core.dart';

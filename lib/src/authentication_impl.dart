@@ -1,4 +1,4 @@
-// Copyright (c) 2014, The Shelf Auth project authors.
+// Copyright (c) 2015, The Shelf Auth project authors.
 // Please see the AUTHORS file for details.
 // All rights reserved. Use of this source code is governed by
 // a BSD 2-Clause License that can be found in the LICENSE file.
@@ -9,7 +9,7 @@ import 'package:shelf/shelf.dart';
 import 'dart:async';
 import 'package:option/option.dart';
 import 'util.dart';
-import 'package:shelf_exception_response/exception.dart';
+import 'package:http_exception/http_exception.dart';
 import 'package:logging/logging.dart';
 import 'core.dart';
 import 'zone_context.dart';
@@ -36,7 +36,7 @@ final Logger _log = new Logger('shelf_auth.authentication.internal');
  *
  * By default if no authenticators either return a successful authentication or
  * throw an exception, the request is allowed to continue as anonymous (guest).
- * This can be overriden by setting [allowAnonymousAccess] to false.
+ * This can be overridden by setting [allowAnonymousAccess] to false.
  */
 class AuthenticationMiddleware {
   final List<Authenticator> authenticators;
@@ -84,17 +84,17 @@ class AuthenticationMiddleware {
       }
 
       final bodyConsumed = authenticators.any((a) => a.readsBody);
-      final initalRequest = bodyConsumed
+      final initialRequest = bodyConsumed
           ? new Request(request.method, request.requestedUri,
               protocolVersion: request.protocolVersion,
               headers: request.headers,
               url: request.url,
-              scriptName: request.scriptName,
+              handlerPath: request.handlerPath,
               body: null,
               context: request.context)
           : request;
 
-      final newRequest = initalRequest.change(
+      final newRequest = initialRequest.change(
           context: {SHELF_AUTH_REQUEST_CONTEXT: authContext});
       final responseFuture = syncFuture(
           () => _runInNewZone(innerHandler, newRequest, authContext));

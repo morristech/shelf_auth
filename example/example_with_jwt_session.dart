@@ -6,7 +6,8 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_auth/shelf_auth.dart';
-import 'package:shelf_exception_response/exception_response.dart';
+import 'package:http_exception/http_exception.dart';
+import 'package:shelf_exception_handler/shelf_exception_handler.dart';
 import 'dart:async';
 import 'package:option/option.dart';
 import 'package:uuid/uuid.dart';
@@ -26,7 +27,7 @@ void main() {
 
   var handler = const Pipeline()
       .addMiddleware(logRequests())
-      .addMiddleware(exceptionResponse())
+      .addMiddleware(exceptionHandler())
       .addMiddleware(authMiddleware)
       .addHandler((Request request) => new Response.ok("I'm in with "
           "${getAuthenticatedContext(request).map((ac) => ac.principal.name)}\n"));
@@ -44,9 +45,9 @@ class RandomAuthenticator extends Authenticator {
   Future<Option<AuthenticatedContext>> authenticate(Request request) {
     approve = !approve;
 
-    return new Future.value(approve
-        ? new Some(new AuthenticatedContext(new Principal("fred")))
-        : throw new UnauthorizedException());
+    return approve ? new Future.value(
+        new Some(new AuthenticatedContext(new Principal("fred"))))
+        : new Future.error(new UnauthorizedException());
   }
 }
 

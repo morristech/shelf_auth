@@ -10,7 +10,7 @@ import 'package:shelf/shelf.dart';
 import 'dart:async';
 import 'package:option/option.dart';
 import '../principal/user_lookup.dart';
-import 'package:shelf_exception_response/exception.dart';
+import 'package:http_exception/http_exception.dart';
 import '../preconditions.dart';
 import 'core.dart';
 import 'package:shelf_path/shelf_path.dart';

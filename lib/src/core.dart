@@ -1,4 +1,4 @@
-// Copyright (c) 2014, The Shelf Auth project authors.
+// Copyright (c) 2015, The Shelf Auth project authors.
 // Please see the AUTHORS file for details.
 // All rights reserved. Use of this source code is governed by
 // a BSD 2-Clause License that can be found in the LICENSE file.
@@ -8,13 +8,13 @@ library shelf_auth.authentication.model;
 import 'package:shelf/shelf.dart';
 import 'dart:async';
 import 'package:option/option.dart';
-import 'package:shelf_exception_response/exception.dart';
+import 'package:http_exception/http_exception.dart';
 import 'package:logging/logging.dart';
 
 final Logger _log = new Logger('shelf_auth.authentication.model');
 
 /**
- * Someone or system that can be authenicated
+ * Someone or system that can be authenticated
  */
 class Principal {
   final String name;
@@ -115,7 +115,7 @@ abstract class Authenticator<P extends Principal> {
    *
    * * An exception if authentication fails (e.g. [UnauthorizedException])
    *
-   * Note: *shelf_auth* assumes that the *shelf_exception_response* package
+   * Note: *shelf_auth* assumes that the *shelf_exception_handler* package
    * or similar is used to turn exceptions into suitable http responses.
    */
   Future<Option<AuthenticatedContext<P>>> authenticate(Request request);

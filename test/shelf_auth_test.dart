@@ -13,7 +13,7 @@ import 'package:mockito/mockito.dart';
 import 'package:option/option.dart';
 import 'package:shelf/shelf.dart';
 import 'dart:async';
-import 'package:shelf_exception_response/exception.dart';
+import 'package:http_exception/http_exception.dart';
 import 'src/matchers.dart';
 
 class MockAuthenticator extends Mock implements Authenticator {

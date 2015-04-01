@@ -7,7 +7,7 @@ library shelf_auth.authorisation.impl;
 
 import 'package:shelf/shelf.dart';
 import 'dart:async';
-import 'package:shelf_exception_response/exception.dart';
+import 'package:http_exception/http_exception.dart';
 import 'package:logging/logging.dart';
 import 'authorisation.dart';
 import 'authentication.dart';
