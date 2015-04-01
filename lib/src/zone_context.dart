@@ -7,7 +7,7 @@ library shelf_auth.context.zone;
 
 import 'dart:async';
 import 'package:option/option.dart';
-import 'core.dart';
+import 'package:shelf_auth/src/context.dart';
 
 const Symbol SHELF_AUTH_ZONE_CONTEXT = #shelf.auth.context;
 

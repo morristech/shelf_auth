@@ -8,10 +8,10 @@ library shelf_auth.authentication.usernamepassword.test;
 import 'package:shelf/shelf.dart';
 import 'dart:async';
 import 'package:option/option.dart';
-import 'package:shelf_auth/src/authentication.dart';
 import 'package:shelf_auth/src/authenticators/username_password_auth.dart';
 import 'package:unittest/unittest.dart';
 import 'package:shelf_auth/src/principal/user_lookup.dart';
+import 'package:shelf_auth/src/context.dart';
 
 final UserLookupByUsernamePassword lookup = testLookup;
 

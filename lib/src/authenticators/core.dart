@@ -7,6 +7,7 @@ library shelf_auth.authentication.core;
 
 import '../authentication.dart';
 import '../preconditions.dart';
+import 'package:shelf_auth/src/context.dart';
 
 /**
  * An base class for [Authenticator]s

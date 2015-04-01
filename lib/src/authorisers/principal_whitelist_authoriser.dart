@@ -4,9 +4,9 @@ import 'package:option/option.dart';
 import '../preconditions.dart';
 import '../authorisation.dart';
 import '../authentication.dart';
-import '../core.dart';
 import 'dart:async';
 import 'package:shelf/shelf.dart';
+import 'package:shelf_auth/src/context.dart';
 
 typedef bool PrincipalWhiteList(Principal p);
 

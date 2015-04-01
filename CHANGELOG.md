@@ -1,3 +1,7 @@
+## 0.5.1
+
+* exposed a models.dart with just things like Principal, AuthenticatedContext etc
+
 ## 0.5.0
 
 * Now uses http_exception package rather than shelf_exception_response

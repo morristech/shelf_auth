@@ -5,9 +5,9 @@
 
 library shelf_auth.principal.lookup;
 
-import '../authentication.dart';
 import 'dart:async';
 import 'package:option/option.dart';
+import 'package:shelf_auth/src/context.dart';
 
 typedef Future<Option<P>> UserLookupByUsernamePassword<P extends Principal>(
     String username, String password);

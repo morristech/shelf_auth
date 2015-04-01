@@ -12,6 +12,7 @@ import 'authentication_impl.dart';
 import 'core.dart';
 
 export 'core.dart';
+import 'context.dart';
 
 final Logger _log = new Logger('shelf_auth.authentication');
 

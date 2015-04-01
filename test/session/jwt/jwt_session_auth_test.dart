@@ -8,12 +8,12 @@ library shelf_auth.authentication.session.jwt.test;
 import 'package:shelf/shelf.dart';
 import 'dart:async';
 import 'package:option/option.dart';
-import 'package:shelf_auth/src/authentication.dart';
 import 'package:unittest/unittest.dart';
 import 'package:shelf_auth/src/principal/user_lookup.dart';
 import 'package:shelf_auth/src/session/jwt/jwt_session_auth.dart';
 import 'package:shelf_auth/src/session/jwt/jwt_session.dart';
 import 'package:dart_jwt/dart_jwt.dart';
+import 'package:shelf_auth/src/context.dart';
 
 final UserLookupByUsername lookup = testLookup;
 const String secret = 'sshhh  its a secret';
