@@ -16,6 +16,7 @@ import 'core.dart';
 import 'package:shelf_path/shelf_path.dart';
 import 'dart:io';
 import '../util.dart';
+import 'package:shelf_auth/src/context.dart';
 
 const String SHELF_AUTH_STD_USER_CREDENTIALS =
     'shelf_auth.std.user.credentials';

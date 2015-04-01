@@ -13,6 +13,7 @@ import '../../preconditions.dart';
 import '../../util.dart';
 import '../../principal/user_lookup.dart';
 import '../session_core.dart';
+import 'package:shelf_auth/src/context.dart';
 
 class JwtSessionHandler<P extends Principal> implements SessionHandler<P> {
   final String issuer;

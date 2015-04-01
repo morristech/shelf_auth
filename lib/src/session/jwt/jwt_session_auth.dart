@@ -16,6 +16,7 @@ import 'package:http_exception/http_exception.dart';
 import '../../preconditions.dart';
 import '../../util.dart';
 import '../../authenticators/core.dart';
+import 'package:shelf_auth/src/context.dart';
 
 /**
  * An [Authenticator] for Shelf Auth Jwt Session Token

@@ -13,6 +13,7 @@ import 'package:http_exception/http_exception.dart';
 import 'package:logging/logging.dart';
 import 'core.dart';
 import 'zone_context.dart';
+import 'context.dart';
 
 const String SHELF_AUTH_REQUEST_CONTEXT = 'shelf.auth.context';
 

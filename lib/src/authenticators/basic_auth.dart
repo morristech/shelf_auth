@@ -15,6 +15,7 @@ import 'package:http_exception/http_exception.dart';
 import '../preconditions.dart';
 import '../util.dart';
 import 'core.dart';
+import 'package:shelf_auth/src/context.dart';
 
 const BASIC_AUTH_SCHEME = 'Basic';
 /**
