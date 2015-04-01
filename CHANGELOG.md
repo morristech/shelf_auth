@@ -1,3 +1,7 @@
+## 0.5.0
+
+* Now uses http_exception package rather than shelf_exception_response
+
 ## 0.4.0
 
 * Upgraded dart-jwt and shelf versions

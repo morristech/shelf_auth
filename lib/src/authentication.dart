@@ -36,7 +36,7 @@ final Logger _log = new Logger('shelf_auth.authentication');
  *
  * ```
  *   var handler = const Pipeline()
-        .addMiddleware(exceptionResponse())
+        .addMiddleware(exceptionHandler())
         .addMiddleware(authenticate([new BasicAuthenticator(userLookup)]))
         .addHandler((Request request) => new Response.ok("I'm in"));
 

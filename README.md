@@ -24,7 +24,7 @@ You then add this `Middleware` at the appropriate place in your shelf pipeline
 
 ```
   var handler = const Pipeline()
-      .addMiddleware(exceptionResponse())
+      .addMiddleware(exceptionHandler())
       .addMiddleware(authMiddleware)
       .addHandler((Request request) => new Response.ok("I'm in with "
           "${getAuthenticatedContext(request).map((ac) => ac.principal.name)}\n"));

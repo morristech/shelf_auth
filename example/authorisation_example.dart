@@ -6,7 +6,7 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_auth/shelf_auth.dart';
-import 'package:shelf_exception_response/exception_response.dart';
+import 'package:shelf_exception_handler/shelf_exception_handler.dart';
 import 'dart:async';
 import 'package:option/option.dart';
 import 'package:logging/logging.dart';
@@ -26,7 +26,7 @@ void main() {
 
   var handler = const Pipeline()
       .addMiddleware(logRequests())
-      .addMiddleware(exceptionResponse())
+      .addMiddleware(exceptionHandler())
       .addMiddleware(authenticationMiddleware)
       .addMiddleware(authorisationMiddleware)
       .addHandler((Request request) => new Response.ok("I'm in with "

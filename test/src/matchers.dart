@@ -16,8 +16,8 @@ Matcher requestWithUrlPath(matcher) =>
 Matcher requestWithUrl(matcher) =>
     requestMatcher("url", matcher, (Request request) => request.url);
 
-Matcher requestWithScriptName(matcher) => requestMatcher(
-    "scriptName", matcher, (Request request) => request.scriptName);
+//Matcher requestWithScriptName(matcher) => requestMatcher(
+//    "scriptName", matcher, (Request request) => request.scriptName);
 
 Matcher requestWithHeaderValue(String headerName, matcher) => requestMatcher(
     "headers", matcher, (Request request) => request.headers[headerName]);
