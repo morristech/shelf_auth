@@ -97,7 +97,7 @@ class AuthenticationMiddleware {
 
       final newRequest = initialRequest.change(
           context: {SHELF_AUTH_REQUEST_CONTEXT: authContext});
-      final responseFuture = syncFuture(
+      final responseFuture = new Future.sync(
           () => _runInNewZone(innerHandler, newRequest, authContext));
 
       final bool canHandleSession = sessionHandler.nonEmpty() &&
@@ -115,7 +115,7 @@ class AuthenticationMiddleware {
         _log.finer('denying unauthenticated access');
         throw new UnauthorizedException();
       }
-      return syncFuture(() => innerHandler(request));
+      return new Future.sync(() => innerHandler(request));
     });
   }
 }
