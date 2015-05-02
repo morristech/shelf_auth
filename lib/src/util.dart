@@ -17,7 +17,6 @@ import 'core.dart';
 /// under the covers.
 Future newFuture(callback()) => new Future.value().then((_) => callback());
 
-
 /// Run [callback] and capture any errors that would otherwise be top-leveled.
 ///
 /// If [this] is called in a non-root error zone, it will just run [callback]
