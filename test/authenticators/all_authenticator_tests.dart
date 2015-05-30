@@ -5,7 +5,7 @@
 
 library shelf_auth.authenticators.all.test;
 
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 import 'basic_auth_test.dart' as basic;
 import 'username_password_auth_test.dart' as username_password;
 

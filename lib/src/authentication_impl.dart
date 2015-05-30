@@ -48,7 +48,7 @@ class AuthenticationMiddleware {
   AuthenticationMiddleware(
       List<Authenticator> authenticators, Option<SessionHandler> sessionHandler,
       {this.allowHttp: false, this.allowAnonymousAccess: true})
-      : this.authenticators = (sessionHandler.nonEmpty()
+      : this.authenticators = (sessionHandler is Some
           ? ([]
         ..add(sessionHandler.get().authenticator)
         ..addAll(authenticators))
@@ -67,7 +67,7 @@ class AuthenticationMiddleware {
             .asyncMap((a) => a.authenticate(request));
 
     final Future<Option<AuthenticatedContext>> optAuthFuture = optAuthContexts
-        .firstWhere((authOpt) => authOpt.nonEmpty(),
+        .firstWhere((authOpt) => authOpt is Some,
             defaultValue: () => const None());
 
     final Future<Response> responseFuture = optAuthFuture
@@ -100,7 +100,7 @@ class AuthenticationMiddleware {
       final responseFuture = syncFuture(
           () => _runInNewZone(innerHandler, newRequest, authContext));
 
-      final bool canHandleSession = sessionHandler.nonEmpty() &&
+      final bool canHandleSession = sessionHandler is Some &&
           (authContext.sessionCreationAllowed ||
               authContext.sessionUpdateAllowed);
 

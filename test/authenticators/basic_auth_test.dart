@@ -9,7 +9,7 @@ import 'package:shelf/shelf.dart';
 import 'dart:async';
 import 'package:option/option.dart';
 import 'package:shelf_auth/src/authenticators/basic_auth.dart';
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 import 'package:shelf_auth/src/principal/user_lookup.dart';
 import 'package:shelf_auth/src/context.dart';
 

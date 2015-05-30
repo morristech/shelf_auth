@@ -7,7 +7,7 @@ library shelf_auth.authorisation.authwithexclusions.test;
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf_auth/src/authorisers/authoriser_with_exclusions.dart';
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 import 'package:shelf_auth/src/authorisation.dart';
 import 'package:mockito/mockito.dart';
 import 'dart:async';
@@ -17,8 +17,8 @@ class MockAuthoriser extends Mock implements Authoriser {
 }
 
 //typedef bool RequestWhiteList(Request r);
-abstract class RequestWhiteListClass {
-  bool call(Request r) {}
+class RequestWhiteListClass {
+  bool call(Request r) => true;
 }
 
 class MockRequestWhiteList extends Mock implements RequestWhiteListClass {

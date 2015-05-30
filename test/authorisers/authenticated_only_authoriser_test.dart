@@ -7,7 +7,7 @@ library shelf_auth.authorisation.authenticatedonly.test;
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf_auth/src/authorisers/authenticated_only_authoriser.dart';
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 import 'package:shelf_auth/src/authentication_impl.dart';
 import 'package:shelf_auth/src/context.dart';
 

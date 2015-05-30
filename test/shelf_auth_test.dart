@@ -8,7 +8,7 @@ library shelf_auth.test;
 import 'package:shelf_auth/shelf_auth.dart';
 import 'package:shelf_auth/src/authentication_impl.dart';
 
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:option/option.dart';
 import 'package:shelf/shelf.dart';

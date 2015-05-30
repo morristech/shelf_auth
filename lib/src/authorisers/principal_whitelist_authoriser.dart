@@ -37,7 +37,7 @@ class PrincipalWhitelistAuthoriser implements Authoriser {
       final isWhitelistedOpt =
           authContextOpt.map((context) => whitelist(context.principal));
 
-      return isWhitelistedOpt.getOrElse(false);
+      return isWhitelistedOpt.getOrElse(()=>false);
     }
   }
 }

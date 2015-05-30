@@ -7,7 +7,7 @@ library shelf_auth.authorisation.sameorigin.test;
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf_auth/src/authorisers/same_origin_authoriser.dart';
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 
 main() {
   requestNoReferer() => new Request('GET', Uri.parse('http://foo.bar/blah'));

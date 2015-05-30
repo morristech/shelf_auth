@@ -8,13 +8,13 @@ library shelf_auth.authorisers.principal.whitelist.test;
 import 'package:shelf/shelf.dart';
 import 'package:shelf_auth/src/authorisers/principal_whitelist_authoriser.dart';
 import 'package:shelf_auth/src/authentication_impl.dart';
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shelf_auth/src/context.dart';
 
 //typedef bool PrincipalWhiteList(Principal p);
-abstract class PrincipalWhiteListClass {
-  bool call(Principal p) {}
+class PrincipalWhiteListClass {
+  bool call(Principal p) => true;
 }
 
 class MockPrincipalWhiteList extends Mock implements PrincipalWhiteListClass {

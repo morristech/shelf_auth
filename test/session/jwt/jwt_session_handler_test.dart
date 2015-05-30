@@ -7,7 +7,7 @@ library shelf_auth.session.jwt.handler.test;
 
 import 'package:shelf_auth/src/session/jwt/jwt_session.dart';
 import 'package:shelf_auth/src/session/jwt/jwt_session_handler.dart';
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 import 'package:shelf_auth/src/principal/user_lookup.dart';
 import 'dart:async';
 import 'package:shelf_auth/shelf_auth.dart';

@@ -1,3 +1,9 @@
+## 0.5.2
+
+* port to option >1.0.0
+* unittest to test replacement
+* added explicit dependency from matcher 0.12.0
+
 ## 0.5.1
 
 * exposed a models.dart with just things like Principal, AuthenticatedContext etc

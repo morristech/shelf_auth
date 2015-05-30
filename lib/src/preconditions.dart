@@ -8,27 +8,20 @@ library preconditions;
 import 'package:matcher/matcher.dart';
 export 'package:matcher/matcher.dart';
 
-const FailureHandler _failureHandler = const _PreconditionFailureHandler();
-
 void ensure(value, Matcher matcher, [String failureMessage]) {
-  expect(value, matcher,
-      reason: failureMessage, failureHandler: _failureHandler);
+  matcher = wrapMatcher(matcher);
+  var matchState = {};
+  try {
+    if (matcher.matches(value, matchState)) return;
+  } catch (e, trace) {
+    if (failureMessage == null) {
+      failureMessage = '${(e is String) ? e : e.toString()} at $trace';
+    }
+  }
+  throw new ArgumentError(_defaultErrorFormatter(value, matcher, failureMessage, matchState, false));
 }
 
-class _PreconditionFailureHandler implements FailureHandler {
-  const _PreconditionFailureHandler();
-
-  void fail(String reason) {
-    throw new ArgumentError(reason);
-  }
-
-  void failMatch(
-      actual, Matcher matcher, String reason, Map matchState, bool verbose) {
-    fail(_defaultErrorFormatter(actual, matcher, reason, matchState, verbose));
-  }
-}
-
-// copied from matcher/expect.dart
+// copied from test/expect.dart
 String _defaultErrorFormatter(
     actual, Matcher matcher, String reason, Map matchState, bool verbose) {
   var description = new StringDescription();
@@ -41,8 +34,6 @@ String _defaultErrorFormatter(
   if (mismatchDescription.length > 0) {
     description.add('   Which: ${mismatchDescription}\n');
   }
-  if (reason != null) {
-    description.add(reason).add('\n');
-  }
+  if (reason != null) description.add(reason).add('\n');
   return description.toString();
 }

@@ -5,7 +5,7 @@
 
 library shelf_auth.authorisers.all.test;
 
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 import 'authorisation_test.dart' as authorisation;
 import 'same_origin_authoriser_test.dart' as same_origin;
 import 'authenticated_only_authoriser_test.dart' as authtenticated;
