@@ -54,7 +54,7 @@ class BasicAuthenticator<P extends Principal> extends AbstractAuthenticator<P> {
     try {
       return new String.fromCharCodes(
           CryptoUtils.base64StringToBytes(authHeader.credentials));
-    } on FormatException catch (e) {
+    } on FormatException catch (_) {
       return '';
     }
   }

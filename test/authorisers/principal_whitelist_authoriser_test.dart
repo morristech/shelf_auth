@@ -14,7 +14,7 @@ import 'package:shelf_auth/src/context.dart';
 
 //typedef bool PrincipalWhiteList(Principal p);
 abstract class PrincipalWhiteListClass {
-  bool call(Principal p) {}
+  bool call(Principal p) => false;
 }
 
 class MockPrincipalWhiteList extends Mock implements PrincipalWhiteListClass {
