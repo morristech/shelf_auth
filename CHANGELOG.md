@@ -1,3 +1,9 @@
+## 0.6.0+1
+
+* upgrade to shelf 0.6.0
+* use test package
+* upgrade option
+
 ## 0.5.2
 
 * port to option >1.0.0
