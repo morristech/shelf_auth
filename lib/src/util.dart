@@ -8,7 +8,6 @@ library shelf.util;
 import 'dart:async';
 import 'dart:io';
 
-import 'package:stack_trace/stack_trace.dart';
 import 'package:shelf/shelf.dart';
 import 'package:http_exception/http_exception.dart';
 import 'package:option/option.dart';
@@ -17,9 +16,6 @@ import 'core.dart';
 /// Like [new Future], but avoids around issue 11911 by using [new Future.value]
 /// under the covers.
 Future newFuture(callback()) => new Future.value().then((_) => callback());
-
-/// Like [Future.sync], but wraps the Future in [Chain.track] as well.
-Future syncFuture(callback()) => Chain.track(new Future.sync(callback));
 
 /// Run [callback] and capture any errors that would otherwise be top-leveled.
 ///

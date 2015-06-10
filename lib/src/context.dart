@@ -55,7 +55,6 @@ class AuthenticatedContext<P extends Principal> {
       this.sessionCreationAllowed: true, this.sessionUpdateAllowed: true});
 }
 
-
 /**
  * An [AuthenticatedContext] established by authenticating via a session
  * token mechanism
@@ -78,4 +77,3 @@ class SessionAuthenticatedContext<P extends Principal>
           sessionCreationAllowed: sessionCreationAllowed,
           sessionUpdateAllowed: sessionUpdateAllowed);
 }
-

@@ -43,9 +43,10 @@ class RandomAuthenticator extends Authenticator {
   Future<Option<AuthenticatedContext>> authenticate(Request request) {
     approve = !approve;
 
-    return approve ? new Future.value(
-        new Some(new AuthenticatedContext(new Principal("fred"))))
-    : new Future.error(new UnauthorizedException());
+    return approve
+        ? new Future.value(
+            new Some(new AuthenticatedContext(new Principal("fred"))))
+        : new Future.error(new UnauthorizedException());
   }
 }
 

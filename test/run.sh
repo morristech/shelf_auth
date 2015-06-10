@@ -1,5 +1,7 @@
 #!/bin/bash
-pushd `dirname $0` > /dev/null
-export TEST_DIR=`pwd`
-popd > /dev/null
-dart ${TEST_DIR}/all_tests.dart
+
+pub global activate test_runner
+
+export PATH="$PATH":"~/.pub-cache/bin"
+
+run_tests -c

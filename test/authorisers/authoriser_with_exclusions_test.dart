@@ -17,8 +17,8 @@ class MockAuthoriser extends Mock implements Authoriser {
 }
 
 //typedef bool RequestWhiteList(Request r);
-class RequestWhiteListClass {
-  bool call(Request r) => true;
+abstract class RequestWhiteListClass {
+  bool call(Request r) => false;
 }
 
 class MockRequestWhiteList extends Mock implements RequestWhiteListClass {

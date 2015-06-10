@@ -13,8 +13,8 @@ import 'package:mockito/mockito.dart';
 import 'package:shelf_auth/src/context.dart';
 
 //typedef bool PrincipalWhiteList(Principal p);
-class PrincipalWhiteListClass {
-  bool call(Principal p) => true;
+abstract class PrincipalWhiteListClass {
+  bool call(Principal p) => false;
 }
 
 class MockPrincipalWhiteList extends Mock implements PrincipalWhiteListClass {

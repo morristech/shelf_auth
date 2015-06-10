@@ -15,7 +15,6 @@ import '../preconditions.dart';
 import 'core.dart';
 import 'package:shelf_path/shelf_path.dart';
 import 'dart:io';
-import '../util.dart';
 import 'package:shelf_auth/src/context.dart';
 
 const String SHELF_AUTH_STD_USER_CREDENTIALS =
@@ -81,7 +80,7 @@ class UsernamePasswordAuthenticator<P extends Principal>
 
   Future<StdUserCredentials> _extractCredentials(Request request) {
     final contextCredentials = getStdUserCredentials(request);
-    final credentialsFuture = syncFuture(() => contextCredentials != null
+    final credentialsFuture = new Future.sync(() => contextCredentials != null
         ? contextCredentials
         : _extractFormCredentials(request));
 
