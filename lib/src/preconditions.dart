@@ -18,7 +18,8 @@ void ensure(value, Matcher matcher, [String failureMessage]) {
       failureMessage = '${(e is String) ? e : e.toString()} at $trace';
     }
   }
-  throw new ArgumentError(_defaultErrorFormatter(value, matcher, failureMessage, matchState, false));
+  throw new ArgumentError(_defaultErrorFormatter(
+      value, matcher, failureMessage, matchState, false));
 }
 
 // copied from test/expect.dart
