@@ -12,7 +12,9 @@ dependencies:
   shelf: '^0.6.0'
   uuid: '>=0.4.0 <0.6.0'
   shelf_path: 
-    path: /Users/blah/dart/newbacklogio/gitbacklog_root/gissue_root/shelfish_root/shelf_path
+    git: 
+      ref: 068c17665049c2ec5c7531bb29f0b3e30e3063cf
+      url: git@bitbucket.org:andersmholmgren/shelf_path.git
 dependency_overrides: 
 dev_dependencies: 
   mock: '>=0.11.0+1 <0.13.0'
