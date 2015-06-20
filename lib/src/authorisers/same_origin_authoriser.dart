@@ -25,7 +25,7 @@ class SameOriginAuthoriser implements Authoriser {
     final allowed = new Option(refererHeader).map((refererStr) {
       final referer = Uri.parse(refererStr);
       return referer.host == request.requestedUri.host;
-    }).getOrElse(()=>false);
+    }).getOrElse(() => false);
     if (_log.isLoggable(Level.FINEST)) {
       _log.finest('checking ${request.requestedUri}'
           ' is same domain as referer ${refererHeader}');
