@@ -51,8 +51,10 @@ class AuthenticatedContext<P extends Principal> {
   /// a result of this authentication
   final bool sessionUpdateAllowed;
 
-  AuthenticatedContext(this.principal, {this.onBehalfOf: const None(),
-      this.sessionCreationAllowed: true, this.sessionUpdateAllowed: true});
+  AuthenticatedContext(this.principal,
+      {this.onBehalfOf: const None(),
+      this.sessionCreationAllowed: true,
+      this.sessionUpdateAllowed: true});
 }
 
 /**
@@ -69,11 +71,16 @@ class SessionAuthenticatedContext<P extends Principal>
 
   final DateTime noSessionRenewalAfter;
 
-  SessionAuthenticatedContext(P principal, this.sessionIdentifier,
-      this.sessionFirstCreated, this.sessionLastRefreshed,
-      this.noSessionRenewalAfter, {Option<P> onBehalfOf: const None(),
-      bool sessionCreationAllowed: true, bool sessionUpdateAllowed: true})
+  SessionAuthenticatedContext(
+      P principal,
+      this.sessionIdentifier,
+      this.sessionFirstCreated,
+      this.sessionLastRefreshed,
+      this.noSessionRenewalAfter,
+      {Option<P> onBehalfOf: const None(),
+      bool sessionCreationAllowed: true,
+      bool sessionUpdateAllowed: true})
       : super(principal,
-          sessionCreationAllowed: sessionCreationAllowed,
-          sessionUpdateAllowed: sessionUpdateAllowed);
+            sessionCreationAllowed: sessionCreationAllowed,
+            sessionUpdateAllowed: sessionUpdateAllowed);
 }

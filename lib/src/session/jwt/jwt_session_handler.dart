@@ -29,8 +29,8 @@ class JwtSessionHandler<P extends Principal> implements SessionHandler<P> {
       this.totalSessionTimeout: const Duration(days: 1),
       this.createSessionId: defaultCreateSessionIdentifier})
       : this.secret = secret,
-        this.authenticator = new JwtSessionAuthenticator<P>(
-            userLookup, secret) {
+        this.authenticator =
+            new JwtSessionAuthenticator<P>(userLookup, secret) {
     ensure(issuer, isNotNull);
     ensure(secret, isNotNull);
     ensure(idleTimeout, isNotNull);

@@ -39,10 +39,10 @@ main() {
   MockHandler handler;
 
   Request request() => new Request('GET', Uri.parse('https://blah/foo'));
-  Request requestAuthenticated() => request().change(
-      context: {
-    SHELF_AUTH_REQUEST_CONTEXT: new AuthenticatedContext(new Principal('fred'))
-  });
+  Request requestAuthenticated() => request().change(context: {
+        SHELF_AUTH_REQUEST_CONTEXT:
+            new AuthenticatedContext(new Principal('fred'))
+      });
   final okResponse = new Response.ok('sweet');
 
   setUp(() {

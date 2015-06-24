@@ -36,7 +36,9 @@ main() {
       new DateTime.now().add(const Duration(seconds: 10));
 
   AuthenticatedContext context(bool expired) => new SessionAuthenticatedContext(
-      new Principal('fred'), sessionId, sessionFirstCreated,
+      new Principal('fred'),
+      sessionId,
+      sessionFirstCreated,
       sessionLastRefreshed,
       expired ? expiredNoSessionRenewalAfter : activeNoSessionRenewalAfter);
 

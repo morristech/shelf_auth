@@ -15,9 +15,9 @@ main() {
   requestSameOrigin() => new Request('GET', Uri.parse('http://foo.bar/blah'),
       headers: {'referer': 'http://foo.bar/fum'});
 
-  requestDifferentOrigin() => new Request(
-      'GET', Uri.parse('http://foo.bar/blah'),
-      headers: {'referer': 'http://blah.blah/fum'});
+  requestDifferentOrigin() =>
+      new Request('GET', Uri.parse('http://foo.bar/blah'),
+          headers: {'referer': 'http://blah.blah/fum'});
 
   final authoriser = new SameOriginAuthoriser();
 

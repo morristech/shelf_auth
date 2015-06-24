@@ -33,12 +33,11 @@ main() {
   requestExpired() => new Request('GET', Uri.parse('http://localhost/foo'),
       headers: {'Authorization': '$JWT_SESSION_AUTH_SCHEME $expiredToken'});
 
-  requestInvalidCredentials() => new Request(
-      'GET', Uri.parse('http://localhost/foo'),
-      headers: {
-    'Authorization':
-        '$JWT_SESSION_AUTH_SCHEME QWxhZGRpbjpvcGVuIHNlc2FtZQXXXXXX=='
-  });
+  requestInvalidCredentials() =>
+      new Request('GET', Uri.parse('http://localhost/foo'), headers: {
+        'Authorization':
+            '$JWT_SESSION_AUTH_SCHEME QWxhZGRpbjpvcGVuIHNlc2FtZQXXXXXX=='
+      });
 
   requestWrongRealm() => new Request('GET', Uri.parse('http://localhost/foo'),
       headers: {'Authorization': 'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=='});
@@ -66,12 +65,16 @@ main() {
         });
 
         test('completes with correct principal', () {
-          expect(authenticator.authenticate(request()), completion(
-              (optContext) => optContext.get().principal.name == subject));
+          expect(
+              authenticator.authenticate(request()),
+              completion(
+                  (optContext) => optContext.get().principal.name == subject));
         });
         test('completes with correct sessionId', () {
-          expect(authenticator.authenticate(request()), completion(
-              (optContext) => optContext.get().sessionIdentifier == sessionId));
+          expect(
+              authenticator.authenticate(request()),
+              completion((optContext) =>
+                  optContext.get().sessionIdentifier == sessionId));
         });
       });
 
@@ -124,7 +127,8 @@ Future<Option<Principal>> testLookup(String username) {
 
 String createExpiredSessionToken(String secret, String issuer, String subject,
     {Duration idleTimeout: const Duration(minutes: 30),
-    Duration totalSessionTimeout: const Duration(days: 1), String audience}) {
+    Duration totalSessionTimeout: const Duration(days: 1),
+    String audience}) {
   final iat = new DateTime.now().subtract(const Duration(days: 2));
 
   final claimSet = new SessionClaimSet(issuer, subject, iat.add(idleTimeout),

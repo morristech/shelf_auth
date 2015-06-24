@@ -400,8 +400,8 @@ main() {
       });
     });
 
-    group('calls sessionHandlers authenticator before other authenticators',
-        () {
+    group(
+        'calls sessionHandlers authenticator before other authenticators', () {
       MockSessionHandler sessionHandler;
       var authHandler;
 

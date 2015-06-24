@@ -18,6 +18,7 @@ import 'core.dart';
 import 'package:shelf_auth/src/context.dart';
 
 const BASIC_AUTH_SCHEME = 'Basic';
+
 /**
  * An [Authenticator] for Basic Authentication (http://tools.ietf.org/html/rfc2617)
  */

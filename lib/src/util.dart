@@ -46,7 +46,8 @@ Map updateMap(Map original, Map updates) {
 Option<AuthorizationHeader> authorizationHeader(
     Request request, String authScheme) {
   return new Option(authorizationHeaders(request).firstWhere(
-      (authHeader) => authHeader.authScheme == authScheme, orElse: () => null));
+      (authHeader) => authHeader.authScheme == authScheme,
+      orElse: () => null));
 }
 
 Iterable<AuthorizationHeader> authorizationHeaders(Request request) {

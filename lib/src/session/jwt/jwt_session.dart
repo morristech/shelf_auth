@@ -19,7 +19,8 @@ const String JWT_SESSION_AUTH_SCHEME = 'ShelfAuthJwtSession';
 String createSessionToken(
     String secret, String issuer, String subject, String sessionIdentifier,
     {Duration idleTimeout: const Duration(minutes: 30),
-    Duration totalSessionTimeout: const Duration(days: 1), String audience}) {
+    Duration totalSessionTimeout: const Duration(days: 1),
+    String audience}) {
   final now = new DateTime.now();
 
   final claimSet = new SessionClaimSet(issuer, subject, now.add(idleTimeout),
@@ -45,19 +46,29 @@ class SessionClaimSet extends OpenIdJwtClaimSet {
   final DateTime totalSessionExpiry;
   final String sessionIdentifier;
 
-  SessionClaimSet(String issuer, String subject, DateTime expiry,
-      DateTime issuedAt, String audience, this.sessionIdentifier,
+  SessionClaimSet(
+      String issuer,
+      String subject,
+      DateTime expiry,
+      DateTime issuedAt,
+      String audience,
+      this.sessionIdentifier,
       this.totalSessionExpiry)
       : super(issuer, subject, expiry, issuedAt, [audience]) {
     ensure(sessionIdentifier, isNotNull);
     ensure(totalSessionExpiry, isNotNull);
   }
 
-  SessionClaimSet.build({String issuer, String subject, DateTime expiry,
-      DateTime issuedAt, String audience, DateTime totalSessionExpiry,
+  SessionClaimSet.build(
+      {String issuer,
+      String subject,
+      DateTime expiry,
+      DateTime issuedAt,
+      String audience,
+      DateTime totalSessionExpiry,
       String sessionIdentifier})
       : this(issuer, subject, expiry, issuedAt, audience, sessionIdentifier,
-          totalSessionExpiry);
+            totalSessionExpiry);
 
   SessionClaimSet.fromJson(Map json)
       : this.totalSessionExpiry = decodeIntDate(json['tse']),
