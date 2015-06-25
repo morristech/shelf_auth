@@ -21,11 +21,11 @@ main() {
       body: new Stream.fromIterable(
           ["username=Aladdin&password=opensesame".codeUnits]));
 
-  requestInvalidCredentials() => new Request(
-      'POST', Uri.parse('http://localhost/login'),
-      headers: {'Content-type': "application/x-www-form-urlencoded"},
-      body: new Stream.fromIterable(
-          ["username=Aladdin&password=foo".codeUnits]));
+  requestInvalidCredentials() =>
+      new Request('POST', Uri.parse('http://localhost/login'),
+          headers: {'Content-type': "application/x-www-form-urlencoded"},
+          body: new Stream.fromIterable(
+              ["username=Aladdin&password=foo".codeUnits]));
 
   requestNoAuth() => new Request('POST', Uri.parse('http://localhost/login'),
       headers: {'Foo': 'bar'});
@@ -50,8 +50,10 @@ main() {
         });
 
         test('completes with correct principal', () {
-          expect(authenticator.authenticate(request()), completion(
-              (optContext) => optContext.get().principal.name == 'Aladdin'));
+          expect(
+              authenticator.authenticate(request()),
+              completion((optContext) =>
+                  optContext.get().principal.name == 'Aladdin'));
         });
       });
 
@@ -80,7 +82,6 @@ main() {
 //        expect(authenticator.authenticate(requestNoAuth()),
 //        completion(new isInstanceOf<None>()));
 //      });
-
     });
   });
 }

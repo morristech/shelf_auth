@@ -52,8 +52,11 @@ class JwtSessionAuthenticator<P extends Principal>
       final principalFuture = userLookup(claimSet.subject);
 
       return principalFuture.then((principalOption) => principalOption.map(
-          (principal) => new SessionAuthenticatedContext(principal,
-              claimSet.sessionIdentifier, claimSet.issuedAt, new DateTime.now(),
+          (principal) => new SessionAuthenticatedContext(
+              principal,
+              claimSet.sessionIdentifier,
+              claimSet.issuedAt,
+              new DateTime.now(),
               claimSet.totalSessionExpiry)));
     }).getOrElse(() => new Future(() => const None()));
   }

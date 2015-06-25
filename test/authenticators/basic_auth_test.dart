@@ -49,8 +49,10 @@ main() {
         });
 
         test('completes with correct principal', () {
-          expect(authenticator.authenticate(request()), completion(
-              (optContext) => optContext.get().principal.name == 'Aladdin'));
+          expect(
+              authenticator.authenticate(request()),
+              completion((optContext) =>
+                  optContext.get().principal.name == 'Aladdin'));
         });
       });
 
