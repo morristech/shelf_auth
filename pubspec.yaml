@@ -12,14 +12,13 @@ dependencies:
   shelf: '^0.6.0'
   uuid: '>=0.4.0 <0.6.0'
   shelf_path: 
-    path: /Users/blah/dart/newbacklogio/gitbacklog_root/gissue_root/shelfish_root/shelf_path
+    git: 
+      ref: 060318b435e847254e331cee5f24dd823dfac4a4
+      url: git@bitbucket.org:andersmholmgren/shelf_path.git
 dependency_overrides: 
 dev_dependencies: 
   mock: '>=0.11.0+1 <0.13.0'
   mockito: '>=0.10.0 <0.11.0'
-  shelf_bind: '>=0.8.0'
-  shelf_exception_handler: '>=0.1.0'
-  shelf_route: '>=0.11.0+1'
   test: '^0.12.0'
 environment: 
   sdk: '>=1.8.0 <2.0.0'
