@@ -10,7 +10,8 @@ export 'src/authenticators/basic_auth.dart';
 export 'src/authenticators/core.dart';
 export 'src/core.dart';
 export 'src/context.dart';
-export 'src/zone_context.dart' show authenticatedContext;
+export 'src/zone_context.dart'
+    show authenticatedContext, authenticatedSessionContext;
 export 'src/authenticators/username_password_auth.dart';
 export 'src/session/jwt/jwt_session_handler.dart';
 export 'src/principal/user_lookup.dart';

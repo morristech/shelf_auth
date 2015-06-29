@@ -10,8 +10,9 @@ dependencies:
   matcher: '^0.12.0'
   option: '>=0.3.3 <1.2.0'
   shelf: '^0.6.0'
-  shelf_path: '^0.1.6'
   uuid: '>=0.4.0 <0.6.0'
+  shelf_path: 
+    path: /Users/blah/dart/newbacklogio/gitbacklog_root/gissue_root/shelfish_root/shelf_path
 dependency_overrides: 
 dev_dependencies: 
   mock: '>=0.11.0+1 <0.13.0'

@@ -18,6 +18,16 @@ const Symbol SHELF_AUTH_ZONE_CONTEXT = #shelf.auth.context;
 Option<AuthenticatedContext> authenticatedContext() =>
     new Option(Zone.current[SHELF_AUTH_ZONE_CONTEXT]);
 
+/**
+ * Same as [authenticatedContext] but returns None if there is an authenticated
+ * context if it is not a [SessionAuthenticatedContext]
+ */
+Option<SessionAuthenticatedContext> authenticatedSessionContext() =>
+    authenticatedContext().expand((context) =>
+        context is SessionAuthenticatedContext
+            ? new Some(context)
+            : const None());
+
 /// Runs the given [body] in a new [Zone] with the given [AuthenticatedContext]
 runInNewZone(AuthenticatedContext authContext, body()) {
   var response;
