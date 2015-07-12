@@ -23,7 +23,7 @@ dev_dependencies:
   test: '^0.12.0'
   shelf_bind: 
     git: 
-      ref: b5ad2e98986780fb1446403dc1a9b1c3563d500f
+      ref: b9a0b12a88e4991aab458018886d8f818b30c08f
       url: git@bitbucket.org:andersmholmgren/shelf_bind.git
   shelf_route: 
     git: 
