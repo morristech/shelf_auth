@@ -21,11 +21,7 @@ dev_dependencies:
   mockito: '>=0.10.0 <0.11.0'
   shelf_exception_handler: '>=0.1.0'
   test: '^0.12.0'
-  shelf_bind: 
-    git: 
-      ref: b9a0b12a88e4991aab458018886d8f818b30c08f
-      url: git@bitbucket.org:andersmholmgren/shelf_bind.git
-  shelf_route: 
+  shelf_route:
     git: 
       ref: 7dca7ed8d2255a2e522705a0ad906323f874152a
       url: git@bitbucket.org:andersmholmgren/shelf_route.git

@@ -12,7 +12,6 @@ import 'package:option/option.dart';
 import 'package:uuid/uuid.dart';
 import 'package:logging/logging.dart';
 import 'package:shelf_route/shelf_route.dart';
-import 'package:shelf_bind/shelf_bind.dart';
 
 /**
  * This example has a login route where username and password are POSTed
@@ -86,7 +85,7 @@ void main() {
       allowHttp: true,
       allowAnonymousAccess: false);
 
-  var rootRouter = router(handlerAdapter: handlerAdapter());
+  var rootRouter = router();
 
   // the route where the login form credentials are posted
   rootRouter.post(
