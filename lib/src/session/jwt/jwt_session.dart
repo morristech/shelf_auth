@@ -23,8 +23,10 @@ typedef Future<Option<P>> UserLookupBySessionClaimSet<P extends Principal, CS ex
 typedef JsonWebToken<CS> SessionTokenDecoder<CS extends SessionClaimSet>(
     String jwtToken, {JwsValidationContext validationContext});
 
-final JwtCodec<SessionClaimSet> jwtSessionCodec =
-    new JwtCodec.simple(decodeSessionToken);
+final JwtCodec<SessionClaimSet> jwtSessionCodec = new JwtCodec.def((Map json,
+        // TODO: validationContext not used. Is that OK?
+        {JwsValidationContext validationContext}) =>
+    new SessionClaimSet.fromJson(json));
 
 /**
  * Creates a Jwt token containing claims about a session
