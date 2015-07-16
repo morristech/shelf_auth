@@ -13,6 +13,7 @@ export 'src/context.dart';
 export 'src/zone_context.dart'
     show authenticatedContext, authenticatedSessionContext;
 export 'src/authenticators/username_password_auth.dart';
+export 'src/session/jwt/jwt_session.dart';
 export 'src/session/jwt/jwt_session_handler.dart';
 export 'src/principal/user_lookup.dart';
 export 'src/authentication_builder.dart';

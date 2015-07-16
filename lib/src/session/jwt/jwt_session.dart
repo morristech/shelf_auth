@@ -71,15 +71,17 @@ class SessionClaimSet extends OpenIdJwtClaimSet {
       : this(issuer, subject, expiry, issuedAt, audience, sessionIdentifier,
           totalSessionExpiry);
 
-  factory SessionClaimSet.std(
-      String issuer, String subject, String sessionIdentifier,
-      {Duration idleTimeout: const Duration(minutes: 30),
-      Duration totalSessionTimeout: const Duration(days: 1), String audience}) {
-    final now = new DateTime.now();
+  SessionClaimSet._std(DateTime now, String issuer, String subject,
+      String sessionIdentifier, Duration idleTimeout,
+      Duration totalSessionTimeout, String audience)
+      : this(issuer, subject, now.add(idleTimeout), now, audience,
+          sessionIdentifier, now.add(totalSessionTimeout));
 
-    return new SessionClaimSet(issuer, subject, now.add(idleTimeout), now,
-        audience, sessionIdentifier, now.add(totalSessionTimeout));
-  }
+  SessionClaimSet.std(String issuer, String subject, String sessionIdentifier,
+      {Duration idleTimeout: const Duration(minutes: 30),
+      Duration totalSessionTimeout: const Duration(days: 1), String audience})
+      : this._std(new DateTime.now(), issuer, subject, sessionIdentifier,
+          idleTimeout, totalSessionTimeout, audience);
 
   SessionClaimSet.fromJson(Map json)
       : this.totalSessionExpiry = decodeIntDate(json['tse']),
