@@ -16,6 +16,10 @@ import '../session_core.dart';
 import 'package:shelf_auth/src/context.dart';
 import 'package:dart_jwt/dart_jwt.dart';
 
+typedef CS SessionClaimFactory<CS extends SessionClaimSet>(String issuer,
+    String subject, String sessionIdentifier, Duration idleTimeout,
+    Duration totalSessionTimeout);
+
 class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
     implements SessionHandler<P, CS> {
   final String issuer;
@@ -25,6 +29,7 @@ class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
   final JwtSessionAuthenticator<P, CS> authenticator;
   final SessionIdentifierFactory createSessionId;
   final JwtCodec<CS> jwtCodec;
+  final SessionClaimFactory sessionClaimFactory;
 
   JwtSessionHandler(
       String issuer, String secret, UserLookupByUsername<P> userLookup,
@@ -32,14 +37,20 @@ class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
       Duration totalSessionTimeout: const Duration(days: 1),
       SessionIdentifierFactory createSessionId: defaultCreateSessionIdentifier,
       JwtCodec<CS> jwtCodec})
-      : this.custom(
-          issuer, secret, (CS claimsSet) => userLookup(claimsSet.subject),
+      : this.custom(issuer, secret,
+          (CS claimsSet) => userLookup(claimsSet.subject), (String issuer,
+              String subject, String sessionIdentifier, Duration idleTimeout,
+              Duration totalSessionTimeout) => new SessionClaimSet.create(
+              issuer, subject,
+              idleTimeout: idleTimeout,
+              totalSessionTimeout: totalSessionTimeout,
+              sessionIdentifier: sessionIdentifier),
           idleTimeout: idleTimeout,
           totalSessionTimeout: totalSessionTimeout,
           createSessionId: createSessionId);
 
-  JwtSessionHandler.custom(
-      this.issuer, String secret, UserLookupBySessionClaimSet<P, CS> userLookup,
+  JwtSessionHandler.custom(this.issuer, String secret,
+      UserLookupBySessionClaimSet<P, CS> userLookup, this.sessionClaimFactory,
       {this.idleTimeout: const Duration(minutes: 30),
       this.totalSessionTimeout: const Duration(days: 1),
       this.createSessionId: defaultCreateSessionIdentifier,
@@ -56,6 +67,7 @@ class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
     ensure(idleTimeout, isNotNull);
     ensure(createSessionId, isNotNull);
     ensure(this.jwtCodec, isNotNull);
+    ensure(sessionClaimFactory, isNotNull);
   }
 
   static JwtCodec _jwtCodec(JwtCodec jwtCodec) =>
@@ -95,10 +107,8 @@ class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
 
   CS createSessionClaim(
       String subject, String sessionIdentifier, Duration newIdleTimeout) {
-    return new SessionClaimSet.create(issuer, subject,
-        idleTimeout: newIdleTimeout,
-        totalSessionTimeout: totalSessionTimeout,
-        sessionIdentifier: sessionIdentifier);
+    return sessionClaimFactory(issuer, subject, sessionIdentifier,
+        newIdleTimeout, totalSessionTimeout);
   }
 
   SessionAuthenticatedContext _getSessionContext(AuthenticatedContext context) {

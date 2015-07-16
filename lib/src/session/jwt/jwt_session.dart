@@ -82,10 +82,11 @@ class SessionClaimSet extends OpenIdJwtClaimSet {
           sessionIdentifier, now.add(totalSessionTimeout));
 
   SessionClaimSet.create(String issuer, String subject,
-      {String sessionIdentifier, Duration idleTimeout: const Duration(minutes: 30),
+      {String sessionIdentifier,
+      Duration idleTimeout: const Duration(minutes: 30),
       Duration totalSessionTimeout: const Duration(days: 1), String audience})
       : this._std(new DateTime.now(), issuer, subject,
-      sessionIdentifier != null ? sessionIdentifier : new Uuid().v4(),
+          sessionIdentifier != null ? sessionIdentifier : new Uuid().v4(),
           idleTimeout, totalSessionTimeout, audience);
 
   SessionClaimSet.fromJson(Map json)
