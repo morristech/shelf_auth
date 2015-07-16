@@ -95,8 +95,10 @@ class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
 
   CS createSessionClaim(
       String subject, String sessionIdentifier, Duration newIdleTimeout) {
-    return new SessionClaimSet.std(issuer, subject, sessionIdentifier,
-        idleTimeout: newIdleTimeout, totalSessionTimeout: totalSessionTimeout);
+    return new SessionClaimSet.create(issuer, subject,
+        idleTimeout: newIdleTimeout,
+        totalSessionTimeout: totalSessionTimeout,
+        sessionIdentifier: sessionIdentifier);
   }
 
   SessionAuthenticatedContext _getSessionContext(AuthenticatedContext context) {
