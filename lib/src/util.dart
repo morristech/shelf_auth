@@ -49,8 +49,20 @@ Option<AuthorizationHeader> authorizationHeader(
       (authHeader) => authHeader.authScheme == authScheme, orElse: () => null));
 }
 
-Iterable<AuthorizationHeader> authorizationHeaders(Request request) {
-  List<String> authHeaders = _authHeaders(request);
+Option<AuthorizationHeader> responseAuthorizationHeader(
+    Response response, String authScheme) {
+  return new Option(responseAuthorizationHeaders(response).firstWhere(
+      (authHeader) => authHeader.authScheme == authScheme, orElse: () => null));
+}
+
+Iterable<AuthorizationHeader> authorizationHeaders(Request request) =>
+    _authorizationHeaders(request);
+
+Iterable<AuthorizationHeader> responseAuthorizationHeaders(Response response) =>
+    _authorizationHeaders(response);
+
+Iterable<AuthorizationHeader> _authorizationHeaders(message) {
+  List<String> authHeaders = _authHeaders(message);
 
   return authHeaders.map((header) {
     final List<String> parts = header.split(' ');
