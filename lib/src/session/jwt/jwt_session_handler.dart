@@ -14,28 +14,52 @@ import '../../util.dart';
 import '../../principal/user_lookup.dart';
 import '../session_core.dart';
 import 'package:shelf_auth/src/context.dart';
+import 'package:dart_jwt/dart_jwt.dart';
 
-class JwtSessionHandler<P extends Principal> implements SessionHandler<P> {
+class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
+    implements SessionHandler<P, CS> {
   final String issuer;
   final String secret;
   final Duration idleTimeout;
   final Duration totalSessionTimeout;
-  final JwtSessionAuthenticator<P> authenticator;
+  final JwtSessionAuthenticator<P, CS> authenticator;
   final SessionIdentifierFactory createSessionId;
+  final JwtCodec<CS> jwtCodec;
 
   JwtSessionHandler(
-      this.issuer, String secret, UserLookupByUsername<P> userLookup,
+      String issuer, String secret, UserLookupByUsername<P> userLookup,
+      {Duration idleTimeout: const Duration(minutes: 30),
+      Duration totalSessionTimeout: const Duration(days: 1),
+      SessionIdentifierFactory createSessionId: defaultCreateSessionIdentifier,
+      JwtCodec<CS> jwtCodec})
+      : this.foo(
+          issuer, secret, (CS claimsSet) => userLookup(claimsSet.subject),
+          idleTimeout: idleTimeout,
+          totalSessionTimeout: totalSessionTimeout,
+          createSessionId: createSessionId);
+
+  JwtSessionHandler.foo(
+      this.issuer, String secret, UserLookupBySessionClaimSet<P, CS> userLookup,
       {this.idleTimeout: const Duration(minutes: 30),
       this.totalSessionTimeout: const Duration(days: 1),
-      this.createSessionId: defaultCreateSessionIdentifier})
+      this.createSessionId: defaultCreateSessionIdentifier,
+      JwtCodec<CS> jwtCodec})
       : this.secret = secret,
-        this.authenticator =
-            new JwtSessionAuthenticator<P>(userLookup, secret) {
+        this.authenticator = new JwtSessionAuthenticator<P, CS>.foo(
+            userLookup, secret,
+            tokenDecoder: (String jwtToken,
+                    {JwsValidationContext validationContext}) =>
+                _jwtCodec(jwtCodec).decoder.convert(jwtToken)),
+        this.jwtCodec = _jwtCodec(jwtCodec) {
     ensure(issuer, isNotNull);
-    ensure(secret, isNotNull);
+    ensure(this.secret, isNotNull);
     ensure(idleTimeout, isNotNull);
     ensure(createSessionId, isNotNull);
+    ensure(this.jwtCodec, isNotNull);
   }
+
+  static JwtCodec _jwtCodec(JwtCodec jwtCodec) =>
+      jwtCodec != null ? jwtCodec : jwtSessionCodec;
 
   @override
   Response handle(

@@ -8,10 +8,22 @@ library shelf_auth.session.jwt;
 import 'package:dart_jwt/dart_jwt.dart';
 import 'package:logging/logging.dart';
 import '../../preconditions.dart';
+import 'dart:async';
+import 'package:option/option.dart';
+import 'package:shelf_auth/src/context.dart';
 
 Logger _log = new Logger('shelf_auth.session.jwt');
 
 const String JWT_SESSION_AUTH_SCHEME = 'ShelfAuthJwtSession';
+
+typedef Future<Option<P>> UserLookupBySessionClaimSet<P extends Principal, CS extends SessionClaimSet>(
+    CS claimSet);
+
+typedef JsonWebToken<CS> SessionTokenDecoder<CS extends SessionClaimSet>(
+    String jwtToken, {JwsValidationContext validationContext});
+
+final JwtCodec<SessionClaimSet> jwtSessionCodec =
+    new JwtCodec.simple(decodeSessionToken);
 
 /**
  * Creates a Jwt token containing claims about a session
@@ -19,8 +31,7 @@ const String JWT_SESSION_AUTH_SCHEME = 'ShelfAuthJwtSession';
 String createSessionToken(
     String secret, String issuer, String subject, String sessionIdentifier,
     {Duration idleTimeout: const Duration(minutes: 30),
-    Duration totalSessionTimeout: const Duration(days: 1),
-    String audience}) {
+    Duration totalSessionTimeout: const Duration(days: 1), String audience}) {
   final now = new DateTime.now();
 
   final claimSet = new SessionClaimSet(issuer, subject, now.add(idleTimeout),
@@ -46,29 +57,19 @@ class SessionClaimSet extends OpenIdJwtClaimSet {
   final DateTime totalSessionExpiry;
   final String sessionIdentifier;
 
-  SessionClaimSet(
-      String issuer,
-      String subject,
-      DateTime expiry,
-      DateTime issuedAt,
-      String audience,
-      this.sessionIdentifier,
+  SessionClaimSet(String issuer, String subject, DateTime expiry,
+      DateTime issuedAt, String audience, this.sessionIdentifier,
       this.totalSessionExpiry)
       : super(issuer, subject, expiry, issuedAt, [audience]) {
     ensure(sessionIdentifier, isNotNull);
     ensure(totalSessionExpiry, isNotNull);
   }
 
-  SessionClaimSet.build(
-      {String issuer,
-      String subject,
-      DateTime expiry,
-      DateTime issuedAt,
-      String audience,
-      DateTime totalSessionExpiry,
+  SessionClaimSet.build({String issuer, String subject, DateTime expiry,
+      DateTime issuedAt, String audience, DateTime totalSessionExpiry,
       String sessionIdentifier})
       : this(issuer, subject, expiry, issuedAt, audience, sessionIdentifier,
-            totalSessionExpiry);
+          totalSessionExpiry);
 
   SessionClaimSet.fromJson(Map json)
       : this.totalSessionExpiry = decodeIntDate(json['tse']),

@@ -11,6 +11,7 @@ import 'package:option/option.dart';
 import 'package:http_exception/http_exception.dart';
 import 'package:logging/logging.dart';
 import 'context.dart';
+import 'package:shelf_auth/src/session/jwt/jwt_session.dart';
 
 final Logger _log = new Logger('shelf_auth.authentication.model');
 
@@ -25,7 +26,7 @@ typedef String SessionIdentifierFactory();
  * [sessionCreationAllowed] and [sessionUpdateAllowed] in the given
  * [AuthenticatedContext]
  */
-abstract class SessionHandler<P extends Principal> {
+abstract class SessionHandler<P extends Principal, CS extends SessionClaimSet> {
   /// Update the [response] with a session token as appropriate
   Response handle(
       AuthenticatedContext context, Request request, Response response);

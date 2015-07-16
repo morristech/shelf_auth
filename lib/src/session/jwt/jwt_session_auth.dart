@@ -21,25 +21,34 @@ import 'package:shelf_auth/src/context.dart';
 /**
  * An [Authenticator] for Shelf Auth Jwt Session Token
  */
-class JwtSessionAuthenticator<P extends Principal>
+class JwtSessionAuthenticator<P extends Principal, CS extends SessionClaimSet>
     extends AbstractAuthenticator<P> {
-  final UserLookupByUsername<P> userLookup;
+  final UserLookupBySessionClaimSet<P, CS> userLookup;
+  final SessionTokenDecoder<CS> tokenDecoder;
   final String secret;
 
-  JwtSessionAuthenticator(this.userLookup, this.secret,
+  JwtSessionAuthenticator(UserLookupByUsername userLookup, String secret,
       {bool sessionCreationAllowed: false, bool sessionUpdateAllowed: true})
+      : this.foo((CS claimsSet) => userLookup(claimsSet.subject), secret,
+          sessionCreationAllowed: sessionCreationAllowed,
+          sessionUpdateAllowed: sessionUpdateAllowed);
+
+  JwtSessionAuthenticator.foo(this.userLookup, this.secret,
+      {bool sessionCreationAllowed: false, bool sessionUpdateAllowed: true,
+      this.tokenDecoder: decodeSessionToken})
       : super(sessionCreationAllowed, sessionUpdateAllowed) {
     ensure(userLookup, isNotNull);
     ensure(secret, isNotNull);
+    ensure(tokenDecoder, isNotNull);
   }
 
   @override
   Future<Option<AuthenticatedContext<P>>> authenticate(Request request) {
     final authHeaderOpt = authorizationHeader(request, JWT_SESSION_AUTH_SCHEME);
-    return authHeaderOpt.map((authHeader) {
+    return authHeaderOpt.map((authHeader) async {
       final sessionJwtToken = authHeader.credentials;
 
-      final sessionJwt = decodeSessionToken(sessionJwtToken);
+      final sessionJwt = tokenDecoder(sessionJwtToken);
       final violations = sessionJwt
           .validate(new JwtValidationContext.withSharedSecret(secret));
 
@@ -48,16 +57,14 @@ class JwtSessionAuthenticator<P extends Principal>
         throw new UnauthorizedException();
       }
 
-      final SessionClaimSet claimSet = sessionJwt.claimSet;
-      final principalFuture = userLookup(claimSet.subject);
+      final CS claimSet = sessionJwt.claimSet;
+      final principalOption = await userLookup(claimSet);
 
-      return principalFuture.then((principalOption) => principalOption.map(
-          (principal) => new SessionAuthenticatedContext(
-              principal,
-              claimSet.sessionIdentifier,
-              claimSet.issuedAt,
-              new DateTime.now(),
-              claimSet.totalSessionExpiry)));
-    }).getOrElse(() => new Future(() => const None()));
+      return principalOption
+          .map((principal) => new SessionAuthenticatedContext(principal,
+              claimSet.sessionIdentifier, claimSet.issuedAt, new DateTime.now(),
+              claimSet.totalSessionExpiry))
+          .getOrElse(() => new Future(() => const None()));
+    });
   }
 }
