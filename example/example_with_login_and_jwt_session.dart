@@ -88,18 +88,14 @@ void main() {
   var rootRouter = router();
 
   // the route where the login form credentials are posted
-  rootRouter.post(
-      '/login',
-      (Request request) => new Response.ok(
+  rootRouter.post('/login', (Request request) => new Response.ok(
           "I'm now logged in as ${loggedInUsername(request)}\n"),
       middleware: loginMiddleware);
 
   // the routes which require an authenticated user
   rootRouter.child('/authenticated', middleware: defaultAuthMiddleware)
-    ..get(
-        '/foo',
-        (Request request) =>
-            new Response.ok("Doing foo as ${loggedInUsername(request)}\n"));
+    ..get('/foo', (Request request) =>
+        new Response.ok("Doing foo as ${loggedInUsername(request)}\n"));
 
   printRoutes(rootRouter);
 
