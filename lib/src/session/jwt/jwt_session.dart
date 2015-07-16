@@ -32,10 +32,10 @@ String createSessionToken(
     String secret, String issuer, String subject, String sessionIdentifier,
     {Duration idleTimeout: const Duration(minutes: 30),
     Duration totalSessionTimeout: const Duration(days: 1), String audience}) {
-  final now = new DateTime.now();
-
-  final claimSet = new SessionClaimSet(issuer, subject, now.add(idleTimeout),
-      now, audience, sessionIdentifier, now.add(totalSessionTimeout));
+  final claimSet = new SessionClaimSet.std(issuer, subject, sessionIdentifier,
+      idleTimeout: idleTimeout,
+      totalSessionTimeout: totalSessionTimeout,
+      audience: audience);
 
   _log.finest('created claimSet: \n${claimSet.toJson()}');
   final jwt = new JsonWebToken.jws(
@@ -70,6 +70,16 @@ class SessionClaimSet extends OpenIdJwtClaimSet {
       String sessionIdentifier})
       : this(issuer, subject, expiry, issuedAt, audience, sessionIdentifier,
           totalSessionExpiry);
+
+  factory SessionClaimSet.std(
+      String issuer, String subject, String sessionIdentifier,
+      {Duration idleTimeout: const Duration(minutes: 30),
+      Duration totalSessionTimeout: const Duration(days: 1), String audience}) {
+    final now = new DateTime.now();
+
+    return new SessionClaimSet(issuer, subject, now.add(idleTimeout), now,
+        audience, sessionIdentifier, now.add(totalSessionTimeout));
+  }
 
   SessionClaimSet.fromJson(Map json)
       : this.totalSessionExpiry = decodeIntDate(json['tse']),

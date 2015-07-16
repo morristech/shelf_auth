@@ -79,12 +79,24 @@ class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
         ? idleTimeout
         : remainingSessionTime;
 
-    final sessionToken = createSessionToken(
-        secret, issuer, context.principal.name, createSessionId(),
-        idleTimeout: newIdleTimeout, totalSessionTimeout: remainingSessionTime);
+    final claimSet = createSessionClaim(
+        context.principal.name, createSessionId(), newIdleTimeout);
+
+//    _log.finest('created claimSet: \n${claimSet.toJson()}');
+
+    final jwt = new JsonWebToken.jws(
+        claimSet, new JwaSymmetricKeySignatureContext(secret));
+
+    final sessionToken = jwt.encode();
 
     return addAuthorizationHeader(response,
         new AuthorizationHeader(JWT_SESSION_AUTH_SCHEME, sessionToken));
+  }
+
+  CS createSessionClaim(
+      String subject, String sessionIdentifier, Duration newIdleTimeout) {
+    return new SessionClaimSet.std(issuer, subject, sessionIdentifier,
+        idleTimeout: newIdleTimeout, totalSessionTimeout: totalSessionTimeout);
   }
 
   SessionAuthenticatedContext _getSessionContext(AuthenticatedContext context) {
