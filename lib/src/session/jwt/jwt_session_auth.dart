@@ -29,11 +29,11 @@ class JwtSessionAuthenticator<P extends Principal, CS extends SessionClaimSet>
 
   JwtSessionAuthenticator(UserLookupByUsername userLookup, String secret,
       {bool sessionCreationAllowed: false, bool sessionUpdateAllowed: true})
-      : this.foo((CS claimsSet) => userLookup(claimsSet.subject), secret,
+      : this.custom((CS claimsSet) => userLookup(claimsSet.subject), secret,
           sessionCreationAllowed: sessionCreationAllowed,
           sessionUpdateAllowed: sessionUpdateAllowed);
 
-  JwtSessionAuthenticator.foo(this.userLookup, this.secret,
+  JwtSessionAuthenticator.custom(this.userLookup, this.secret,
       {bool sessionCreationAllowed: false, bool sessionUpdateAllowed: true,
       this.tokenDecoder: decodeSessionToken})
       : super(sessionCreationAllowed, sessionUpdateAllowed) {

@@ -32,20 +32,20 @@ class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
       Duration totalSessionTimeout: const Duration(days: 1),
       SessionIdentifierFactory createSessionId: defaultCreateSessionIdentifier,
       JwtCodec<CS> jwtCodec})
-      : this.foo(
+      : this.custom(
           issuer, secret, (CS claimsSet) => userLookup(claimsSet.subject),
           idleTimeout: idleTimeout,
           totalSessionTimeout: totalSessionTimeout,
           createSessionId: createSessionId);
 
-  JwtSessionHandler.foo(
+  JwtSessionHandler.custom(
       this.issuer, String secret, UserLookupBySessionClaimSet<P, CS> userLookup,
       {this.idleTimeout: const Duration(minutes: 30),
       this.totalSessionTimeout: const Duration(days: 1),
       this.createSessionId: defaultCreateSessionIdentifier,
       JwtCodec<CS> jwtCodec})
       : this.secret = secret,
-        this.authenticator = new JwtSessionAuthenticator<P, CS>.foo(
+        this.authenticator = new JwtSessionAuthenticator<P, CS>.custom(
             userLookup, secret,
             tokenDecoder: (String jwtToken,
                     {JwsValidationContext validationContext}) =>
@@ -87,7 +87,7 @@ class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
     final jwt = new JsonWebToken.jws(
         claimSet, new JwaSymmetricKeySignatureContext(secret));
 
-    final sessionToken = jwt.encode();
+    final sessionToken = jwtCodec.encode(jwt);
 
     return addAuthorizationHeader(response,
         new AuthorizationHeader(JWT_SESSION_AUTH_SCHEME, sessionToken));
