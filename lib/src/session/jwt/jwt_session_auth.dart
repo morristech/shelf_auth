@@ -60,11 +60,9 @@ class JwtSessionAuthenticator<P extends Principal, CS extends SessionClaimSet>
       final CS claimSet = sessionJwt.claimSet;
       final principalOption = await userLookup(claimSet);
 
-      return principalOption
-          .map((principal) => new SessionAuthenticatedContext(principal,
-              claimSet.sessionIdentifier, claimSet.issuedAt, new DateTime.now(),
-              claimSet.totalSessionExpiry))
-          .getOrElse(() => new Future(() => const None()));
-    });
+      return principalOption.map((principal) => new SessionAuthenticatedContext(
+          principal, claimSet.sessionIdentifier, claimSet.issuedAt,
+          new DateTime.now(), claimSet.totalSessionExpiry));
+    }).getOrElse(() => new Future(() => const None()));
   }
 }
