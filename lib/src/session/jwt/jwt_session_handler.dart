@@ -22,7 +22,7 @@ typedef Future<CS> SessionClaimFactory<CS extends SessionClaimSet>(
     Duration idleTimeout, Duration totalSessionTimeout);
 
 class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
-    implements SessionHandler<P, CS> {
+    implements SessionHandler<P> {
   final String issuer;
   final String secret;
   final Duration idleTimeout;

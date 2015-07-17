@@ -26,7 +26,7 @@ typedef String SessionIdentifierFactory();
  * [sessionCreationAllowed] and [sessionUpdateAllowed] in the given
  * [AuthenticatedContext]
  */
-abstract class SessionHandler<P extends Principal, CS extends SessionClaimSet> {
+abstract class SessionHandler<P extends Principal> {
   /// Update the [response] with a session token as appropriate
   Future<Response> handle(
       AuthenticatedContext context, Request request, Response response);
