@@ -15,10 +15,11 @@ import '../../principal/user_lookup.dart';
 import '../session_core.dart';
 import 'package:shelf_auth/src/context.dart';
 import 'package:dart_jwt/dart_jwt.dart';
+import 'dart:async';
 
-typedef CS SessionClaimFactory<CS extends SessionClaimSet>(String issuer,
-    String subject, String sessionIdentifier, Duration idleTimeout,
-    Duration totalSessionTimeout);
+typedef Future<CS> SessionClaimFactory<CS extends SessionClaimSet>(
+    String issuer, String subject, String sessionIdentifier,
+    Duration idleTimeout, Duration totalSessionTimeout);
 
 class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
     implements SessionHandler<P, CS> {
@@ -39,12 +40,12 @@ class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
       JwtCodec<CS> jwtCodec})
       : this.custom(issuer, secret,
           (CS claimsSet) => userLookup(claimsSet.subject), (String issuer,
-              String subject, String sessionIdentifier, Duration idleTimeout,
-              Duration totalSessionTimeout) => new SessionClaimSet.create(
-              issuer, subject,
-              idleTimeout: idleTimeout,
-              totalSessionTimeout: totalSessionTimeout,
-              sessionIdentifier: sessionIdentifier),
+                  String subject, String sessionIdentifier,
+                  Duration idleTimeout, Duration totalSessionTimeout) async =>
+              await new SessionClaimSet.create(issuer, subject,
+                  idleTimeout: idleTimeout,
+                  totalSessionTimeout: totalSessionTimeout,
+                  sessionIdentifier: sessionIdentifier),
           idleTimeout: idleTimeout,
           totalSessionTimeout: totalSessionTimeout,
           createSessionId: createSessionId);
@@ -74,8 +75,8 @@ class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
       jwtCodec != null ? jwtCodec : jwtSessionCodec;
 
   @override
-  Response handle(
-      AuthenticatedContext context, Request request, Response response) {
+  Future<Response> handle(
+      AuthenticatedContext context, Request request, Response response) async {
     final now = new DateTime.now();
 
     final sessionContext = _getSessionContext(context);
@@ -91,7 +92,7 @@ class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
         ? idleTimeout
         : remainingSessionTime;
 
-    final claimSet = createSessionClaim(
+    final claimSet = await createSessionClaim(
         context.principal.name, createSessionId(), newIdleTimeout);
 
 //    _log.finest('created claimSet: \n${claimSet.toJson()}');
@@ -105,7 +106,7 @@ class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
         new AuthorizationHeader(JWT_SESSION_AUTH_SCHEME, sessionToken));
   }
 
-  CS createSessionClaim(
+  Future<CS> createSessionClaim(
       String subject, String sessionIdentifier, Duration newIdleTimeout) {
     return sessionClaimFactory(issuer, subject, sessionIdentifier,
         newIdleTimeout, totalSessionTimeout);
