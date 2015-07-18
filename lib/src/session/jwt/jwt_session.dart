@@ -89,7 +89,10 @@ class SessionClaimSet extends OpenIdJwtClaimSet {
       Duration totalSessionTimeout: const Duration(days: 1), String audience})
       : this._std(new DateTime.now(), issuer, subject,
           sessionIdentifier != null ? sessionIdentifier : new Uuid().v4(),
-          idleTimeout, totalSessionTimeout, audience);
+          idleTimeout != null ? idleTimeout : const Duration(minutes: 30),
+          totalSessionTimeout != null
+              ? totalSessionTimeout
+              : const Duration(days: 1), audience);
 
   SessionClaimSet.fromJson(Map json)
       : this.totalSessionExpiry = decodeIntDate(json['tse']),
@@ -128,7 +131,8 @@ class SessionClaimSet extends OpenIdJwtClaimSet {
 }
 // TODO: these were copied from dart-jwt. Should expose them there instead
 
-DateTime decodeIntDate(int secondsSinceEpoch) =>
-    new DateTime.fromMillisecondsSinceEpoch(secondsSinceEpoch * 1000);
+DateTime decodeIntDate(int secondsSinceEpoch) => secondsSinceEpoch != null
+    ? new DateTime.fromMillisecondsSinceEpoch(secondsSinceEpoch * 1000)
+    : null;
 
 int encodeIntDate(DateTime dateTime) => dateTime.millisecondsSinceEpoch ~/ 1000;
