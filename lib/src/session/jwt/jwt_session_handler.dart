@@ -17,9 +17,9 @@ import 'package:shelf_auth/src/context.dart';
 import 'package:dart_jwt/dart_jwt.dart';
 import 'dart:async';
 
-typedef Future<CS> SessionClaimFactory<CS extends SessionClaimSet>(
-    String issuer, String subject, String sessionIdentifier,
-    Duration idleTimeout, Duration totalSessionTimeout);
+typedef Future<CS> SessionClaimFactory<P extends Principal, CS extends SessionClaimSet>(
+    String issuer, P subject, String sessionIdentifier, Duration idleTimeout,
+    Duration totalSessionTimeout);
 
 class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
     implements SessionHandler<P> {
@@ -30,7 +30,7 @@ class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
   final JwtSessionAuthenticator<P, CS> authenticator;
   final SessionIdentifierFactory createSessionId;
   final JwtCodec<CS> jwtCodec;
-  final SessionClaimFactory sessionClaimFactory;
+  final SessionClaimFactory<P, CS> sessionClaimFactory;
 
   JwtSessionHandler(
       String issuer, String secret, UserLookupByUsername<P> userLookup,
@@ -40,9 +40,9 @@ class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
       JwtCodec<CS> jwtCodec})
       : this.custom(issuer, secret,
           (CS claimsSet) => userLookup(claimsSet.subject), (String issuer,
-                  String subject, String sessionIdentifier,
-                  Duration idleTimeout, Duration totalSessionTimeout) async =>
-              await new SessionClaimSet.create(issuer, subject,
+                  P principal, String sessionIdentifier, Duration idleTimeout,
+                  Duration totalSessionTimeout) async =>
+              await new SessionClaimSet.create(issuer, principal.name,
                   idleTimeout: idleTimeout,
                   totalSessionTimeout: totalSessionTimeout,
                   sessionIdentifier: sessionIdentifier),
@@ -93,7 +93,7 @@ class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
         : remainingSessionTime;
 
     final claimSet = await createSessionClaim(
-        context.principal.name, createSessionId(), newIdleTimeout);
+        context.principal, createSessionId(), newIdleTimeout);
 
 //    _log.finest('created claimSet: \n${claimSet.toJson()}');
 
@@ -107,8 +107,8 @@ class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
   }
 
   Future<CS> createSessionClaim(
-      String subject, String sessionIdentifier, Duration newIdleTimeout) {
-    return sessionClaimFactory(issuer, subject, sessionIdentifier,
+      P principal, String sessionIdentifier, Duration newIdleTimeout) {
+    return sessionClaimFactory(issuer, principal, sessionIdentifier,
         newIdleTimeout, totalSessionTimeout);
   }
 
