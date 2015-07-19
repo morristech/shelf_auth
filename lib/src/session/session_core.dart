@@ -8,3 +8,14 @@ library shelf_auth.session;
 import 'package:uuid/uuid.dart';
 
 String defaultCreateSessionIdentifier() => new Uuid().v1();
+
+///// encodes the session token in the response somewhere
+//typedef Response SessionTokenResponseEncoder(Response response, String sessionToken);
+//
+//Response headerSessionTokenResponseEncoder(Response response, String sessionToken) {
+//
+//}
+//
+//Response metaTagSessionTokenResponseEncoder(Response response, String sessionToken) {
+//
+//}

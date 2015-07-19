@@ -8,23 +8,39 @@ library shelf_auth.session.jwt;
 import 'package:dart_jwt/dart_jwt.dart';
 import 'package:logging/logging.dart';
 import '../../preconditions.dart';
+import 'dart:async';
+import 'package:option/option.dart';
+import 'package:shelf_auth/src/context.dart';
+import 'package:uuid/uuid.dart';
 
 Logger _log = new Logger('shelf_auth.session.jwt');
 
 const String JWT_SESSION_AUTH_SCHEME = 'ShelfAuthJwtSession';
 
+typedef Future<Option<P>> UserLookupBySessionClaimSet<P extends Principal, CS extends SessionClaimSet>(
+    CS claimSet);
+
+typedef JsonWebToken<CS> SessionTokenDecoder<CS extends SessionClaimSet>(
+    String jwtToken, {JwsValidationContext validationContext});
+
+final JwtCodec<SessionClaimSet> jwtSessionCodec = new JwtCodec.def((Map json,
+        // TODO: validationContext not used. Is that OK?
+        {JwsValidationContext validationContext}) =>
+    new SessionClaimSet.fromJson(json));
+
 /**
  * Creates a Jwt token containing claims about a session
  */
+@deprecated
 String createSessionToken(
     String secret, String issuer, String subject, String sessionIdentifier,
     {Duration idleTimeout: const Duration(minutes: 30),
-    Duration totalSessionTimeout: const Duration(days: 1),
-    String audience}) {
-  final now = new DateTime.now();
-
-  final claimSet = new SessionClaimSet(issuer, subject, now.add(idleTimeout),
-      now, audience, sessionIdentifier, now.add(totalSessionTimeout));
+    Duration totalSessionTimeout: const Duration(days: 1), String audience}) {
+  final claimSet = new SessionClaimSet.create(issuer, subject,
+      idleTimeout: idleTimeout,
+      totalSessionTimeout: totalSessionTimeout,
+      sessionIdentifier: sessionIdentifier,
+      audience: audience);
 
   _log.finest('created claimSet: \n${claimSet.toJson()}');
   final jwt = new JsonWebToken.jws(
@@ -35,6 +51,7 @@ String createSessionToken(
 /**
  * Decodes a Jwt token containing claims about a session
  */
+@deprecated
 JsonWebToken<SessionClaimSet> decodeSessionToken(String jwtToken,
     {JwsValidationContext validationContext}) {
   return new JsonWebToken.decode(jwtToken,
@@ -46,29 +63,36 @@ class SessionClaimSet extends OpenIdJwtClaimSet {
   final DateTime totalSessionExpiry;
   final String sessionIdentifier;
 
-  SessionClaimSet(
-      String issuer,
-      String subject,
-      DateTime expiry,
-      DateTime issuedAt,
-      String audience,
-      this.sessionIdentifier,
+  SessionClaimSet(String issuer, String subject, DateTime expiry,
+      DateTime issuedAt, String audience, this.sessionIdentifier,
       this.totalSessionExpiry)
       : super(issuer, subject, expiry, issuedAt, [audience]) {
     ensure(sessionIdentifier, isNotNull);
     ensure(totalSessionExpiry, isNotNull);
   }
 
-  SessionClaimSet.build(
-      {String issuer,
-      String subject,
-      DateTime expiry,
-      DateTime issuedAt,
-      String audience,
-      DateTime totalSessionExpiry,
+  SessionClaimSet.build({String issuer, String subject, DateTime expiry,
+      DateTime issuedAt, String audience, DateTime totalSessionExpiry,
       String sessionIdentifier})
       : this(issuer, subject, expiry, issuedAt, audience, sessionIdentifier,
-            totalSessionExpiry);
+          totalSessionExpiry);
+
+  SessionClaimSet._std(DateTime now, String issuer, String subject,
+      String sessionIdentifier, Duration idleTimeout,
+      Duration totalSessionTimeout, String audience)
+      : this(issuer, subject, now.add(idleTimeout), now, audience,
+          sessionIdentifier, now.add(totalSessionTimeout));
+
+  SessionClaimSet.create(String issuer, String subject,
+      {String sessionIdentifier,
+      Duration idleTimeout: const Duration(minutes: 30),
+      Duration totalSessionTimeout: const Duration(days: 1), String audience})
+      : this._std(new DateTime.now(), issuer, subject,
+          sessionIdentifier != null ? sessionIdentifier : new Uuid().v4(),
+          idleTimeout != null ? idleTimeout : const Duration(minutes: 30),
+          totalSessionTimeout != null
+              ? totalSessionTimeout
+              : const Duration(days: 1), audience);
 
   SessionClaimSet.fromJson(Map json)
       : this.totalSessionExpiry = decodeIntDate(json['tse']),
@@ -105,15 +129,10 @@ class SessionClaimSet extends OpenIdJwtClaimSet {
     return new Set();
   }
 }
-
-//class SessionClaimSetValidationContext extends JwtClaimSetValidationContext {
-//  SessionClaimSetValidationContext({Duration expiryTolerance: const Duration(seconds: 30) })
-//   : super(expiryTolerance: expiryTolerance);
-//}
-
 // TODO: these were copied from dart-jwt. Should expose them there instead
 
-DateTime decodeIntDate(int secondsSinceEpoch) =>
-    new DateTime.fromMillisecondsSinceEpoch(secondsSinceEpoch * 1000);
+DateTime decodeIntDate(int secondsSinceEpoch) => secondsSinceEpoch != null
+    ? new DateTime.fromMillisecondsSinceEpoch(secondsSinceEpoch * 1000)
+    : null;
 
 int encodeIntDate(DateTime dateTime) => dateTime.millisecondsSinceEpoch ~/ 1000;

@@ -45,13 +45,11 @@ final Logger _log = new Logger('shelf_auth.authentication');
   * ```
  */
 Middleware authenticate(Iterable<Authenticator> authenticators,
-        {SessionHandler sessionHandler,
-        bool allowHttp: false,
-        bool allowAnonymousAccess: true}) =>
-    new AuthenticationMiddleware(
-        authenticators.toList(growable: false), new Option(sessionHandler),
-        allowHttp: allowHttp,
-        allowAnonymousAccess: allowAnonymousAccess).middleware;
+    {SessionHandler sessionHandler, bool allowHttp: false,
+    bool allowAnonymousAccess: true}) => new AuthenticationMiddleware(
+    authenticators.toList(growable: false), new Option(sessionHandler),
+    allowHttp: allowHttp,
+    allowAnonymousAccess: allowAnonymousAccess).middleware;
 
 /**
  * Retrieves the current [AuthenticatedContext] from the [request] if one

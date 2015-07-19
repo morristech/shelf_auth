@@ -13,6 +13,7 @@ export 'src/context.dart';
 export 'src/zone_context.dart'
     show authenticatedContext, authenticatedSessionContext;
 export 'src/authenticators/username_password_auth.dart';
+export 'src/session/jwt/jwt_session.dart';
 export 'src/session/jwt/jwt_session_handler.dart';
 export 'src/principal/user_lookup.dart';
 export 'src/authentication_builder.dart';
@@ -20,3 +21,5 @@ export 'src/authorisation.dart';
 export 'src/authorisers/same_origin_authoriser.dart';
 export 'src/authorisers/principal_whitelist_authoriser.dart';
 export 'src/authorisation_builder.dart';
+export 'src/util.dart'
+    show authorizationHeader, responseAuthorizationHeader, AuthorizationHeader;
