@@ -11,7 +11,6 @@ import 'package:option/option.dart';
 import 'package:http_exception/http_exception.dart';
 import 'package:logging/logging.dart';
 import 'context.dart';
-import 'package:shelf_auth/src/session/jwt/jwt_session.dart';
 
 final Logger _log = new Logger('shelf_auth.authentication.model');
 

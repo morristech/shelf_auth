@@ -11,13 +11,9 @@ dependencies:
   shelf: '^0.6.0'
   uuid: '>=0.4.0 <0.6.0'
   dart_jwt: 
-    git: 
-      ref: a7a41c695cd429b9da738d62d8c497834bda7dc0
-      url: git@bitbucket.org:aholmgren/dart_jwt.git
+    path: /Users/aholmgren/Projects/dart/connect/addons/bb/bbclienttest_jefe_root/new-acdart_root/shelfish_root/dart_jwt
   shelf_path: 
-    git: 
-      ref: 7c910514e97cfd2aa47f0d1ba8733b00d925578a
-      url: git@bitbucket.org:andersmholmgren/shelf_path.git
+    path: /Users/aholmgren/Projects/dart/connect/addons/bb/bbclienttest_jefe_root/new-acdart_root/shelfish_root/shelf_path
 dependency_overrides: 
 dev_dependencies: 
   mock: '>=0.11.0+1 <0.13.0'
@@ -25,8 +21,6 @@ dev_dependencies:
   shelf_exception_handler: '>=0.1.0'
   test: '^0.12.0'
   shelf_route: 
-    git: 
-      ref: 538f4027664bcf77dd4308232b6fe69d95387647
-      url: git@bitbucket.org:andersmholmgren/shelf_route.git
+    path: /Users/aholmgren/Projects/dart/connect/addons/bb/bbclienttest_jefe_root/new-acdart_root/shelfish_root/shelf_route
 environment: 
   sdk: '>=1.8.0 <2.0.0'
