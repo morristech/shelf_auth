@@ -20,6 +20,8 @@ class Principal {
   Principal(this.name) {
     checkNotNull(name);
   }
+
+  String toString() => 'Principal[$name]';
 }
 
 /**
