@@ -23,8 +23,8 @@ Option<AuthenticatedContext> authenticatedContext() =>
  * context if it is not a [SessionAuthenticatedContext]
  */
 Option<SessionAuthenticatedContext> authenticatedSessionContext() =>
-    authenticatedContext().expand(
-        (context) => context is SessionAuthenticatedContext
+    authenticatedContext().expand((context) =>
+        context is SessionAuthenticatedContext
             ? new Some(context)
             : const None());
 
@@ -34,7 +34,9 @@ runInNewZone(AuthenticatedContext authContext, body()) {
 
   runZoned(() {
     response = body();
-  }, zoneValues: <Symbol, Object>{SHELF_AUTH_ZONE_CONTEXT: authContext});
+  }, zoneValues: <Symbol, Object>{
+    SHELF_AUTH_ZONE_CONTEXT: authContext
+  });
 
   return response;
 }

@@ -17,8 +17,12 @@ import 'package:shelf_auth/src/context.dart';
 import 'package:dart_jwt/dart_jwt.dart';
 import 'dart:async';
 
-typedef Future<CS> SessionClaimFactory<P extends Principal, CS extends SessionClaimSet>(
-    String issuer, P subject, String sessionIdentifier, Duration idleTimeout,
+typedef Future<CS> SessionClaimFactory<P extends Principal,
+    CS extends SessionClaimSet>(
+    String issuer,
+    P subject,
+    String sessionIdentifier,
+    Duration idleTimeout,
     Duration totalSessionTimeout);
 
 class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
@@ -38,17 +42,22 @@ class JwtSessionHandler<P extends Principal, CS extends SessionClaimSet>
       Duration totalSessionTimeout: const Duration(days: 1),
       SessionIdentifierFactory createSessionId: defaultCreateSessionIdentifier,
       JwtCodec<CS> jwtCodec})
-      : this.custom(issuer, secret,
-          (CS claimsSet) => userLookup(claimsSet.subject), (String issuer,
-                  P principal, String sessionIdentifier, Duration idleTimeout,
-                  Duration totalSessionTimeout) async =>
-              await new SessionClaimSet.create(issuer, principal.name,
-                  idleTimeout: idleTimeout,
-                  totalSessionTimeout: totalSessionTimeout,
-                  sessionIdentifier: sessionIdentifier),
-          idleTimeout: idleTimeout,
-          totalSessionTimeout: totalSessionTimeout,
-          createSessionId: createSessionId);
+      : this.custom(
+            issuer,
+            secret,
+            (CS claimsSet) => userLookup(claimsSet.subject),
+            (String issuer,
+                    P principal,
+                    String sessionIdentifier,
+                    Duration idleTimeout,
+                    Duration totalSessionTimeout) async =>
+                await new SessionClaimSet.create(issuer, principal.name,
+                    idleTimeout: idleTimeout,
+                    totalSessionTimeout: totalSessionTimeout,
+                    sessionIdentifier: sessionIdentifier),
+            idleTimeout: idleTimeout,
+            totalSessionTimeout: totalSessionTimeout,
+            createSessionId: createSessionId);
 
   JwtSessionHandler.custom(this.issuer, String secret,
       UserLookupBySessionClaimSet<P, CS> userLookup, this.sessionClaimFactory,

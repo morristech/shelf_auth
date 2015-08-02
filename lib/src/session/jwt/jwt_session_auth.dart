@@ -30,11 +30,12 @@ class JwtSessionAuthenticator<P extends Principal, CS extends SessionClaimSet>
   JwtSessionAuthenticator(UserLookupByUsername userLookup, String secret,
       {bool sessionCreationAllowed: false, bool sessionUpdateAllowed: true})
       : this.custom((CS claimsSet) => userLookup(claimsSet.subject), secret,
-          sessionCreationAllowed: sessionCreationAllowed,
-          sessionUpdateAllowed: sessionUpdateAllowed);
+            sessionCreationAllowed: sessionCreationAllowed,
+            sessionUpdateAllowed: sessionUpdateAllowed);
 
   JwtSessionAuthenticator.custom(this.userLookup, this.secret,
-      {bool sessionCreationAllowed: false, bool sessionUpdateAllowed: true,
+      {bool sessionCreationAllowed: false,
+      bool sessionUpdateAllowed: true,
       this.tokenDecoder: decodeSessionToken})
       : super(sessionCreationAllowed, sessionUpdateAllowed) {
     ensure(userLookup, isNotNull);
@@ -61,8 +62,11 @@ class JwtSessionAuthenticator<P extends Principal, CS extends SessionClaimSet>
       final principalOption = await userLookup(claimSet);
 
       return principalOption.map((principal) => new SessionAuthenticatedContext(
-          principal, claimSet.sessionIdentifier, claimSet.issuedAt,
-          new DateTime.now(), claimSet.totalSessionExpiry));
+          principal,
+          claimSet.sessionIdentifier,
+          claimSet.issuedAt,
+          new DateTime.now(),
+          claimSet.totalSessionExpiry));
     }).getOrElse(() => new Future(() => const None()));
   }
 }
