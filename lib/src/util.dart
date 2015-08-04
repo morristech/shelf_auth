@@ -12,6 +12,7 @@ import 'package:shelf/shelf.dart';
 import 'package:http_exception/http_exception.dart';
 import 'package:option/option.dart';
 import 'core.dart';
+import 'package:quiver/iterables.dart';
 
 /// Like [new Future], but avoids around issue 11911 by using [new Future.value]
 /// under the covers.
@@ -46,15 +47,13 @@ Map updateMap(Map original, Map updates) {
 Option<AuthorizationHeader> authorizationHeader(
     Request request, String authScheme) {
   return new Option(authorizationHeaders(request).firstWhere(
-      (authHeader) => authHeader.authScheme == authScheme,
-      orElse: () => null));
+      (authHeader) => authHeader.authScheme == authScheme, orElse: () => null));
 }
 
 Option<AuthorizationHeader> responseAuthorizationHeader(
     Response response, String authScheme) {
   return new Option(responseAuthorizationHeaders(response).firstWhere(
-      (authHeader) => authHeader.authScheme == authScheme,
-      orElse: () => null));
+      (authHeader) => authHeader.authScheme == authScheme, orElse: () => null));
 }
 
 Iterable<AuthorizationHeader> authorizationHeaders(Request request) =>
@@ -77,15 +76,16 @@ Iterable<AuthorizationHeader> _authorizationHeaders(message) {
 
 Response addAuthorizationHeader(
     Response response, AuthorizationHeader authorizationHeader) {
-  final String credentials =
-      '${authorizationHeader.authScheme} ' '${authorizationHeader.credentials}';
 
-  List<String> authHeaders = _authHeaders(response);
+//  List<String> authHeaders = _authHeaders(response);
+  final Iterable<AuthorizationHeader> authHeaders = _authorizationHeaders(
+      response).where(
+      (authHeader) => authHeader.authScheme != authorizationHeader.authScheme);
 
-  final newAuthHeaders = []
-    ..addAll(authHeaders)
-    ..add(credentials);
-  final newAuthHeadersStr = newAuthHeaders.join(',');
+  final Iterable<AuthorizationHeader> newAuthHeaders =
+      concat([authHeaders, [authorizationHeader]]);
+
+  final newAuthHeadersStr = newAuthHeaders.map((h) => h.toString()).join(',');
 
   return response.change(
       headers: {HttpHeaders.AUTHORIZATION: newAuthHeadersStr});
@@ -102,6 +102,8 @@ class AuthorizationHeader {
   final String credentials;
 
   AuthorizationHeader(this.authScheme, this.credentials);
+
+  String toString() => '${authScheme} ${credentials}';
 }
 
 Middleware withOptionalExclusions(
