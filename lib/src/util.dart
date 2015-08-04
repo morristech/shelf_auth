@@ -77,6 +77,7 @@ Iterable<AuthorizationHeader> _authorizationHeaders(message) {
 Response addAuthorizationHeader(
     Response response, AuthorizationHeader authorizationHeader,
     {bool omitIfAuthSchemeAlreadyInHeader: true}) {
+
   final Iterable<AuthorizationHeader> authHeaders =
       _authorizationHeaders(response);
 

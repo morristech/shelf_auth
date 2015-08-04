@@ -98,7 +98,9 @@ main() {
             responseAuthorizationHeader(firstResponse, JWT_SESSION_AUTH_SCHEME);
         final secondAuth = responseAuthorizationHeader(
             secondResponse, JWT_SESSION_AUTH_SCHEME);
-        expect(secondAuth, isNot(firstAuth));
+
+        expect(secondAuth.get().authScheme, firstAuth.get().authScheme);
+        expect(secondAuth.get().credentials, firstAuth.get().credentials);
       });
     });
   });
