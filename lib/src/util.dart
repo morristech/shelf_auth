@@ -77,13 +77,12 @@ Iterable<AuthorizationHeader> _authorizationHeaders(message) {
 Response addAuthorizationHeader(
     Response response, AuthorizationHeader authorizationHeader,
     {bool omitIfAuthSchemeAlreadyInHeader: true}) {
-
   final Iterable<AuthorizationHeader> authHeaders =
       _authorizationHeaders(response);
 
   if (omitIfAuthSchemeAlreadyInHeader &&
       authHeaders.any((authHeader) =>
-          authHeader.authScheme != authorizationHeader.authScheme)) {
+          authHeader.authScheme == authorizationHeader.authScheme)) {
     return response;
   } else {
     final Iterable<AuthorizationHeader> newAuthHeaders =
