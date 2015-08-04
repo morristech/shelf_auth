@@ -75,20 +75,25 @@ Iterable<AuthorizationHeader> _authorizationHeaders(message) {
 }
 
 Response addAuthorizationHeader(
-    Response response, AuthorizationHeader authorizationHeader) {
+    Response response, AuthorizationHeader authorizationHeader,
+    {bool omitIfAuthSchemeAlreadyInHeader: true}) {
 
-//  List<String> authHeaders = _authHeaders(response);
-  final Iterable<AuthorizationHeader> authHeaders = _authorizationHeaders(
-      response).where(
-      (authHeader) => authHeader.authScheme != authorizationHeader.authScheme);
+  final Iterable<AuthorizationHeader> authHeaders =
+      _authorizationHeaders(response);
 
-  final Iterable<AuthorizationHeader> newAuthHeaders =
-      concat([authHeaders, [authorizationHeader]]);
+  if (omitIfAuthSchemeAlreadyInHeader &&
+      authHeaders.any((authHeader) =>
+          authHeader.authScheme != authorizationHeader.authScheme)) {
+    return response;
+  } else {
+    final Iterable<AuthorizationHeader> newAuthHeaders =
+        concat([authHeaders, [authorizationHeader]]);
 
-  final newAuthHeadersStr = newAuthHeaders.map((h) => h.toString()).join(',');
+    final newAuthHeadersStr = newAuthHeaders.map((h) => h.toString()).join(',');
 
-  return response.change(
-      headers: {HttpHeaders.AUTHORIZATION: newAuthHeadersStr});
+    return response.change(
+        headers: {HttpHeaders.AUTHORIZATION: newAuthHeadersStr});
+  }
 }
 
 // TODO: raise issue on shelf to expose the Message class
