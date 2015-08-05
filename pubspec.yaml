@@ -8,7 +8,7 @@ dependencies:
   http_exception: '^0.1.0'
   matcher: '^0.12.0'
   option: '>=0.3.3 <1.2.0'
-  shelf: '^0.6.0'
+  shelf: '^0.6.2'
   uuid: '>=0.4.0 <0.6.0'
   dart_jwt: 
     path: /Users/blah/dart/backlogio_acdart/gitbacklog_root/gissue_root/new-acdart_root/shelfish_root/dart_jwt

@@ -50,6 +50,39 @@ Option<AuthorizationHeader> authorizationHeader(
       (authHeader) => authHeader.authScheme == authScheme, orElse: () => null));
 }
 
+Request removeAuthorizationHeader(Request request, String authScheme) {
+  final authHeaders = authorizationHeaders(request);
+  if (authHeaders.isEmpty) {
+    return request;
+  }
+  final adjustedAuthHeaders = authHeaders
+      .where((authHeader) => authHeader.authScheme != authScheme)
+      .map((ah) => ah.toString());
+  if (adjustedAuthHeaders.length == authHeaders.length) {
+    return request;
+  } else {
+    final r = request;
+
+    final adjustedHeaders = {}
+      ..addAll(r.headers)
+      ..remove(HttpHeaders.AUTHORIZATION);
+    if (adjustedAuthHeaders.isNotEmpty) {
+      final adjustedAuthHeadersStr =
+          adjustedAuthHeaders.map((h) => h.toString()).join(',');
+      adjustedHeaders[HttpHeaders.AUTHORIZATION] = adjustedAuthHeadersStr;
+    }
+
+    return new Request(r.method, r.requestedUri,
+        handlerPath: r.handlerPath,
+        url: r.url,
+        protocolVersion: r.protocolVersion,
+        body: r.read(),
+        context: r.context,
+        encoding: r.encoding,
+        headers: adjustedHeaders);
+  }
+}
+
 Option<AuthorizationHeader> responseAuthorizationHeader(
     Response response, String authScheme) {
   return new Option(responseAuthorizationHeaders(response).firstWhere(
@@ -77,7 +110,6 @@ Iterable<AuthorizationHeader> _authorizationHeaders(message) {
 Response addAuthorizationHeader(
     Response response, AuthorizationHeader authorizationHeader,
     {bool omitIfAuthSchemeAlreadyInHeader: true}) {
-
   final Iterable<AuthorizationHeader> authHeaders =
       _authorizationHeaders(response);
 
