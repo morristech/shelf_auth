@@ -12,6 +12,7 @@ import 'dart:async';
 import 'package:option/option.dart';
 import 'package:shelf_auth/src/context.dart';
 import 'package:uuid/uuid.dart';
+import '../../util.dart';
 
 Logger _log = new Logger('shelf_auth.session.jwt');
 
@@ -28,6 +29,11 @@ final JwtCodec<SessionClaimSet> jwtSessionCodec = new JwtCodec.def((Map json,
         // TODO: validationContext not used. Is that OK?
         {JwsValidationContext validationContext}) =>
     new SessionClaimSet.fromJson(json));
+
+class JwtSessionAuthorizationHeader extends AuthorizationHeader {
+  JwtSessionAuthorizationHeader(String credentials)
+      : super(JWT_SESSION_AUTH_SCHEME, credentials);
+}
 
 /**
  * Creates a Jwt token containing claims about a session

@@ -141,6 +141,8 @@ class AuthorizationHeader {
   AuthorizationHeader(this.authScheme, this.credentials);
 
   String toString() => '${authScheme} ${credentials}';
+
+  Map toAuthorizationHeader() => { HttpHeaders.AUTHORIZATION: toString() };
 }
 
 Middleware withOptionalExclusions(
