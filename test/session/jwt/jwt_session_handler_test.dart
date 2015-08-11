@@ -75,20 +75,32 @@ main() {
         expect(await header(HttpHeaders.AUTHORIZATION), isNotNull);
       });
 
-      test('and adds an authorization header with correct auth scheme',
-          () async {
+      test('with correct auth scheme', () async {
         expect(await header(HttpHeaders.AUTHORIZATION),
             startsWith(JWT_SESSION_AUTH_SCHEME));
       });
 
-      test('and adds an authorization header which would validate successfully',
-          () async {
-        final authheader = await header(HttpHeaders.AUTHORIZATION);
-        final req = requestWithHeader({HttpHeaders.AUTHORIZATION: authheader});
+      test('which would validate successfully', () async {
+        final authHeader = await header(HttpHeaders.AUTHORIZATION);
+        final req = requestWithHeader({HttpHeaders.AUTHORIZATION: authHeader});
 
         expect(sessionHandler().authenticator.authenticate(req), completes);
         expect(sessionHandler().authenticator.authenticate(req),
             completion(new isInstanceOf<Some>()));
+      });
+
+      test('unless session token already in response', () async {
+        final firstResponse = await handle(new Response.ok('hi'));
+
+        final secondResponse = await handle(firstResponse);
+
+        final firstAuth =
+            responseAuthorizationHeader(firstResponse, JWT_SESSION_AUTH_SCHEME);
+        final secondAuth = responseAuthorizationHeader(
+            secondResponse, JWT_SESSION_AUTH_SCHEME);
+
+        expect(secondAuth.get().authScheme, firstAuth.get().authScheme);
+        expect(secondAuth.get().credentials, firstAuth.get().credentials);
       });
     });
   });

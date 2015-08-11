@@ -12,21 +12,28 @@ import 'dart:async';
 import 'package:option/option.dart';
 import 'package:shelf_auth/src/context.dart';
 import 'package:uuid/uuid.dart';
+import '../../util.dart';
 
 Logger _log = new Logger('shelf_auth.session.jwt');
 
 const String JWT_SESSION_AUTH_SCHEME = 'ShelfAuthJwtSession';
 
-typedef Future<Option<P>> UserLookupBySessionClaimSet<P extends Principal, CS extends SessionClaimSet>(
-    CS claimSet);
+typedef Future<Option<P>> UserLookupBySessionClaimSet<P extends Principal,
+    CS extends SessionClaimSet>(CS claimSet);
 
 typedef JsonWebToken<CS> SessionTokenDecoder<CS extends SessionClaimSet>(
-    String jwtToken, {JwsValidationContext validationContext});
+    String jwtToken,
+    {JwsValidationContext validationContext});
 
 final JwtCodec<SessionClaimSet> jwtSessionCodec = new JwtCodec.def((Map json,
         // TODO: validationContext not used. Is that OK?
         {JwsValidationContext validationContext}) =>
     new SessionClaimSet.fromJson(json));
+
+class JwtSessionAuthorizationHeader extends AuthorizationHeader {
+  JwtSessionAuthorizationHeader(String credentials)
+      : super(JWT_SESSION_AUTH_SCHEME, credentials);
+}
 
 /**
  * Creates a Jwt token containing claims about a session
@@ -35,7 +42,8 @@ final JwtCodec<SessionClaimSet> jwtSessionCodec = new JwtCodec.def((Map json,
 String createSessionToken(
     String secret, String issuer, String subject, String sessionIdentifier,
     {Duration idleTimeout: const Duration(minutes: 30),
-    Duration totalSessionTimeout: const Duration(days: 1), String audience}) {
+    Duration totalSessionTimeout: const Duration(days: 1),
+    String audience}) {
   final claimSet = new SessionClaimSet.create(issuer, subject,
       idleTimeout: idleTimeout,
       totalSessionTimeout: totalSessionTimeout,
@@ -63,36 +71,56 @@ class SessionClaimSet extends OpenIdJwtClaimSet {
   final DateTime totalSessionExpiry;
   final String sessionIdentifier;
 
-  SessionClaimSet(String issuer, String subject, DateTime expiry,
-      DateTime issuedAt, String audience, this.sessionIdentifier,
+  SessionClaimSet(
+      String issuer,
+      String subject,
+      DateTime expiry,
+      DateTime issuedAt,
+      String audience,
+      this.sessionIdentifier,
       this.totalSessionExpiry)
       : super(issuer, subject, expiry, issuedAt, [audience]) {
     ensure(sessionIdentifier, isNotNull);
     ensure(totalSessionExpiry, isNotNull);
   }
 
-  SessionClaimSet.build({String issuer, String subject, DateTime expiry,
-      DateTime issuedAt, String audience, DateTime totalSessionExpiry,
+  SessionClaimSet.build(
+      {String issuer,
+      String subject,
+      DateTime expiry,
+      DateTime issuedAt,
+      String audience,
+      DateTime totalSessionExpiry,
       String sessionIdentifier})
       : this(issuer, subject, expiry, issuedAt, audience, sessionIdentifier,
-          totalSessionExpiry);
+            totalSessionExpiry);
 
-  SessionClaimSet._std(DateTime now, String issuer, String subject,
-      String sessionIdentifier, Duration idleTimeout,
-      Duration totalSessionTimeout, String audience)
+  SessionClaimSet._std(
+      DateTime now,
+      String issuer,
+      String subject,
+      String sessionIdentifier,
+      Duration idleTimeout,
+      Duration totalSessionTimeout,
+      String audience)
       : this(issuer, subject, now.add(idleTimeout), now, audience,
-          sessionIdentifier, now.add(totalSessionTimeout));
+            sessionIdentifier, now.add(totalSessionTimeout));
 
   SessionClaimSet.create(String issuer, String subject,
       {String sessionIdentifier,
       Duration idleTimeout: const Duration(minutes: 30),
-      Duration totalSessionTimeout: const Duration(days: 1), String audience})
-      : this._std(new DateTime.now(), issuer, subject,
-          sessionIdentifier != null ? sessionIdentifier : new Uuid().v4(),
-          idleTimeout != null ? idleTimeout : const Duration(minutes: 30),
-          totalSessionTimeout != null
-              ? totalSessionTimeout
-              : const Duration(days: 1), audience);
+      Duration totalSessionTimeout: const Duration(days: 1),
+      String audience})
+      : this._std(
+            new DateTime.now(),
+            issuer,
+            subject,
+            sessionIdentifier != null ? sessionIdentifier : new Uuid().v4(),
+            idleTimeout != null ? idleTimeout : const Duration(minutes: 30),
+            totalSessionTimeout != null
+                ? totalSessionTimeout
+                : const Duration(days: 1),
+            audience);
 
   SessionClaimSet.fromJson(Map json)
       : this.totalSessionExpiry = decodeIntDate(json['tse']),

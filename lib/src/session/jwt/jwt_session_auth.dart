@@ -17,6 +17,9 @@ import '../../preconditions.dart';
 import '../../util.dart';
 import '../../authenticators/core.dart';
 import 'package:shelf_auth/src/context.dart';
+import 'package:logging/logging.dart';
+
+Logger _log = new Logger('shelf_auth.authentication.session.jwt');
 
 /**
  * An [Authenticator] for Shelf Auth Jwt Session Token
@@ -44,6 +47,8 @@ class JwtSessionAuthenticator<P extends Principal, CS extends SessionClaimSet>
 
   @override
   Future<Option<AuthenticatedContext<P>>> authenticate(Request request) {
+    _log.finest('JwtSessionAuthenticator.authenticate');
+
     final authHeaderOpt = authorizationHeader(request, JWT_SESSION_AUTH_SCHEME);
     return authHeaderOpt.map((authHeader) async {
       final sessionJwtToken = authHeader.credentials;
@@ -53,16 +58,24 @@ class JwtSessionAuthenticator<P extends Principal, CS extends SessionClaimSet>
           .validate(new JwtValidationContext.withSharedSecret(secret));
 
       if (violations.isNotEmpty) {
-        // TODO: include error details
-        throw new UnauthorizedException();
+        // TODO: create a well formatted message
+        String message = '$violations';
+        throw new UnauthorizedException({'error': message}, message);
       }
 
       final CS claimSet = sessionJwt.claimSet;
       final principalOption = await userLookup(claimSet);
 
-      return principalOption.map((principal) => new SessionAuthenticatedContext(
-          principal, claimSet.sessionIdentifier, claimSet.issuedAt,
-          new DateTime.now(), claimSet.totalSessionExpiry));
-    }).getOrElse(() => new Future(() => const None()));
+      return principalOption.map((principal) {
+        _log.finer('successfully authenticated $principal');
+
+        return new SessionAuthenticatedContext(principal,
+            claimSet.sessionIdentifier, claimSet.issuedAt, new DateTime.now(),
+            claimSet.totalSessionExpiry);
+      });
+    }).getOrElse(() {
+      _log.finest('no session authenitcation data in request');
+      return new Future(() => const None());
+    });
   }
 }

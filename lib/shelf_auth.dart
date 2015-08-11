@@ -22,4 +22,8 @@ export 'src/authorisers/same_origin_authoriser.dart';
 export 'src/authorisers/principal_whitelist_authoriser.dart';
 export 'src/authorisation_builder.dart';
 export 'src/util.dart'
-    show authorizationHeader, responseAuthorizationHeader, AuthorizationHeader;
+    show
+        authorizationHeader,
+        responseAuthorizationHeader,
+        AuthorizationHeader,
+        removeAuthorizationHeader;

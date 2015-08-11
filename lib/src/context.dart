@@ -7,6 +7,8 @@ library shelf_auth.authentication.model.context;
 
 import 'package:option/option.dart';
 import 'package:logging/logging.dart';
+import 'package:dart_jwt/src/util.dart';
+import 'package:quiver/core.dart';
 
 final Logger _log = new Logger('shelf_auth.authentication.model');
 
@@ -16,7 +18,11 @@ final Logger _log = new Logger('shelf_auth.authentication.model');
 class Principal {
   final String name;
 
-  Principal(this.name);
+  Principal(this.name) {
+    checkNotNull(name);
+  }
+
+  String toString() => 'Principal[$name]';
 }
 
 /**
@@ -76,4 +82,11 @@ class SessionAuthenticatedContext<P extends Principal>
       : super(principal,
           sessionCreationAllowed: sessionCreationAllowed,
           sessionUpdateAllowed: sessionUpdateAllowed);
+
+  SessionAuthenticatedContext refresh({P principal}) =>
+      new SessionAuthenticatedContext(firstNonNull(principal, this.principal),
+          sessionIdentifier, sessionFirstCreated, new DateTime.now(),
+          noSessionRenewalAfter, onBehalfOf: onBehalfOf,
+          // TODO: these properties seem strange in this context. Review
+          sessionCreationAllowed: false, sessionUpdateAllowed: true);
 }

@@ -15,10 +15,10 @@ main() {
   Request requestUnauthenticated() =>
       new Request('GET', Uri.parse('http://foo.bar/blah'));
 
-  Request requestAuthenticated() => requestUnauthenticated().change(
-      context: {
-    SHELF_AUTH_REQUEST_CONTEXT: new AuthenticatedContext(new Principal('fred'))
-  });
+  Request requestAuthenticated() => requestUnauthenticated().change(context: {
+        SHELF_AUTH_REQUEST_CONTEXT:
+            new AuthenticatedContext(new Principal('fred'))
+      });
 
   AuthenticatedOnlyAuthoriser authoriser;
 

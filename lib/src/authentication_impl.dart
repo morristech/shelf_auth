@@ -48,11 +48,9 @@ class AuthenticationMiddleware {
   AuthenticationMiddleware(
       List<Authenticator> authenticators, Option<SessionHandler> sessionHandler,
       {this.allowHttp: false, this.allowAnonymousAccess: true})
-      : this.authenticators = (sessionHandler is Some
-          ? ([]
-        ..add(sessionHandler.get().authenticator)
-        ..addAll(authenticators))
-          : authenticators),
+      : this.authenticators = (sessionHandler is Some ? ([]
+          ..add(sessionHandler.get().authenticator)
+          ..addAll(authenticators)) : authenticators),
         this.sessionHandler = sessionHandler;
 
   Middleware get middleware => _createHandler;
