@@ -12,7 +12,7 @@ dependencies:
   uuid: '>=0.4.0 <0.6.0'
   dart_jwt: 
     git: 
-      ref: a26432534f1d7cd04f5c16861546d57ae4451889
+      ref: 998fbedc834e1619c6dac4d387fbc1d48bb4a9cf
       url: git@bitbucket.org:aholmgren/dart_jwt.git
   shelf_path: 
     git: 
