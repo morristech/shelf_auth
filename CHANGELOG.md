@@ -1,3 +1,8 @@
+## 0.7.0
+
+* SessionHandler returns a Future
+* Support for custom session claimsets
+
 ## 0.6.0+1
 
 * upgrade to shelf 0.6.0

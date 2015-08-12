@@ -30,7 +30,7 @@ class JwtSessionAuthenticator<P extends Principal, CS extends SessionClaimSet>
   final SessionTokenDecoder<CS> tokenDecoder;
   final String secret;
 
-  JwtSessionAuthenticator(UserLookupByUsername userLookup, String secret,
+  JwtSessionAuthenticator(UserLookupByUsername<P> userLookup, String secret,
       {bool sessionCreationAllowed: false, bool sessionUpdateAllowed: true})
       : this.custom((CS claimsSet) => userLookup(claimsSet.subject), secret,
           sessionCreationAllowed: sessionCreationAllowed,
