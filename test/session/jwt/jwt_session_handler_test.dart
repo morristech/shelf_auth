@@ -36,9 +36,7 @@ main() {
       new DateTime.now().add(const Duration(seconds: 10));
 
   AuthenticatedContext context(bool expired) => new SessionAuthenticatedContext(
-      new Principal('fred'),
-      sessionId,
-      sessionFirstCreated,
+      new Principal('fred'), sessionId, sessionFirstCreated,
       sessionLastRefreshed,
       expired ? expiredNoSessionRenewalAfter : activeNoSessionRenewalAfter);
 
@@ -51,44 +49,58 @@ main() {
     group('does not change response', () {
       group('when total session timeout expired', () {
         final resp = response();
-        test('', () {
-          expect(sessionHandler().handle(context(true), request(), resp),
+        test('', () async {
+          expect(await sessionHandler().handle(context(true), request(), resp),
               same(resp));
         });
       });
     });
     group('adds authorization header when session valid', () {
-      Response handle(Response resp) =>
+      Future<Response> handle(Response resp) =>
           sessionHandler().handle(context(false), request(), resp);
+
+      Future<String> header(String name) async =>
+          (await handle(response())).headers[name];
 
       test('and changes response', () {
         final resp = response();
         expect(handle(resp), isNot(same(resp)));
       });
 
-      test('and adds a header', () {
-        expect(handle(response()).headers, hasLength(1));
+      test('and adds a header', () async {
+        expect((await handle(response())).headers, hasLength(1));
       });
 
-      test('and adds an authorization header', () {
-        expect(
-            handle(response()).headers[HttpHeaders.AUTHORIZATION], isNotNull);
+      test('and adds an authorization header', () async {
+        expect(await header(HttpHeaders.AUTHORIZATION), isNotNull);
       });
 
-      test('and adds an authorization header with correct auth scheme', () {
-        expect(handle(response()).headers[HttpHeaders.AUTHORIZATION],
+      test('with correct auth scheme', () async {
+        expect(await header(HttpHeaders.AUTHORIZATION),
             startsWith(JWT_SESSION_AUTH_SCHEME));
       });
 
-      test('and adds an authorization header which would validate successfully',
-          () {
-        final authheader =
-            handle(response()).headers[HttpHeaders.AUTHORIZATION];
-        final req = requestWithHeader({HttpHeaders.AUTHORIZATION: authheader});
+      test('which would validate successfully', () async {
+        final authHeader = await header(HttpHeaders.AUTHORIZATION);
+        final req = requestWithHeader({HttpHeaders.AUTHORIZATION: authHeader});
 
         expect(sessionHandler().authenticator.authenticate(req), completes);
         expect(sessionHandler().authenticator.authenticate(req),
             completion(new isInstanceOf<Some>()));
+      });
+
+      test('unless session token already in response', () async {
+        final firstResponse = await handle(new Response.ok('hi'));
+
+        final secondResponse = await handle(firstResponse);
+
+        final firstAuth =
+            responseAuthorizationHeader(firstResponse, JWT_SESSION_AUTH_SCHEME);
+        final secondAuth = responseAuthorizationHeader(
+            secondResponse, JWT_SESSION_AUTH_SCHEME);
+
+        expect(secondAuth.get().authScheme, firstAuth.get().authScheme);
+        expect(secondAuth.get().credentials, firstAuth.get().credentials);
       });
     });
   });

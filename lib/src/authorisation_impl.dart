@@ -46,9 +46,11 @@ class AuthorisationMiddleware {
       bool isAuthorised, Request request, Handler innerHandler) {
     if (!isAuthorised) {
       if (getAuthenticatedContext(request) is Some) {
-        throw new ForbiddenException();
+        throw new ForbiddenException(
+            {'error': 'authorisation failed'}, 'authorisation failed');
       } else {
-        throw new UnauthorizedException();
+        throw new UnauthorizedException(
+            {'error': 'authorisation failed'}, 'authorisation failed');
       }
     }
 

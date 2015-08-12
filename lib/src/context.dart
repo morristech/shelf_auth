@@ -7,6 +7,8 @@ library shelf_auth.authentication.model.context;
 
 import 'package:option/option.dart';
 import 'package:logging/logging.dart';
+import 'package:dart_jwt/src/util.dart';
+import 'package:quiver/core.dart';
 
 final Logger _log = new Logger('shelf_auth.authentication.model');
 
@@ -16,7 +18,11 @@ final Logger _log = new Logger('shelf_auth.authentication.model');
 class Principal {
   final String name;
 
-  Principal(this.name);
+  Principal(this.name) {
+    checkNotNull(name);
+  }
+
+  String toString() => 'Principal[$name]';
 }
 
 /**
@@ -51,10 +57,8 @@ class AuthenticatedContext<P extends Principal> {
   /// a result of this authentication
   final bool sessionUpdateAllowed;
 
-  AuthenticatedContext(this.principal,
-      {this.onBehalfOf: const None(),
-      this.sessionCreationAllowed: true,
-      this.sessionUpdateAllowed: true});
+  AuthenticatedContext(this.principal, {this.onBehalfOf: const None(),
+      this.sessionCreationAllowed: true, this.sessionUpdateAllowed: true});
 }
 
 /**
@@ -71,16 +75,18 @@ class SessionAuthenticatedContext<P extends Principal>
 
   final DateTime noSessionRenewalAfter;
 
-  SessionAuthenticatedContext(
-      P principal,
-      this.sessionIdentifier,
-      this.sessionFirstCreated,
-      this.sessionLastRefreshed,
-      this.noSessionRenewalAfter,
-      {Option<P> onBehalfOf: const None(),
-      bool sessionCreationAllowed: true,
-      bool sessionUpdateAllowed: true})
+  SessionAuthenticatedContext(P principal, this.sessionIdentifier,
+      this.sessionFirstCreated, this.sessionLastRefreshed,
+      this.noSessionRenewalAfter, {Option<P> onBehalfOf: const None(),
+      bool sessionCreationAllowed: true, bool sessionUpdateAllowed: true})
       : super(principal,
-            sessionCreationAllowed: sessionCreationAllowed,
-            sessionUpdateAllowed: sessionUpdateAllowed);
+          sessionCreationAllowed: sessionCreationAllowed,
+          sessionUpdateAllowed: sessionUpdateAllowed);
+
+  SessionAuthenticatedContext refresh({P principal}) =>
+      new SessionAuthenticatedContext(firstNonNull(principal, this.principal),
+          sessionIdentifier, sessionFirstCreated, new DateTime.now(),
+          noSessionRenewalAfter, onBehalfOf: onBehalfOf,
+          // TODO: these properties seem strange in this context. Review
+          sessionCreationAllowed: false, sessionUpdateAllowed: true);
 }

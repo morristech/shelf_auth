@@ -80,14 +80,14 @@ main() {
 
       group('and credentials is for invalid user', () {
         test('throws', () {
-          expect(() => authenticator.authenticate(requestInvalidCredentials()),
-              throws);
+          expect(
+              authenticator.authenticate(requestInvalidCredentials()), throws);
         });
       });
 
       group('and session expired', () {
         test('throws', () {
-          expect(() => authenticator.authenticate(requestExpired()), throws);
+          expect(authenticator.authenticate(requestExpired()), throws);
         });
       });
 

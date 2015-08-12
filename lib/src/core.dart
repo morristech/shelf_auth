@@ -27,7 +27,7 @@ typedef String SessionIdentifierFactory();
  */
 abstract class SessionHandler<P extends Principal> {
   /// Update the [response] with a session token as appropriate
-  Response handle(
+  Future<Response> handle(
       AuthenticatedContext context, Request request, Response response);
 
   /// authenticator for session tokens created by the [handle] method

@@ -2,22 +2,22 @@ author: Anders Holmgren <andersmholmgren@gmail.com>
 description: A shelf handler for authentication and authorisation
 homepage: https://bitbucket.org/andersmholmgren/shelf_auth
 name: shelf_auth
-version: 0.6.8
+version: 0.7.0
 dependencies: 
   crypto: '>=0.9.0 <0.10.0'
-  dart_jwt: '^0.4.2'
+  dart_jwt: '^0.4.3'
   http_exception: '^0.1.0'
   matcher: '^0.12.0'
   option: '>=0.3.3 <1.2.0'
-  shelf: '^0.6.0'
-  shelf_path: '^0.1.6'
+  shelf: '^0.6.2'
+  shelf_path: '^0.1.7'
   uuid: '>=0.4.0 <0.6.0'
 dependency_overrides: 
 dev_dependencies: 
   mock: '>=0.11.0+1 <0.13.0'
   mockito: '>=0.10.0 <0.11.0'
   shelf_exception_handler: '>=0.1.0'
-  shelf_route: '^0.13.4'
+  shelf_route: '^0.13.5'
   test: '^0.12.0'
 environment: 
   sdk: '>=1.8.0 <2.0.0'
