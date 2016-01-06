@@ -12,7 +12,7 @@ dependencies:
   uuid: '>=0.4.0 <0.6.0'
   dart_jwt: 
     path: /Users/blah/dart/backlogio_acdart/gitbacklog_root/gissue_root/new-acdart_root/shelfish_root/dart_jwt
-  shelf_path:
+  shelf_path: 
     path: /Users/blah/dart/backlogio_acdart/gitbacklog_root/gissue_root/new-acdart_root/shelfish_root/shelf_path
 dependency_overrides: 
 dev_dependencies: 
