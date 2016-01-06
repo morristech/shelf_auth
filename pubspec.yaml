@@ -5,28 +5,19 @@ name: shelf_auth
 version: 0.7.1
 dependencies: 
   crypto: '>=0.9.0 <0.10.0'
+  dart_jwt: '^0.4.5'
   http_exception: '^0.1.0'
   matcher: '^0.12.0'
   option: '>=0.3.3 <1.2.0'
   shelf: '^0.6.2'
+  shelf_path: '^0.1.7'
   uuid: '>=0.4.0 <0.6.0'
-  dart_jwt: 
-    git: 
-      ref: be6d28b8dbf85543fdc8e98c59fc742adcdaa52c
-      url: git@bitbucket.org:aholmgren/dart_jwt.git
-  shelf_path: 
-    git: 
-      ref: cc24cbaa3725659453f1881def3158adc6eb0894
-      url: git@bitbucket.org:andersmholmgren/shelf_path.git
 dependency_overrides: 
 dev_dependencies: 
   mock: '>=0.11.0+1 <0.13.0'
   mockito: '>=0.10.0 <0.11.0'
   shelf_exception_handler: '>=0.1.0'
+  shelf_route: '^0.14.1'
   test: '^0.12.0'
-  shelf_route: 
-    git: 
-      ref: 45db11f8ac8637593d9d47f784bbcc8d1a1597ac
-      url: git@bitbucket.org:andersmholmgren/shelf_route.git
 environment: 
   sdk: '>=1.8.0 <2.0.0'
