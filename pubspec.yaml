@@ -26,7 +26,7 @@ dev_dependencies:
   test: '^0.12.0'
   shelf_route: 
     git: 
-      ref: 962b6a94e682e8361cbc8cf591affd5c1b99ffe8
+      ref: 45db11f8ac8637593d9d47f784bbcc8d1a1597ac
       url: git@bitbucket.org:andersmholmgren/shelf_route.git
 environment: 
   sdk: '>=1.8.0 <2.0.0'
