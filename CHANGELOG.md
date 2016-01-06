@@ -1,3 +1,7 @@
+## 0.7.1
+
+* Update dependency versions on dart_jwt, shelf_path and shelf_route
+
 ## 0.7.0
 
 * SessionHandler returns a Future
