@@ -47,7 +47,8 @@ Map updateMap(Map original, Map updates) {
 Option<AuthorizationHeader> authorizationHeader(
     Request request, String authScheme) {
   return new Option(authorizationHeaders(request).firstWhere(
-      (authHeader) => authHeader.authScheme == authScheme, orElse: () => null));
+      (authHeader) => authHeader.authScheme == authScheme,
+      orElse: () => null));
 }
 
 Request removeAuthorizationHeader(Request request, String authScheme) {
@@ -86,7 +87,8 @@ Request removeAuthorizationHeader(Request request, String authScheme) {
 Option<AuthorizationHeader> responseAuthorizationHeader(
     Response response, String authScheme) {
   return new Option(responseAuthorizationHeaders(response).firstWhere(
-      (authHeader) => authHeader.authScheme == authScheme, orElse: () => null));
+      (authHeader) => authHeader.authScheme == authScheme,
+      orElse: () => null));
 }
 
 Iterable<AuthorizationHeader> authorizationHeaders(Request request) =>
@@ -118,13 +120,15 @@ Response addAuthorizationHeader(
           authHeader.authScheme == authorizationHeader.authScheme)) {
     return response;
   } else {
-    final Iterable<AuthorizationHeader> newAuthHeaders =
-        concat([authHeaders, [authorizationHeader]]);
+    final Iterable<AuthorizationHeader> newAuthHeaders = concat([
+      authHeaders,
+      [authorizationHeader]
+    ]);
 
     final newAuthHeadersStr = newAuthHeaders.map((h) => h.toString()).join(',');
 
-    return response.change(
-        headers: {HttpHeaders.AUTHORIZATION: newAuthHeadersStr});
+    return response
+        .change(headers: {HttpHeaders.AUTHORIZATION: newAuthHeadersStr});
   }
 }
 
@@ -142,7 +146,8 @@ class AuthorizationHeader {
 
   String toString() => '${authScheme} ${credentials}';
 
-  Map toAuthorizationHeader() => { HttpHeaders.AUTHORIZATION: toString() };
+  Map<String, String> toAuthorizationHeader() =>
+      {HttpHeaders.AUTHORIZATION: toString()};
 }
 
 Middleware withOptionalExclusions(
