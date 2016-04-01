@@ -18,7 +18,6 @@ abstract class PrincipalWhiteListClass {
 }
 
 class MockPrincipalWhiteList extends Mock implements PrincipalWhiteListClass {
-  noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }
 
 main() {
@@ -32,16 +31,19 @@ main() {
 //  return new Option(request.context[SHELF_AUTH_REQUEST_CONTEXT]);
 
   PrincipalWhitelistAuthoriser authoriser;
-  MockPrincipalWhiteList whitelist;
+  MockPrincipalWhiteList _whitelist;
+
+  bool whitelist(Principal p) => _whitelist.call(p);
 
   setUp(() {
-    whitelist = new MockPrincipalWhiteList();
+    _whitelist = new MockPrincipalWhiteList();
   });
+
 
   group('isAuthorised', () {
     group('when user unauthenticated', () {
       setUp(() {
-        when(whitelist.call(any)).thenReturn(true);
+        when(_whitelist.call(any)).thenReturn(true);
       });
 
       group('and denyUnauthenticated is false', () {
@@ -79,7 +81,7 @@ main() {
       group('and user in whitelist', () {
         setUp(() {
           authoriser = new PrincipalWhitelistAuthoriser(whitelist);
-          when(whitelist.call(any)).thenReturn(true);
+          when(_whitelist.call(any)).thenReturn(true);
         });
 
         test('completes', () {
@@ -95,7 +97,7 @@ main() {
       group('and not user in whitelist', () {
         setUp(() {
           authoriser = new PrincipalWhitelistAuthoriser(whitelist);
-          when(whitelist.call(any)).thenReturn(false);
+          when(_whitelist.call(any)).thenReturn(false);
         });
         test('completes', () {
           expect(authoriser.isAuthorised(requestAuthenticated()), completes);

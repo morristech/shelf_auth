@@ -17,7 +17,7 @@ dependencies:
     path: "/Users/blah/dart/backlogio_acdart/gitbacklog_root/gissue_root/acdart_root/shelfish_root/shelf_path"
 dev_dependencies: 
   mock: ">=0.11.0+1 <0.13.0"
-  mockito: ">=0.10.0 <0.11.0"
+  mockito: ">=0.11.0 <0.12.0"
   shelf_exception_handler: ">=0.1.0"
   test: "^0.12.0"
   shelf_route: 

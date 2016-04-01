@@ -5,18 +5,16 @@
 
 library shelf_auth.authorisation.test;
 
-import 'package:shelf_auth/shelf_auth.dart';
-import 'package:shelf_auth/src/authentication_impl.dart';
+import 'dart:async';
 
-import 'package:test/test.dart';
+import 'package:http_exception/http_exception.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shelf/shelf.dart';
-import 'dart:async';
-import 'package:http_exception/http_exception.dart';
+import 'package:shelf_auth/shelf_auth.dart';
+import 'package:shelf_auth/src/authentication_impl.dart';
+import 'package:test/test.dart';
 
-class MockAuthoriser extends Mock implements Authoriser {
-  noSuchMethod(_) => super.noSuchMethod(_);
-}
+class MockAuthoriser extends Mock implements Authoriser {}
 
 //typedef Handler(Request request);
 abstract class HandlerClass {
@@ -25,13 +23,9 @@ abstract class HandlerClass {
   }
 }
 
-class MockHandler extends Mock implements HandlerClass {
-  noSuchMethod(_) => super.noSuchMethod(_);
-}
+class MockHandler extends Mock implements HandlerClass {}
 
-class MockSessionHandler extends Mock implements SessionHandler {
-  noSuchMethod(_) => super.noSuchMethod(_);
-}
+class MockSessionHandler extends Mock implements SessionHandler {}
 
 main() {
   MockAuthoriser authoriser1;
@@ -55,10 +49,10 @@ main() {
 
   group('authorisationMiddleware', () {
     group('when passed an empty list of authorisers', () {
-      var middlewareHandler;
+      Handler middlewareHandler;
       setUp(() {
-        final mw = authorise([]);
-        middlewareHandler = mw(handler);
+        final Middleware mw = authorise([]);
+        middlewareHandler = mw((Request r) => handler.call(r));
       });
 
       test('completes', () {
@@ -91,7 +85,7 @@ main() {
         when(authoriser1.isAuthorised(any)).thenReturn(new Future.value(true));
         when(authoriser2.isAuthorised(any)).thenReturn(new Future.value(true));
         final mw = authorise([authoriser1, authoriser2]);
-        middlewareHandler = mw(handler);
+        middlewareHandler = mw((Request r) => handler.call(r));
       });
 
       test('completes', () {
@@ -128,7 +122,7 @@ main() {
         when(authoriser1.isAuthorised(any)).thenReturn(new Future.value(false));
         when(authoriser2.isAuthorised(any)).thenReturn(new Future.value(true));
         final mw = authorise([authoriser1, authoriser2]);
-        middlewareHandler = mw(handler);
+        middlewareHandler = mw((Request r) => handler.call(r));
       });
 
       test('and request unauthenticated throws an UnauthorizedException', () {
