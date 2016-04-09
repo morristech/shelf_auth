@@ -11,15 +11,21 @@ dependencies:
   shelf: "^0.6.2"
   uuid: ">=0.4.0 <0.6.0"
   dart_jwt: 
-    path: "/Users/blah/dart/shelfish_root/dart_jwt"
+    git: 
+      ref: "6d9dca78927ee747fb3b0f1ab834d9e802cbd909"
+      url: "git@bitbucket.org:aholmgren/dart_jwt.git"
   shelf_path: 
-    path: "/Users/blah/dart/shelfish_root/shelf_path"
+    git: 
+      ref: "9087c6f8640afc005550e1ea7652e913287ff13e"
+      url: "git@bitbucket.org:andersmholmgren/shelf_path.git"
 dev_dependencies: 
   mock: ">=0.11.0+1 <0.13.0"
   mockito: ">=0.11.0 <0.12.0"
   shelf_exception_handler: ">=0.1.0"
   test: "^0.12.0"
   shelf_route: 
-    path: "/Users/blah/dart/shelfish_root/shelf_route"
+    git: 
+      ref: "383a03ffb2a1c9f38f7e636337594b41631efef5"
+      url: "git@bitbucket.org:andersmholmgren/shelf_route.git"
 environment: 
   sdk: ">=1.8.0 <2.0.0"
