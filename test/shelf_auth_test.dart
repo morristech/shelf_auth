@@ -5,20 +5,19 @@
 
 library shelf_auth.test;
 
-import 'package:shelf_auth/shelf_auth.dart';
-import 'package:shelf_auth/src/authentication_impl.dart';
+import 'dart:async';
 
-import 'package:test/test.dart';
+import 'package:http_exception/http_exception.dart';
 import 'package:mockito/mockito.dart';
 import 'package:option/option.dart';
 import 'package:shelf/shelf.dart';
-import 'dart:async';
-import 'package:http_exception/http_exception.dart';
+import 'package:shelf_auth/shelf_auth.dart';
+import 'package:shelf_auth/src/authentication_impl.dart';
+import 'package:test/test.dart';
+
 import 'src/matchers.dart';
 
-class MockAuthenticator extends Mock implements Authenticator {
-  noSuchMethod(_) => super.noSuchMethod(_);
-}
+class MockAuthenticator extends Mock implements Authenticator {}
 
 //typedef Handler(Request request);
 abstract class HandlerClass {
@@ -27,13 +26,9 @@ abstract class HandlerClass {
   }
 }
 
-class MockHandler extends Mock implements HandlerClass {
-  noSuchMethod(_) => super.noSuchMethod(_);
-}
+class MockHandler extends Mock implements HandlerClass {}
 
-class MockSessionHandler extends Mock implements SessionHandler {
-  noSuchMethod(_) => super.noSuchMethod(_);
-}
+class MockSessionHandler extends Mock implements SessionHandler {}
 
 main() {
   MockAuthenticator authenticator1;
@@ -71,7 +66,7 @@ main() {
       var middlewareHandler;
       setUp(() {
         final mw = authenticate([]);
-        middlewareHandler = mw(handler);
+        middlewareHandler = mw((Request r) => handler.call(r));
       });
 
       test('completes', () {
@@ -111,7 +106,7 @@ main() {
         when(authenticator2.authenticate(any))
             .thenReturn(new Future.value(const None()));
         final mw = authenticate([authenticator1, authenticator2]);
-        middlewareHandler = mw(handler);
+        middlewareHandler = mw((Request r) => handler.call(r));
       });
 
       test('completes', () {
@@ -159,7 +154,7 @@ main() {
             .thenReturn(new Future.value(const None()));
         final mw = authenticate([authenticator1, authenticator2],
             allowAnonymousAccess: false);
-        middlewareHandler = mw(handler);
+        middlewareHandler = mw((Request r) => handler.call(r));
       });
 
       test('completes', () {
@@ -176,7 +171,7 @@ main() {
         when(authenticator2.authenticate(any))
             .thenReturn(new Future.value(const None()));
         final mw = authenticate([authenticator1, authenticator2]);
-        middlewareHandler = mw(handler);
+        middlewareHandler = mw((Request r) => handler.call(r));
       });
 
       test('completes', () {
@@ -217,7 +212,7 @@ main() {
 
         final mw =
             authenticate([authenticator1, authenticator2, authenticator3]);
-        middlewareHandler = mw(handler);
+        middlewareHandler = mw((Request r) => handler.call(r));
       });
 
       test('completes', () {
@@ -264,7 +259,7 @@ main() {
 
       middlewareHandler(bool allowHttp) {
         final mw = authenticate([authenticator1], allowHttp: allowHttp);
-        return mw(handler);
+        return mw((Request r) => handler.call(r));
       }
 
       test('and allowHttp false then UnauthorizedException thrown', () {
@@ -288,7 +283,7 @@ main() {
 
       Handler authHandler(Iterable<Authenticator> auths) {
         final mw = authenticate(auths, sessionHandler: sessionHandler);
-        return mw(handler);
+        return mw((Request r) => handler.call(r));
       }
 
       verifyHandlerNotCalledFor(Iterable<Authenticator> auths) {
@@ -336,7 +331,7 @@ main() {
 
         final mw =
             authenticate([authenticator1], sessionHandler: sessionHandler);
-        authHandler = mw(handler);
+        authHandler = mw((Request r) => handler.call(r));
       });
 
       verifyHandlerCalledFor(
@@ -388,7 +383,7 @@ main() {
 
         final mw =
             authenticate([authenticator1], sessionHandler: sessionHandler);
-        authHandler = mw(handler);
+        authHandler = mw((Request r) => handler.call(r));
       });
 
       test("", () {
@@ -400,8 +395,8 @@ main() {
       });
     });
 
-    group(
-        'calls sessionHandlers authenticator before other authenticators', () {
+    group('calls sessionHandlers authenticator before other authenticators',
+        () {
       MockSessionHandler sessionHandler;
       var authHandler;
 
@@ -418,7 +413,7 @@ main() {
 
         final mw =
             authenticate([authenticator1], sessionHandler: sessionHandler);
-        authHandler = mw(handler);
+        authHandler = mw((Request r) => handler.call(r));
       });
 
       test('', () {
