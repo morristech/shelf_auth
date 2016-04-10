@@ -1,3 +1,7 @@
+## 0.7.2
+
+- updated crypto dependency with required code changes
+
 ## 0.7.1
 
 * Update dependency versions on dart_jwt, shelf_path and shelf_route

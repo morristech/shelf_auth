@@ -12,18 +12,14 @@ import 'package:shelf_auth/src/authorisation.dart';
 import 'package:mockito/mockito.dart';
 import 'dart:async';
 
-class MockAuthoriser extends Mock implements Authoriser {
-  noSuchMethod(_) => super.noSuchMethod(_);
-}
+class MockAuthoriser extends Mock implements Authoriser {}
 
 //typedef bool RequestWhiteList(Request r);
 abstract class RequestWhiteListClass {
   bool call(Request r) => false;
 }
 
-class MockRequestWhiteList extends Mock implements RequestWhiteListClass {
-  noSuchMethod(Invocation i) => super.noSuchMethod(i);
-}
+class MockRequestWhiteList extends Mock implements RequestWhiteListClass {}
 
 main() {
   Request request() => new Request('GET', Uri.parse('http://foo.bar/blah'));
@@ -36,7 +32,8 @@ main() {
     setUp(() {
       realAuthoriser = new MockAuthoriser();
       whitelist = new MockRequestWhiteList();
-      authoriser = new AuthoriserWithExclusions(whitelist, realAuthoriser);
+      authoriser = new AuthoriserWithExclusions(
+          (Request r) => whitelist.call(r), realAuthoriser);
     });
 
     group('when whitelist returns true', () {
