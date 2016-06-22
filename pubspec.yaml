@@ -2,7 +2,7 @@ author: "Anders Holmgren <andersmholmgren@gmail.com>"
 description: "A shelf handler for authentication and authorisation"
 homepage: "https://bitbucket.org/andersmholmgren/shelf_auth"
 name: "shelf_auth"
-version: "0.7.2"
+version: "0.7.3"
 dependencies:
   crypto: ">=0.9.2 <2.0.0"
   dart_jwt: "^0.5.1"
