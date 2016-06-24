@@ -1,6 +1,11 @@
+## 0.7.3
+
+* Require dart-sdk version 1.16.0
+* Remove `crypto` dependency (dart 1.16.0 ships with all necessary functions in `dart:convert`)
+
 ## 0.7.2
 
-- updated crypto dependency with required code changes
+* Updated crypto dependency with required code changes
 
 ## 0.7.1
 
@@ -13,19 +18,19 @@
 
 ## 0.6.0+1
 
-* upgrade to shelf 0.6.0
-* use test package
-* upgrade option
+* Upgrade to shelf 0.6.0
+* Use test package
+* Upgrade option
 
 ## 0.5.2
 
-* port to option >1.0.0
+* Port to option >1.0.0
 * unittest to test replacement
-* added explicit dependency from matcher 0.12.0
+* Added explicit dependency from matcher 0.12.0
 
 ## 0.5.1
 
-* exposed a models.dart with just things like Principal, AuthenticatedContext etc
+* Exposed a models.dart with just things like Principal, AuthenticatedContext etc
 
 ## 0.5.0
 
@@ -64,7 +69,7 @@
 
 ## 0.2.2+1
 
-* some doco
+* Some doco
 
 ## 0.2.2
 
