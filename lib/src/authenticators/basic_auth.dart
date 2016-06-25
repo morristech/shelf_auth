@@ -6,8 +6,8 @@
 library shelf_auth.authentication.basic;
 
 import 'dart:async';
+import 'dart:convert';
 
-import 'package:crypto/crypto.dart';
 import 'package:http_exception/http_exception.dart';
 import 'package:option/option.dart';
 import 'package:shelf/shelf.dart';
@@ -56,7 +56,7 @@ class BasicAuthenticator<P extends Principal> extends AbstractAuthenticator<P> {
   String _getCredentials(AuthorizationHeader authHeader) {
     try {
       return new String.fromCharCodes(
-          const Base64Codec(urlSafe: true).decode(authHeader.credentials));
+          const Base64Codec.urlSafe().decode(authHeader.credentials));
     } on FormatException catch (_) {
       return '';
     }
