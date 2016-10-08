@@ -1,6 +1,6 @@
 # Authentication and Authorisation Middleware for Dart Shelf
 
-[![Build Status](https://drone.io/bitbucket.org/andersmholmgren/shelf_auth/status.png)](https://drone.io/bitbucket.org/andersmholmgren/shelf_auth/latest)
+[![Build Status](https://pipelines-badges-service.useast.staging.atlassian.io/badge/andersmholmgren/shelf_auth.svg)](https://bitbucket.org/andersmholmgren/shelf_auth/addon/pipelines/home#!/results/branch/master/page/1)
 [![Pub Version](http://img.shields.io/pub/v/shelf_auth.svg)](https://pub.dartlang.org/packages/shelf_auth)
 
 ## Introduction
