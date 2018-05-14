@@ -66,7 +66,7 @@ class AuthenticationMiddleware {
 
     final Future<Option<AuthenticatedContext>> optAuthFuture = optAuthContexts
         .firstWhere((authOpt) => authOpt is Some,
-            defaultValue: () => const None());
+            orElse: () => const None());
 
     final Future<Response> responseFuture = optAuthFuture
         .then((authOpt) => _createResponse(authOpt, request, innerHandler));
