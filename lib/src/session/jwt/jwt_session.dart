@@ -5,7 +5,7 @@
 
 library shelf_auth.session.jwt;
 
-import 'package:dart_jwt/dart_jwt.dart';
+import '../../../dart_jwt/dart_jwt.dart';
 import 'package:logging/logging.dart';
 import '../../preconditions.dart';
 import 'dart:async';

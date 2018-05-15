@@ -14,7 +14,7 @@ import '../../util.dart';
 import '../../principal/user_lookup.dart';
 import '../session_core.dart';
 import 'package:shelf_auth/src/context.dart';
-import 'package:dart_jwt/dart_jwt.dart';
+import '../../../dart_jwt/dart_jwt.dart';
 import 'dart:async';
 
 typedef Future<CS> SessionClaimFactory<P extends Principal,

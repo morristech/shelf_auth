@@ -11,7 +11,7 @@ import 'dart:async';
 import 'package:option/option.dart';
 import '../../principal/user_lookup.dart';
 import 'jwt_session.dart';
-import 'package:dart_jwt/dart_jwt.dart';
+import '../../../dart_jwt/dart_jwt.dart';
 import 'package:http_exception/http_exception.dart';
 import '../../preconditions.dart';
 import '../../util.dart';

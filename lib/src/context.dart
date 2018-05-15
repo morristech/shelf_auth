@@ -7,7 +7,7 @@ library shelf_auth.authentication.model.context;
 
 import 'package:option/option.dart';
 import 'package:logging/logging.dart';
-import 'package:dart_jwt/src/util.dart';
+import '../dart_jwt/src/util.dart';
 import 'package:quiver/core.dart';
 
 final Logger _log = new Logger('shelf_auth.authentication.model');
