@@ -13,10 +13,10 @@ export 'jwt_claimset.dart';
 /**
  * Represents a [JSON Web Token](http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-19)
  */
-abstract class JsonWebToken<H extends JoseHeader, T extends JwtClaimSet>
-    implements JoseObject<H, T> {
+abstract class JsonWebToken
+    implements JoseObject {
   /// The payload of a JWT is its claim set
-  T get claimSet;
+  get claimSet;
 
   factory JsonWebToken.decode(String jwtToken,
       {JwsValidationContext validationContext,
@@ -30,7 +30,7 @@ abstract class JsonWebToken<H extends JoseHeader, T extends JwtClaimSet>
     }
   }
 
-  factory JsonWebToken.jws(T claimSet, JwaSignatureContext signatureContext,
+  factory JsonWebToken.jws(claimSet, JwaSignatureContext signatureContext,
       {JsonWebAlgorithm algorithm: JsonWebAlgorithm.HS256}) {
     return new JwtInJws(claimSet, signatureContext, algorithm);
   }
@@ -48,12 +48,12 @@ abstract class JsonWebToken<H extends JoseHeader, T extends JwtClaimSet>
 /**
  * Represents a [JsonWebToken] that is encoded within a [JsonWebSignature]
  */
-class JwtInJws<T extends JwtClaimSet> extends JsonWebSignature<T>
-    /*implements JsonWebToken*/ {
-  T get claimSet => payload;
+class JwtInJws extends JsonWebSignature
+    implements JsonWebToken {
+  get claimSet => payload;
 
   JwtInJws._internal(
-      JwsHeader header, T claimSet, JwsSignature signature, String signingInput)
+      JwsHeader header, claimSet, JwsSignature signature, String signingInput)
       : super(header, claimSet, signature, signingInput);
 
   factory JwtInJws.decode(String jwtToken,
@@ -71,7 +71,7 @@ class JwtInJws<T extends JwtClaimSet> extends JsonWebSignature<T>
 
     final signingInput = jwtToken.substring(0, jwtToken.lastIndexOf('.'));
 
-    final jwt =
+    final JsonWebToken jwt =
         new JwtInJws._internal(header, claimSet, signature, signingInput);
 
     if (validationContext != null) {
@@ -85,7 +85,7 @@ class JwtInJws<T extends JwtClaimSet> extends JsonWebSignature<T>
     return jwt;
   }
 
-  factory JwtInJws(T claimSet, JwaSignatureContext signatureContext,
+  factory JwtInJws(claimSet, JwaSignatureContext signatureContext,
       JsonWebAlgorithm algorithm) {
     final JwsHeader header =
         new JwsHeader.build(type: JwsType.JWT, algorithm: algorithm);
@@ -98,7 +98,7 @@ class JwtInJws<T extends JwtClaimSet> extends JsonWebSignature<T>
   }
 
   @override
-  Set<ConstraintViolation> validatePayload(
+  Set<ConstraintViolation> validatePayload(covariant
           JwtValidationContext validationContext) =>
       claimSet.validate(validationContext.claimSetValidationContext);
 }

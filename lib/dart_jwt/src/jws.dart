@@ -15,15 +15,15 @@ typedef JosePayload PayloadParser(Map json);
  * A Jws has a [header] that describes the [JsonWebAlgorithm] used to generate
  * the [signature]
  */
-abstract class JsonWebSignature<P extends JosePayload>
-    extends JoseObject<JwsHeader, P> {
+abstract class JsonWebSignature
+    extends JoseObject {
   final JwsSignature signature;
   final String _signingInput;
 
   Iterable<Base64EncodedData> get segments => [header, payload, signature];
 
   JsonWebSignature(
-      JwsHeader header, P payload, this.signature, this._signingInput)
+      JwsHeader header, payload, this.signature, this._signingInput)
       : super(header, payload);
 
   Set<ConstraintViolation> validate(JwsValidationContext validationContext) {

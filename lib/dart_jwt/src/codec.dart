@@ -7,7 +7,7 @@ import 'jws.dart';
 import 'jwt.dart';
 import 'jwt_claimset.dart';
 
-typedef JsonWebToken<H, CS> JwtTokenDecoder<H extends JoseHeader,
+typedef JsonWebToken JwtTokenDecoder<H extends JoseHeader,
     CS extends JwtClaimSet>(String jwtToken, {JwsValidationContext validationContext});
 
 typedef CS JwtClaimSetDecoder<CS extends JwtClaimSet>(Map claimSetJson,
@@ -22,10 +22,10 @@ JwtTokenDecoder<JoseHeader, JwtClaimSet> defaultJwtTokenDecoder(
 }
 
 class JwtCodec<H extends JoseHeader, CS extends JwtClaimSet>
-    extends Codec<JsonWebToken<H, CS>, String> {
-  final Converter<JsonWebToken<H, CS>, String> encoder =
+    extends Codec<JsonWebToken, String> {
+  final Converter<JsonWebToken, String> encoder =
       new JwtEncoder<H, CS>();
-  final Converter<String, JsonWebToken<H, CS>> decoder;
+  final Converter<String, JsonWebToken> decoder;
 
   JwtCodec(this.decoder);
 
@@ -39,20 +39,20 @@ class JwtCodec<H extends JoseHeader, CS extends JwtClaimSet>
 }
 
 class JwtDecoder<H extends JoseHeader, CS extends JwtClaimSet>
-    extends Converter<String, JsonWebToken<H, CS>> {
+    extends Converter<String, JsonWebToken> {
   final JwtTokenDecoder<H, CS> decoder;
   final JwsValidationContextFactory contextFactory;
 
   JwtDecoder(this.decoder, this.contextFactory);
 
   @override
-  JsonWebToken<H, CS> convert(String input) => contextFactory != null
+  JsonWebToken convert(String input) => contextFactory != null
       ? decoder(input, validationContext: contextFactory())
       : decoder(input);
 }
 
 class JwtEncoder<H extends JoseHeader, CS extends JwtClaimSet>
-    extends Converter<JsonWebToken<H, CS>, String> {
+    extends Converter<JsonWebToken, String> {
   @override
-  String convert(JsonWebToken<H, CS> input) => input.encode();
+  String convert(JsonWebToken input) => input.encode();
 }

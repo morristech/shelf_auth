@@ -7,7 +7,7 @@ library shelf_auth.session.jwt.test;
 
 import 'package:shelf_auth/src/session/jwt/jwt_session.dart';
 import 'package:test/test.dart';
-import 'package:dart_jwt/dart_jwt.dart';
+import 'package:shelf_auth/dart_jwt/dart_jwt.dart';
 
 main() {
   group('encode decode rountrip', () {

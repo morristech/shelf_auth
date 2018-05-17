@@ -11,9 +11,9 @@ import 'util.dart';
  *
  * At minimum they have a [header] and a [payload] as the first two segments.
  */
-abstract class JoseObject<H extends JoseHeader, P extends JosePayload> {
-  final H header;
-  final P payload;
+abstract class JoseObject {
+  final header;
+  final payload;
   Iterable<Base64EncodedData> get segments;
 
   /**
